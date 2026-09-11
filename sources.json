@@ -1,0 +1,37 @@
+{
+  "_readme": [
+    "수집 대상 사이트 목록. kind=builtin 은 손으로 짠 모듈, kind=generic 은 설정만으로 도는 범용 수집기입니다.",
+    "generic 항목 추가 전에 'python -m scraper.probe <목록 URL>' 로 읽히는지 먼저 확인하세요.",
+    "list_url   : 게시판 목록 페이지",
+    "page_param : 2페이지 이후를 부르는 쿼리 이름 (없으면 1페이지만)",
+    "detail_url : 목록이 링크 대신 JS 로 글을 열 때, {id} 를 글 번호로 바꿔 쓸 상세 주소",
+    "repo : '사이트 추가' 폼이 이슈를 열 GitHub 저장소"
+  ],
+  "repo": "Woohye0n/gpu-grants-dashboard",
+  "sources": [
+    {
+      "key": "aiinfrahub",
+      "kind": "builtin",
+      "module": "aiinfrahub"
+    },
+    {
+      "key": "nipa",
+      "kind": "builtin",
+      "module": "nipa"
+    },
+    {
+      "key": "seoulaihub",
+      "kind": "builtin",
+      "module": "seoulaihub"
+    },
+    {
+      "key": "nia",
+      "kind": "generic",
+      "label": "한국지능정보사회진흥원(NIA)",
+      "org": "NIA",
+      "list_url": "https://www.nia.or.kr/site/nia_kor/ex/bbs/List.do?cbIdx=78336",
+      "page_param": "pageIndex",
+      "pages": 2
+    }
+  ]
+}

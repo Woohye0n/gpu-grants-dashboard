@@ -22,7 +22,7 @@ concurrency:
 jobs:
   collect-and-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -40,7 +40,7 @@ jobs:
       # 실패한 사이트는 직전 수집 결과를 그대로 쓰므로 배포는 계속 진행한다.
       - name: 공고 수집
         continue-on-error: true
-        run: python -m scraper.run --deadline-seconds 600
+        run: python -m scraper.run --deadline-seconds 900
 
       - name: 수집 결과 커밋
         run: |

@@ -396,6 +396,62 @@
       <p><span class="k">마지막 수집</span> ${escapeHtml(DATA.generated_at_kst || '—')} KST</p>`;
   }
 
+  /* ------------------------------------------------------- 사이트 추가 폼 */
+  function sourceConfigFromForm() {
+    const label = $('asLabel').value.trim();
+    const url = $('asUrl').value.trim();
+    if (!label || !url) return null;
+    const key = (url.replace(/^https?:\/\//, '').split(/[/?]/)[0] || 'site')
+      .replace(/^www\./, '').replace(/[^a-z0-9]+/gi, '_').toLowerCase().slice(0, 24);
+    const cfg = { key: key, kind: 'generic', label: label, list_url: url };
+    const org = $('asOrg').value.trim();
+    const pageParam = $('asPageParam').value.trim();
+    const pages = parseInt($('asPages').value, 10);
+    const detail = $('asDetail').value.trim();
+    if (org) cfg.org = org;
+    if (pageParam) cfg.page_param = pageParam;
+    if (pages > 1) cfg.pages = pages;
+    if (detail) cfg.detail_url = detail;
+    return cfg;
+  }
+
+  function wireAddSource() {
+    const form = $('addSourceForm');
+    if (!form) return;
+    const msg = $('asMsg');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const cfg = sourceConfigFromForm();
+      if (!cfg) { msg.textContent = '사이트 이름과 목록 URL 은 필수입니다.'; return; }
+      const repo = DATA.repo;
+      if (!repo) { msg.textContent = '저장소가 설정되어 있지 않습니다 (sources.json 의 repo).'; return; }
+      const body = [
+        '아래 설정으로 수집 대상에 추가해 주세요.', '',
+        '```json', JSON.stringify(cfg, null, 2), '```', '',
+        '- 등록자가 확인한 목록 주소: ' + cfg.list_url,
+      ].join('\n');
+      const href = `https://github.com/${repo}/issues/new`
+        + `?title=${encodeURIComponent('[사이트 추가] ' + cfg.label)}`
+        + `&labels=${encodeURIComponent('new-source')}`
+        + `&body=${encodeURIComponent(body)}`;
+      window.open(href, '_blank', 'noopener');
+      msg.textContent = 'GitHub 이슈 작성 창을 열었습니다. 내용 확인 후 Submit 하세요.';
+    });
+
+    $('asCopy').addEventListener('click', async () => {
+      const cfg = sourceConfigFromForm();
+      if (!cfg) { msg.textContent = '사이트 이름과 목록 URL 은 필수입니다.'; return; }
+      const text = JSON.stringify(cfg, null, 2);
+      try {
+        await navigator.clipboard.writeText(text);
+        msg.textContent = '복사했습니다. sources.json 의 sources 배열에 붙여넣으세요.';
+      } catch (err) {
+        msg.textContent = '복사 실패 — 아래 내용을 직접 복사하세요: ' + text;
+      }
+    });
+  }
+
   function render() {
     const rows = filtered();
     renderTotals();
@@ -477,5 +533,6 @@
   });
 
   fillFilters();
+  wireAddSource();
   render();
 })();

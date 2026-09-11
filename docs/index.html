@@ -78,6 +78,40 @@
     <section id="tab-sources" class="panel hidden">
       <h2>수집 대상 사이트</h2>
       <div id="sourceCards" class="cards"></div>
+      <h2>사이트 추가 <span class="hint">— 게시판 목록 주소만 넣으면 다음 수집부터 함께 훑습니다</span></h2>
+      <div class="emailbox">
+        <form id="addSourceForm" class="addform" autocomplete="off">
+          <label><span class="cap">사이트 이름 <span class="req">*</span></span>
+            <input type="text" id="asLabel" placeholder="예: 한국지능정보사회진흥원(NIA)" required />
+          </label>
+          <label><span class="cap">주관 기관</span>
+            <input type="text" id="asOrg" placeholder="예: 과학기술정보통신부·NIA" />
+          </label>
+          <label class="wide"><span class="cap">게시판 목록 URL <span class="req">*</span></span>
+            <input type="url" id="asUrl" placeholder="https://… 공고 목록이 여러 줄 보이는 페이지" required />
+          </label>
+          <label><span class="cap">다음 페이지 파라미터</span>
+            <input type="text" id="asPageParam" placeholder="예: curPage / pageIndex (모르면 비워두세요)" />
+          </label>
+          <label><span class="cap">훑을 페이지 수</span>
+            <input type="number" id="asPages" min="1" max="20" value="3" />
+          </label>
+          <label class="wide"><span class="cap">상세 URL 형식 <span class="hint">목록이 링크 대신 자바스크립트로 글을 열 때만</span></span>
+            <input type="text" id="asDetail" placeholder="https://…/View.do?id={id}  — 글 번호 자리에 {id}" />
+          </label>
+          <div class="addactions">
+            <button type="submit" class="btn primary">GitHub 이슈로 등록</button>
+            <button type="button" id="asCopy" class="btn">설정 JSON 복사</button>
+            <span class="hint" id="asMsg"></span>
+          </div>
+        </form>
+        <p class="hint">
+          등록하면 저장소에 이슈가 열리고, 자동 검사가 그 주소를 실제로 읽어봅니다.
+          읽히면 <code>sources.json</code> 에 추가되고 바로 수집이 돌며, 못 읽으면 이슈에 이유를 답니다.
+          <b>저장소 소유자가 연 이슈만</b> 반영됩니다.
+        </p>
+      </div>
+
       <h2>미확인 가속기 <span class="hint">— 목록에 없는 기종 이름이 공고에 보이면 알립니다</span></h2>
       <div class="emailbox" id="unknownBox"></div>
 

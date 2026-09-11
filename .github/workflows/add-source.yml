@@ -1,0 +1,62 @@
+# 대시보드의 '사이트 추가' 폼이 연 이슈를 받아 sources.json 에 반영한다.
+# 검사는 실제로 그 목록 주소를 읽어보는 것이고, 못 읽으면 추가하지 않고 이유를 댓글로 남긴다.
+name: add-source
+
+on:
+  issues:
+    types: [opened, edited, labeled]
+
+permissions:
+  contents: write      # sources.json 커밋
+  issues: write        # 결과 댓글 / 닫기
+  actions: write       # 수집 워크플로 즉시 실행
+
+jobs:
+  add:
+    # 아무나 여는 이슈로 수집 대상이 바뀌면 안 된다 — 저장소 소유자만 받는다
+    if: >
+      github.event.issue.author_association == 'OWNER' &&
+      (contains(github.event.issue.labels.*.name, 'new-source') ||
+       startsWith(github.event.issue.title, '[사이트 추가]'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+
+      # 이슈 본문은 신뢰할 수 없는 입력이다. 셸에 끼워넣지 말고 환경변수로만 넘긴다.
+      - name: 이슈 본문 저장
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: printf '%s' "$ISSUE_BODY" > issue_body.md
+
+      - name: 설정 검사 및 추가
+        id: add
+        continue-on-error: true
+        run: python -m scraper.add_source --body-file issue_body.md --report-file report.md
+
+      - name: 결과 댓글
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue comment "${{ github.event.issue.number }}" --body-file report.md
+
+      - name: sources.json 커밋
+        if: steps.add.outcome == 'success'
+        run: |
+          git config user.name  "gpu-grants-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sources.json
+          git diff --staged --quiet || git commit -m "chore: 수집 대상 추가 (#${{ github.event.issue.number }})"
+          git push
+
+      - name: 수집 즉시 실행 후 이슈 닫기
+        if: steps.add.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run daily-collect || echo "수집 워크플로 수동 실행 실패 — 예약 실행 때 반영됩니다"
+          gh issue close "${{ github.event.issue.number }}" --comment "수집 대상에 반영했습니다."

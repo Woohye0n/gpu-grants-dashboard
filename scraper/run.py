@@ -15,15 +15,45 @@ import traceback
 from datetime import datetime, timedelta
 
 from .common import KST, ROOT, dday, now_kst, out_of_time, set_deadline
-from .sources import aiinfrahub, nipa, seoulaihub
+from .sources import aiinfrahub, generic, nipa, seoulaihub
 
-SOURCES = [aiinfrahub, nipa, seoulaihub]
+BUILTIN = {"aiinfrahub": aiinfrahub, "nipa": nipa, "seoulaihub": seoulaihub}
 SOURCE_SITES = {
     "aiinfrahub": "https://aiinfrahub.kr/project",
     "nipa": "https://www.nipa.kr/home/2-2",
     "seoulaihub": "https://www.seoulaihub.kr/board/board_basic/board_list.asp"
                   "?scrID=0000000170&pageNum=4&subNum=1&ssubNum=1&page=1",
 }
+SOURCES_FILE = os.path.join(ROOT, "sources.json")
+
+
+def load_sources() -> list[dict]:
+    """sources.json 의 목록. 파일이 없거나 깨졌으면 손으로 짠 3곳만 쓴다."""
+    fallback = [{"key": k, "kind": "builtin", "module": k} for k in BUILTIN]
+    try:
+        with open(SOURCES_FILE, encoding="utf-8") as fh:
+            conf = json.load(fh)
+    except (OSError, ValueError):
+        return fallback
+    rows = [s for s in (conf.get("sources") or []) if s.get("key") and not s.get("disabled")]
+    return rows or fallback
+
+
+def repo_slug() -> str:
+    """'사이트 추가' 폼이 이슈를 열 저장소."""
+    try:
+        with open(SOURCES_FILE, encoding="utf-8") as fh:
+            return (json.load(fh).get("repo") or "").strip()
+    except (OSError, ValueError):
+        return ""
+
+
+def _describe(cfg: dict) -> tuple[str, str]:
+    """화면에 쓸 (이름, 게시판 주소)."""
+    if cfg.get("kind") == "builtin":
+        mod = BUILTIN.get(cfg.get("module") or cfg["key"])
+        return (mod.SOURCE_LABEL if mod else cfg["key"]), SOURCE_SITES.get(cfg["key"], "")
+    return cfg.get("label") or cfg["key"], cfg.get("list_url", "")
 # announcements that closed longer ago than this drop off the board
 KEEP_CLOSED_DAYS = 400
 DOCS = os.path.join(ROOT, "docs")
@@ -226,20 +256,35 @@ def collect(deep: bool = True) -> tuple[list[dict], list[dict]]:
     """Fetch every source. A site that breaks or blocks us keeps its last good
     rows instead of silently disappearing from the board."""
     programs, report = [], []
-    for mod in SOURCES:
-        entry = {"key": mod.SOURCE, "label": mod.SOURCE_LABEL, "url": SOURCE_SITES[mod.SOURCE]}
+    for cfg in load_sources():
+        key = cfg["key"]
+        label, site = _describe(cfg)
+        entry = {"key": key, "label": label, "url": site,
+                 "kind": cfg.get("kind", "generic")}
         rows, error = [], ""
         try:
-            rows = mod.fetch(deep=deep)
+            if cfg.get("kind") == "builtin":
+                mod = BUILTIN.get(cfg.get("module") or key)
+                if mod is None:
+                    raise KeyError(f"알 수 없는 builtin 모듈: {cfg.get('module') or key}")
+                rows = mod.fetch(deep=deep)
+            else:
+                rows = generic.fetch_config(cfg, deep=deep)
         except Exception as exc:                         # noqa: BLE001 - one bad site must not sink the run
             error = f"{type(exc).__name__}: {exc}"
-            print(f"[warn] {mod.SOURCE} failed: {exc}", file=sys.stderr)
+            print(f"[warn] {key} failed: {exc}", file=sys.stderr)
             traceback.print_exc(file=sys.stderr)
 
-        cached, cached_at = _load_last_good(mod.SOURCE)
+        cached, cached_at = _load_last_good(key)
+        scanned = generic.LAST_SCAN.get(key, 0)
         if rows and not error:
-            _save_last_good(mod.SOURCE, rows)
+            _save_last_good(key, rows)
             entry.update(ok=True, stale=False, count=len(rows), error="", collected_at="")
+        elif not error and scanned:
+            # 목록은 멀쩡히 읽었고 GPU 공고가 없을 뿐이다 — 실패가 아니다
+            _save_last_good(key, rows)
+            entry.update(ok=True, stale=False, count=0, collected_at="",
+                         error=f"게시글 {scanned}건을 읽었고, 그중 GPU 관련 공고는 없었습니다")
         elif cached:
             if error:
                 reason = error
@@ -249,7 +294,7 @@ def collect(deep: bool = True) -> tuple[list[dict], list[dict]]:
                 reason = "공고를 한 건도 읽지 못했습니다 (게시판 구조가 바뀌었을 수 있습니다)"
             rows = [{**r, "stale": True, "stale_since": cached_at} for r in cached]
             entry.update(ok=False, stale=True, count=len(rows), error=reason, collected_at=cached_at)
-            print(f"[warn] {mod.SOURCE}: {cached_at} 수집분을 그대로 사용합니다", file=sys.stderr)
+            print(f"[warn] {key}: {cached_at} 수집분을 그대로 사용합니다", file=sys.stderr)
         else:
             entry.update(ok=False, stale=False, count=0,
                          error=error or "수집 결과 없음", collected_at="")
@@ -314,6 +359,7 @@ def build(deep: bool = True) -> dict:
         "generated_at_kst": today.strftime("%Y-%m-%d %H:%M"),
         "timezone": "Asia/Seoul (KST)",
         "sources": report,
+        "repo": repo_slug(),
         "stale_sources": [s["label"] for s in report if s.get("stale")],
         "unknown_models": _unknown_digest(programs),
         "counts": {

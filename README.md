@@ -52,8 +52,29 @@ python -m scraper.run --dry-run    # 파일을 쓰지 않고 결과만 출력
 | 정보통신산업진흥원 NIPA (nipa.kr) | 알림마당 > 사업공고 | 최근 12페이지를 훑어 GPU·고성능컴퓨팅 공고만 추리고, 상세의 `.hwp/.hwpx/.pdf` 첨부를 파싱 |
 | 서울 AI 허브 (seoulaihub.kr) | 허브소식 > 공지사항 | 최근 3페이지. 본문에 GPU 표가 그대로 있어 본문 우선, 첨부는 보조 |
 
-새 사이트 추가는 `scraper/sources/` 에 `SOURCE`, `SOURCE_LABEL`, `fetch(deep=True)` 를 가진
-모듈을 하나 더 만들고 `scraper/run.py` 의 `SOURCES`/`SOURCE_SITES` 에 등록하면 됩니다.
+### 사이트 추가
+
+수집 대상은 `sources.json` 이 정합니다. 두 종류가 있습니다.
+
+* `kind: builtin` — 손으로 짠 모듈(위 세 곳). 사이트별 별난 점(JSON API, 첨부 다운로드 방식)을 다룹니다.
+* `kind: generic` — **설정만으로 도는 범용 수집기.** `scraper/probe.py` 가 '같은 모양의 행이 반복되고
+  각 행에 제목과 날짜가 있다'는 게시판 구조를 찾아 읽습니다. `<a href>` 목록도, `goDetail('...')`
+  처럼 자바스크립트로 글을 여는 목록도 됩니다(글 번호는 *행마다 값이 달라지는 인자*로 찾습니다).
+
+붙이기 전에 읽히는지 먼저 확인하세요:
+
+```bash
+python -m scraper.probe "https://example.kr/board/list"
+```
+
+**대시보드 "수집 상태" 탭의 폼**으로도 추가할 수 있습니다. 이름과 목록 URL 을 넣고 `GitHub 이슈로
+등록` 을 누르면 `[사이트 추가]` 이슈가 열리고, `add-source` 워크플로가 **그 주소를 실제로 읽어본 뒤**
+`sources.json` 에 넣고 수집을 바로 돌립니다. 못 읽으면 추가하지 않고 이유를 이슈에 답니다.
+이슈는 **저장소 소유자가 연 것만** 반영되고, 내부/사설 IP 로 해석되는 주소는 거부합니다.
+
+손으로 짠 모듈이 필요할 만큼 특이한 사이트라면 `scraper/sources/` 에 `SOURCE`, `SOURCE_LABEL`,
+`fetch(deep=True)` 를 가진 모듈을 만들고 `scraper/run.py` 의 `BUILTIN` 에 등록한 뒤
+`sources.json` 에 `kind: builtin` 으로 적으면 됩니다.
 
 ## 값이 만들어지는 방식
 
