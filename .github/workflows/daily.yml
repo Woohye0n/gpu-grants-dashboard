@@ -4,6 +4,8 @@
 name: daily-collect
 
 on:
+  push:
+    branches: [main]           # 코드가 바뀌면 바로 다시 배포
   schedule:
     - cron: "10 0 * * *"      # 00:10 UTC = 09:10 KST
   workflow_dispatch:           # 수동 실행 버튼
