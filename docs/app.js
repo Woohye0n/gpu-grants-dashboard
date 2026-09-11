@@ -32,6 +32,10 @@
   };
   const view = (p) => (p.status === 'open' && p.closing_soon ? 'soon' : p.status);
   const nz = (v, fallback) => (v === null || v === undefined ? fallback : v);
+  const isAcademic = (a) => /학계|연구계/.test(a || '');
+  // 비용은 {audience, text} 목록이다. 예전 스냅샷(문자열)도 그대로 읽는다.
+  const costRows = (p) => (p.cost || []).map(
+    (c) => (typeof c === 'string' ? { audience: '', text: c } : c));
 
   function ddayText(p) {
     if (p.dday == null) return '';
@@ -184,7 +188,14 @@
 
     if ((p.cost || []).length) {
       const c = el('div', 'v');
-      c.appendChild(el('div', null, p.cost[0]));
+      costRows(p).forEach((row, i) => {
+        const line = el('div', 'costline' + (i === 0 ? ' primary' : ''));
+        if (row.audience) {
+          line.appendChild(el('span', 'aud' + (isAcademic(row.audience) ? ' academic' : ''), row.audience));
+        }
+        line.appendChild(el('span', 'txt', row.text));
+        c.appendChild(line);
+      });
       add('비용', c);
     }
     if ((p.scale || []).length) {
@@ -227,7 +238,7 @@
       frag.appendChild(el('div', null, p.summary));
     }
     block('지원 규모 (원문)', p.scale, (t) => el('li', null, t));
-    block('비용 (원문)', p.cost, (t) => el('li', null, t));
+    block('비용 (원문)', costRows(p), (c) => el('li', null, (c.audience ? c.audience + ' — ' : '') + c.text));
     block('GPU 기종·수량 근거', (p.gpu_specs || []).map((s) => s.line), (t) => el('li', null, t));
     block('첨부파일', p.attachments, (att) => {
       const li = el('li');

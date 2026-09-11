@@ -180,6 +180,20 @@ def dedupe_lines(items: list[str]) -> list[str]:
 # --------------------------------------------------------------------------- #
 # overrides
 # --------------------------------------------------------------------------- #
+def _dedupe_costs(items: list[dict] | None) -> list[dict]:
+    """같은 문장이 첨부 PDF·HWP 양쪽에서 올라오는 것을 걸러낸다."""
+    out: list[dict] = []
+    for row in items or []:
+        if isinstance(row, str):                         # 예전 스키마 방어
+            row = {"audience": "", "text": row}
+        core = re.sub(r"\W", "", row.get("text", ""))
+        if not core or any(core in re.sub(r"\W", "", o["text"]) or
+                           re.sub(r"\W", "", o["text"]) in core for o in out):
+            continue
+        out.append(row)
+    return out
+
+
 def apply_overrides(programs: list[dict]) -> list[dict]:
     path = os.path.join(ROOT, "overrides.json")
     if not os.path.exists(path):
@@ -277,7 +291,7 @@ def build(deep: bool = True) -> dict:
     programs = merge(programs)
     for p in programs:
         p["scale"] = dedupe_lines(p.get("scale"))
-        p["cost"] = dedupe_lines(p.get("cost"))
+        p["cost"] = _dedupe_costs(p.get("cost"))
         decorate(p, today)
     programs = apply_overrides(programs)
 

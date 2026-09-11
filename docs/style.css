@@ -125,6 +125,17 @@ main { padding: 20px; max-width: 1280px; margin: 0 auto; }
 .kv .v { font-variant-numeric: tabular-nums; }
 .kv .v .note { color: var(--muted); font-size: 11px; font-variant-numeric: normal; }
 
+/* 비용은 지원 대상별로 조건이 다르다 — 라벨을 붙여 한 줄씩 쌓는다 */
+.costline { display: flex; gap: 6px; align-items: baseline; margin-top: 3px; }
+.costline:first-child { margin-top: 0; }
+.costline .aud {
+  flex: none; font-size: 10px; font-weight: 700; letter-spacing: .02em;
+  border-radius: 9px; padding: 1px 7px; background: var(--chip); color: var(--muted);
+}
+.costline .aud.academic { color: var(--green); background: rgba(63,185,80,.14); }
+.costline:not(.primary) { color: var(--muted); font-size: 12px; }
+.costline .txt { min-width: 0; }
+
 /* gpu spec list */
 .specs { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
 .spec { display: flex; gap: 8px; align-items: baseline; font-size: 12px; padding: 2px 0; }

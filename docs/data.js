@@ -1,6 +1,6 @@
 window.GPU_GRANTS = {
- "generated_at": "2026-09-11T13:10+09:00",
- "generated_at_kst": "2026-09-11 13:10",
+ "generated_at": "2026-09-11T13:46+09:00",
+ "generated_at_kst": "2026-09-11 13:46",
  "timezone": "Asia/Seoul (KST)",
  "sources": [
   {
@@ -105,7 +105,10 @@ window.GPU_GRANTS = {
     "m (선정 규모) 총 5개사 ※ 평가에 따라 선정규모 변동될 수 있음"
    ],
    "cost": [
-    "(지원 내용) 기업당 최대 2,000만 원 상당 GPU 크레딧"
+    {
+     "audience": "",
+     "text": "(지원 내용) 기업당 최대 2,000만 원 상당 GPU 크레딧"
+    }
    ],
    "usage_period": {
     "text": "(지원 기간) 2026. 10. 12. ~ 2027. 1. 11. (약 3개월)",
@@ -175,7 +178,10 @@ window.GPU_GRANTS = {
     "(지원규모) ’25년 추경 정부 구매분 중 B200 서버 64대(512장)"
    ],
    "cost": [
-    "(비용) 자부담금 전액 면제(무상 지원)"
+    {
+     "audience": "",
+     "text": "(비용) 자부담금 전액 면제(무상 지원)"
+    }
    ],
    "usage_period": {
     "text": "",
@@ -190,7 +196,7 @@ window.GPU_GRANTS = {
     },
     {
      "name": "(붙임1) 「첨단 GPU 활용 지원 사업」 베타서비스 참여자 모집 공고문(제205-1068호).hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=I3iTD8jQrc^Lctb0yrLbfA==&fileTy=ATTACH&fileNo=Trywq4uGSKEgCIpXI0qHdg=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=73^2iO4g63oxu^rmskDZjA==&fileTy=ATTACH&fileNo=E4Z55Rq3xTKtvfQGr8JOMg=="
     }
    ],
    "links": [
@@ -264,9 +270,14 @@ window.GPU_GRANTS = {
     "(지원 규모) H200 서버 2대(16장) ~ 서버 32대(256장)"
    ],
    "cost": [
-    "(산업계) H200 서버 1대 320만원/월, B200 서버 1대 640만원/월, 청년기업 50%할인",
-    "H200 — 40만원",
-    "H200 — 320만원"
+    {
+     "audience": "학계·연구계",
+     "text": "무상, 단, 지원받은 자원을 활용한 연구결과를 공개하여야 함"
+    },
+    {
+     "audience": "산업계",
+     "text": "H200 서버 1대 320만원/월, B200 서버 1대 640만원/월, 청년기업 50%할인"
+    }
    ],
    "usage_period": {
     "text": "(지원기간) 협약체결일로부터 3개월~ 12개월 이내 지원",
@@ -297,23 +308,23 @@ window.GPU_GRANTS = {
     },
     {
      "name": "(붙임1) [공고문] 「첨단 GPU 활용 지원 사업」사용자 모집(25-1차).hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=k9CwpZKEBoKwzOAzafJTEg==&fileTy=ATTACH&fileNo=L1DqV8gw6L4AuwkRapd19Q=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=XQo3DEXyMsH9gjaJgXfzww==&fileTy=ATTACH&fileNo=o9Ka9ztCdpHhFtiP50FQOw=="
     },
     {
      "name": "(붙임2) [공모안내서] 「첨단 GPU 활용 지원 사업」 사용자 모집(25-1차) 공모 안내서(산학연 대상).hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=u89eGgsEHd8bkTqrZgh3rA==&fileTy=ATTACH&fileNo=xefl6U3vPCXbMrpoyIJzXg=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=ly3ri06dxsvMJkebQq5mAQ==&fileTy=ATTACH&fileNo=iqNBvPFDhPfwWKOPQHZ8IA=="
     },
     {
      "name": "(붙임3) 「첨단 GPU 활용 지원 사업」 사업수행계획서(산학연용).hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=h89*KFPEW^aFstkJLlesIQ==&fileTy=ATTACH&fileNo=uDmoHlUmn8bttOqpoNn5tA=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=0DrP8Mi3UdLx8BxO^HhVXA==&fileTy=ATTACH&fileNo=IzUvyZZFaProlcZzzaLHSg=="
     },
     {
      "name": "(붙임4) 제출서류 양식.hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=aT7VsC*4hJIxXqfTj5jfGQ==&fileTy=ATTACH&fileNo=A7uk^n0OycEmUdZG0otO3A=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=^hjw3uKCE1m8L*bDQQXFwA==&fileTy=ATTACH&fileNo=679DsrtVa438qlYwAVj0UA=="
     },
     {
      "name": "(붙임5) 관련 규정.Zip",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=XC8mPFvopMARR4Wlv9mBfA==&fileTy=ATTACH&fileNo=WFntucEuxXXO1bnFs7KWEw=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=25uaGBLsMEJXIKpk4pXZtQ==&fileTy=ATTACH&fileNo=pKyeiaBkYXpGZR^UUuFLKw=="
     }
    ],
    "links": [
@@ -378,9 +389,10 @@ window.GPU_GRANTS = {
    ],
    "scale": [],
    "cost": [
-    "H100/1장 또는 H200/1장 기준 — 40만원/월",
-    "H100/1장 또는 H200/1장 기준 — 20만원/월",
-    "A100/1장 기준 — 10만원/월"
+    {
+     "audience": "학계",
+     "text": "2) 대학교(원)(대학병원 포함)는 자부담금 부여 대상에서 제외"
+    }
    ],
    "usage_period": {
     "text": "",
@@ -391,19 +403,19 @@ window.GPU_GRANTS = {
    "attachments": [
     {
      "name": "붙임 1. 2026년 고성능컴퓨팅지원 운영기관 모집 공고.hwpx",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=Pij7JxFr32CWBQl5CscEDQ==&fileTy=ATTACH&fileNo=9hC6wETll*kW5lCOMQGd6A=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=pOMutKE75hjok9je*gx8xw==&fileTy=ATTACH&fileNo=CI5xTTs3eAseeMhZV1Qpkw=="
     },
     {
      "name": "붙임 2. 2026년 고성능컴퓨팅지원 운영기관 공모 안내서.hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=67H0FwZ0*Gn8P8wTUKY4WQ==&fileTy=ATTACH&fileNo=rlM4xXZ^nb2T1HjvxqOovA=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=XQbwz207dP46stNSjgcmMQ==&fileTy=ATTACH&fileNo=^WEE0LUJVGFDbExSa6JIIg=="
     },
     {
      "name": "붙임 3. 2026년 고성능컴퓨팅지원 사업계획서(양식) 및 제출서류.zip",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=WwBqdUckBY56DRnKldjBrg==&fileTy=ATTACH&fileNo=uWu^J1iL*v26qSRZ56mXxA=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=dkRSlfisJjjJ4I6R5q8cmQ==&fileTy=ATTACH&fileNo=OHlc33sQG18CsQCjkkaAUg=="
     },
     {
      "name": "붙임 4. 외부사용자 메뉴얼(NXT시스템-회원가입, 접수).zip",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=lyuugT9wqhBqkAXx5YqxqA==&fileTy=ATTACH&fileNo=*a^I7KZX66f9l6WLfBgkdQ=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=saQfoMf2Y9Tlh2yOSh49Bw==&fileTy=ATTACH&fileNo=X^ijuVw6dp1mb1FlQZKCmQ=="
     }
    ],
    "links": [
@@ -456,8 +468,10 @@ window.GPU_GRANTS = {
     "(지원 규모) B200 서버 2대(16장) ~ 서버 16대(128장)"
    ],
    "cost": [
-    "(산업계) B200 서버 1대 640만원/월, 청년기업 50%할인",
-    "B200 — 80만원"
+    {
+     "audience": "산업계",
+     "text": "B200 서버 1대 640만원/월, 청년기업 50%할인"
+    }
    ],
    "usage_period": {
     "text": "(지원기간) 협약체결일로부터 ~ ‘26. 7. 31.까지",
@@ -488,23 +502,23 @@ window.GPU_GRANTS = {
     },
     {
      "name": "(붙임1) 「첨단 GPU 활용 지원 사업」사용자 모집(26-1차) 공고문(산업계 대상).hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=Nu5pSkzc0CDKvsEJKhKbUw==&fileTy=ATTACH&fileNo=dF4AIRaPEo8ce5KdCMTKEg=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=KOsstcTqZ3xdjoCFtL7u0A==&fileTy=ATTACH&fileNo=OiU7eaNQyn6oki*sKeo^aQ=="
     },
     {
      "name": "(붙임2) 「첨단 GPU 활용 지원 사업」 사용자 모집(26-1차) 공모 안내서(산업계 대상).hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=TEbR0m3q*mPxxJyMIJdUvg==&fileTy=ATTACH&fileNo=uwmjZ1xih33hCs^MVP9aPw=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=guYcf2SFvzxalqICyY1DMA==&fileTy=ATTACH&fileNo=52hwu3O2Pelv4yNC0vqvLQ=="
     },
     {
      "name": "(붙임3) 「첨단 GPU 활용 지원 사업」 사업수행계획서(산업계 대상).hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=MrIGv1aX8mf0earONIBikw==&fileTy=ATTACH&fileNo=Tp4i6dK*aidUHX7bkqtPZA=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=QrysLf9*XXmYE4^vuF17Qg==&fileTy=ATTACH&fileNo=PLl8nSDWAmIe8wS*6VvivA=="
     },
     {
      "name": "(붙임4) 「첨단 GPU 활용 지원 사업」 제출 서류.hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=6xi2x7Yn1qHcKNXb5UettA==&fileTy=ATTACH&fileNo=HMCRiyK6PfLp79DWsO8frw=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=HAyM6Mr9uxQehFV^fflMyQ==&fileTy=ATTACH&fileNo=dBx15Q7SuLtHh*OSnnztqg=="
     },
     {
      "name": "(붙임5) 관련 규정.Zip",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=gtruhdaQjMJnxYX5agrK7A==&fileTy=ATTACH&fileNo=8PkSU5fCiXcYA5JMOFAhpQ=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=ukyaoh9yhVBUO09ie5*5cg==&fileTy=ATTACH&fileNo=mZTC1b2iTWmNs*DG4DaiVQ=="
     }
    ],
    "links": [
@@ -543,8 +557,14 @@ window.GPU_GRANTS = {
    "gpu_specs": [],
    "scale": [],
    "cost": [
-    "(사업예산) 총 2,080,515백만원",
-    "자사(또는 계열사 등)의 AI모델 개발 및 고도화에 직접 활용, 국내 산·학·연 대상 무상·저렴 GPU 지원 등 활용계획을 상세하게 제시"
+    {
+     "audience": "",
+     "text": "(사업예산) 총 2,080,515백만원"
+    },
+    {
+     "audience": "",
+     "text": "- 자사(또는 계열사 등)의 AI모델 개발 및 고도화에 직접 활용, 국내 산·학·연 대상 무상·저렴 GPU 지원 등 활용계획을 상세하게 제시"
+    }
    ],
    "usage_period": {
     "text": "(협약 및 사업기간) ‘26. 협약월 ~ ’31. 12.31.(약 68개월, (’26년) 구축 및 서비스 개시, (’27~’31년) 서비스 운영)",
@@ -555,23 +575,23 @@ window.GPU_GRANTS = {
    "attachments": [
     {
      "name": "붙임1. 2026년 AI컴퓨팅자원 활용기반 강화사업(GPU확보구축운용지원) 공고문.hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=qbfDxngnDhnnlcp4ge3pDQ==&fileTy=ATTACH&fileNo=W8tvWdQNH3bqXKv3uR**GQ=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=XfjMw24W22fQUvBo^zJFiw==&fileTy=ATTACH&fileNo=MYVdnefhlh^wbuAfP^HFPg=="
     },
     {
      "name": "붙임2. 2026년 AI컴퓨팅자원 활용기반 강화사업(GPU확보구축운용지원) 공모안내서.hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=CkEwB^YSsxGkUU59Dz2OYA==&fileTy=ATTACH&fileNo=^ZtQbUFiYNXHmSHDGIqWQw=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=juhsfRTlv9nj1AM*BkdVaQ==&fileTy=ATTACH&fileNo=utQyF^m7kY2eBCR8^VO4ig=="
     },
     {
      "name": "붙임3. 수행계획서 및 제출서류 양식.zip",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=r^tB*nuPPsBdRk^ZjA^JnA==&fileTy=ATTACH&fileNo=C3vvuw8eWysG3EBL64i^gQ=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=Ww5j^sfMURt5ZVgtjmICXQ==&fileTy=ATTACH&fileNo=wfOpT2cL4uBQr9j2^earjg=="
     },
     {
      "name": "붙임4. 관련 규정.zip",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=sQYcO9rliEb*NxAlHXEb9g==&fileTy=ATTACH&fileNo=lnqs4uYF1Ay22imw*SERTg=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=3^LkhBBub62k7md8hgKGdg==&fileTy=ATTACH&fileNo=wT^MNT1sqZn1^tNDxVoqlw=="
     },
     {
      "name": "붙임5. 외부사용자 메뉴얼(NXT시스템-회원가입, 접수).zip",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=N2FDTeeopHHuwNG6O8kIGg==&fileTy=ATTACH&fileNo=E2cPFVYLSHE9aVGCNiPl8Q=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=YZOF5qSsEhZ1t*pJGoXpmQ==&fileTy=ATTACH&fileNo=2rYSqrHCOUo8M5kX7PN3ZQ=="
     }
    ],
    "links": [
@@ -665,8 +685,14 @@ window.GPU_GRANTS = {
    ],
    "scale": [],
    "cost": [
-    "③ 동적할당 장애 발생 조치 프로세스(장애 발생 시 대기시간 8시간 초과하지 않아야 함, 단 대기시간 1시간 단위로 협상 단가의 할인된 금액을 해당 사용자에게 적용하며, 할인비율은 기술/가격협상 시 협의 가능)",
-    "1개월 무상 지원기간 종료 후, 차년도 사업시작 전까지 3개월 내외 기간동안 사용자에게 시중가 대비 할인된 가격*으로 상품을 지원하여야 함"
+    {
+     "audience": "",
+     "text": "③ 동적할당 장애 발생 조치 프로세스(장애 발생 시 대기시간 8시간 초과하지 않아야 함, 단 대기시간 1시간 단위로 협상 단가의 할인된 금액을 해당 사용자에게 적용하며, 할인비율은 기술/가격협상 시 협의 가능)"
+    },
+    {
+     "audience": "",
+     "text": "1개월 무상 지원기간 종료 후, 차년도 사업시작 전까지 3개월 내외 기간동안 사용자에게 시중가 대비 할인된 가격*으로 상품을 지원하여야 함"
+    }
    ],
    "usage_period": {
     "text": "1개월 무상 지원기간 종료 후, 차년도 사업시작 전까지 3개월 내외 기간동안 사용자에게 시중가 대비 할인된 가격*으로 상품을 지원하여야 함",
@@ -677,43 +703,43 @@ window.GPU_GRANTS = {
    "attachments": [
     {
      "name": "(사업공고) 2026년 고성능컴퓨팅지원 공급사 모집공고문.hwpx",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=Jr5XVc9G1wLxOUWPHnr^*g==&fileTy=ATTACH&fileNo=msfm5K8WZvmfAH9ezVitcw=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=biaGbHOsP*ZLsY67FHXMhg==&fileTy=ATTACH&fileNo=eDTvR^bZd81yCvOaD23*aQ=="
     },
     {
      "name": "[붙임1-1, 2-1] 2026년 고성능컴퓨팅지원 공급사 공고안내서(최종).hwpx",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=BuA3X65UrMEjhka^JLDQLQ==&fileTy=ATTACH&fileNo=ZYyyoZrfsBh2A10iqmr30Q=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=P6biuE5eiHUpsT0AUNflMg==&fileTy=ATTACH&fileNo=jGaCY1FxeJzO^PqXizc7dA=="
     },
     {
      "name": "[붙임1-2] 2026년 고성능 컴퓨팅 자원 지원 사업 공급자 신청서.hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=vkeuwm87stT1EYUjJu3hMg==&fileTy=ATTACH&fileNo=zA6*AnkQ3aagLLob8zuq9g=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=s3ozVaAmr0^dRSNbdSG3Kg==&fileTy=ATTACH&fileNo=cUVyxEXJ2*zePVc*4mS5BA=="
     },
     {
      "name": "[붙임1-3] 평가항목 참조표(고성능컴퓨팅자원지원사업).hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=UF4YR5ErfApGp4*eg7vMOw==&fileTy=ATTACH&fileNo=gn9VYzNIq1^ET*S7A7z^9A=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=oaa9^0XcGbq9h7vNp5fOfA==&fileTy=ATTACH&fileNo=W^szNgJRb3pgHyjXIaGf1w=="
     },
     {
      "name": "[붙임1-4] 공급사 AI가속기 현황 자료(고성능컴퓨팅 지원사업)_v2.xlsx",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=97oZc7wUQ8pJIwC5sSnv1A==&fileTy=ATTACH&fileNo=wO9FIO5eQmkopnPJTqejFQ=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=jvmdszzl5pPn7EgQpde*Pg==&fileTy=ATTACH&fileNo=FNRM9QU6rpKl7I6CwMDn4Q=="
     },
     {
      "name": "[붙임2-2] 2026년 국산 AI 반도체 활용 사업 공급자 신청서.hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=Db^WWjoUvWJz6o77cQow3A==&fileTy=ATTACH&fileNo=9Hbcllhh22Lql4iamtAXxw=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=F3Fef3*A47iqluK3z3pH9g==&fileTy=ATTACH&fileNo=QrWtd^0ZD4Ig8YS2fDvhfg=="
     },
     {
      "name": "[붙임2-3] 평가항목 참조표(국산AI반도체활용사업).hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=guZ9bbnX5tFrAVIxgEAfIw==&fileTy=ATTACH&fileNo=MqHuxyldk7O*ChNE5PIp*g=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=W9YlqT78aJMkm5aFRs1Lqw==&fileTy=ATTACH&fileNo=9pLp5Haqkg4czo4fMZHUhQ=="
     },
     {
      "name": "[붙임2-4] 기술지원 확약서.hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=GRf4ryV3Sqpt0BUeKrdzTQ==&fileTy=ATTACH&fileNo=T^FueudDZPeGIXiWqicNbQ=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=5ao24fYWEuPVy6Fzeyi8Iw==&fileTy=ATTACH&fileNo=FAoW0Em^CfiaX8a8jMswEg=="
     },
     {
      "name": "[붙임2-5] AI 반도체 설치 확인서.hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=3L8YPgJvohSTuxyVLXRoSg==&fileTy=ATTACH&fileNo=ikntxY5LpkaG*VfT2*KOWA=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=zwRdOmTrotPvHWw0DEzAIA==&fileTy=ATTACH&fileNo=*zJjAqySpKUYo0mqFKn8wg=="
     },
     {
      "name": "[붙임2-9] 공급사 AI가속기 현황 자료(국산 AI반도체 활용사업)_v2.xlsx",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=wkGI9oHV5L57J*4o5DDv9g==&fileTy=ATTACH&fileNo=qWqQeTLRYt^LkJdtCIezsA=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=fkjZrpJdXkbqi71JWpkgDg==&fileTy=ATTACH&fileNo=TpK1AQ*1dvhkfTYSQuR4gA=="
     }
    ],
    "links": [
@@ -810,9 +836,18 @@ window.GPU_GRANTS = {
     "사업예산 규모 : A100 200장, H100·H200 860장 이상"
    ],
    "cost": [
-    "H100/1장 또는 H200/1장 기준 — 40만원/월",
-    "H100/1장 또는 H200/1장 기준 — 20만원/월",
-    "A100/1장 기준 — 10만원/월"
+    {
+     "audience": "",
+     "text": "H100/1장 또는 H200/1장 기준 — 40만원/월"
+    },
+    {
+     "audience": "",
+     "text": "H100/1장 또는 H200/1장 기준 — 20만원/월"
+    },
+    {
+     "audience": "",
+     "text": "A100/1장 기준 — 10만원/월"
+    }
    ],
    "usage_period": {
     "text": "사업기간 : 협약 체결일 ∼ 2026. 12. 31.",
@@ -823,23 +858,23 @@ window.GPU_GRANTS = {
    "attachments": [
     {
      "name": "붙임 1. 2026년 고성능 컴퓨팅 지원 사용자 모집 공고(제2026-0365호).hwpx",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=HVYmS83HuVnUQNIC7*Tlqg==&fileTy=ATTACH&fileNo=cEVozF3ZmPPjeXvB0B*Nog=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=cr7ZsV4BSC2PuRsaFHr9hw==&fileTy=ATTACH&fileNo=QDj1P1R75hPaptBai78L*w=="
     },
     {
      "name": "[모집안내문] 2026년 고성능컴퓨팅 지원사업(GPU) 사용자 모집 공모안내서.hwpx",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=9sLxQd4tdlLx3I2cez62WA==&fileTy=ATTACH&fileNo=*zZJgAY5QaSngIDQo048lQ=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=S86*IBZKWkWdPK8fAAnHKw==&fileTy=ATTACH&fileNo=X3xleHDdiLVbsHROZRt*eg=="
     },
     {
      "name": "[모집안내문] 붙임1. 2026년 고성능컴퓨팅 지원사업(NPU) 사용자 모집 공모안내서.hwpx",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=9DMGAG6g78jNfRY*^KvvlA==&fileTy=ATTACH&fileNo=mbMPg*2SbHwzAXm7IBmbFQ=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=vk9cM4cOgo^lL6o92IOUdA==&fileTy=ATTACH&fileNo=7nM8mRY1SeeqXBB*xswNug=="
     },
     {
      "name": "붙임 2. 2026년 고성능컴퓨팅지원(GPU) 사용자 모집안내서(제출서류포함).zip",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=ewLGSUG8Ghl8TYgKStcgWA==&fileTy=ATTACH&fileNo=wJ^Lrx0mXbTnBoXwveFUVw=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=DkIpogEH3qsmpJ4WfLvHiA==&fileTy=ATTACH&fileNo=^s17wl2lrflSsbnfrj^xoQ=="
     },
     {
      "name": "붙임 3. 2026년 고성능컴퓨팅지원(NPU_국산AI반도체활용사업) 사용자 모집안내서(제출서류포함).zip",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=68o241Bau*sIrp0Q**0zcw==&fileTy=ATTACH&fileNo=PeiVDBPOC7GomORcM31m6Q=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=QNifGpYPOxJj9u9ksbtzpQ==&fileTy=ATTACH&fileNo=EYpTjxFlemJzU6RqF39SnA=="
     }
    ],
    "links": [
@@ -937,9 +972,18 @@ window.GPU_GRANTS = {
     "사업예산 규모 : 35개 내외 기업·기관 당 NPU 자원 1식"
    ],
    "cost": [
-    "H100/1장 또는 H200/1장 기준 — 40만원/월",
-    "H100/1장 또는 H200/1장 기준 — 20만원/월",
-    "A100/1장 기준 — 10만원/월"
+    {
+     "audience": "",
+     "text": "H100/1장 또는 H200/1장 기준 — 40만원/월"
+    },
+    {
+     "audience": "",
+     "text": "H100/1장 또는 H200/1장 기준 — 20만원/월"
+    },
+    {
+     "audience": "",
+     "text": "A100/1장 기준 — 10만원/월"
+    }
    ],
    "usage_period": {
     "text": "사업기간 : 협약 체결일 ∼ 2026. 12. 31.",
@@ -950,27 +994,27 @@ window.GPU_GRANTS = {
    "attachments": [
     {
      "name": "[모집안내문] 2026년 고성능컴퓨팅 지원사업(GPU) 사용자 추가모집 공모안내서.hwpx",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=71Cs0UnctlzevQdsr8ovtg==&fileTy=ATTACH&fileNo=xCIyBnn63wdl**fFdVgKIA=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=o1yL06ENspg*xf2iRvgHCQ==&fileTy=ATTACH&fileNo=po4SzOJWZ^SzKH8453c3Mw=="
     },
     {
      "name": "붙임2. 2026년 고성능 컴퓨팅 지원(GPU) 사용자(추가모집) 이용신청서 및 현황표.zip",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=ICcKVmaNaMcvRrqoo5D2dg==&fileTy=ATTACH&fileNo=Ev*wIcejev7BFa1cuzamGQ=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=m^yV0kAhJoqJYnb5WYXXOQ==&fileTy=ATTACH&fileNo=0xMPlfsaO9xf2RkUVoBAiA=="
     },
     {
      "name": "붙임3. 2026년 고성능 컴퓨팅 지원(NPU) 사용자(추가모집) 이용신청서 및 현황표.zip",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=GOXvINZyKnw5iHVB^6^Zdw==&fileTy=ATTACH&fileNo=bGi8LEeaaSF37^glXmugdA=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=lEQsyo61m4jxrRipwqSwrg==&fileTy=ATTACH&fileNo=gj7Nk0zoidKY0lKc2TSpjg=="
     },
     {
      "name": "붙임1. 2026년 고성능 컴퓨팅 지원 사용자 추가 모집 공고(제2026-0654호).hwpx",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=7zcc3XoUlOjAEFotaqJYpA==&fileTy=ATTACH&fileNo=uLUO*4ttL5aglXofmW1X^w=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=wTlEgaOjSuynMGsoBtAZzg==&fileTy=ATTACH&fileNo=N^rMEU1zOaVQh1yjHE9^MQ=="
     },
     {
      "name": "고성능컴퓨팅 지원사업 사업관리시스템 메뉴얼.pdf",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=p0btNItGtUwsBft4VUdQuQ==&fileTy=ATTACH&fileNo=5981ckvGQZLaKTDArCslSw=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=CStf4w^wycnYF3RfJMZdpQ==&fileTy=ATTACH&fileNo=0yx6ouoDrQmVlNkHoh7suQ=="
     },
     {
      "name": "[모집안내문] 2026년 고성능컴퓨팅 지원사업(NPU) 사용자 추가모집 공모안내서.hwpx",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=vAS9hYXnEBr0iQjp82buIQ==&fileTy=ATTACH&fileNo=rLf8GXjnPu9bOPkOg2IQog=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=oSZ2EDrMUzGO74IeCxs5dQ==&fileTy=ATTACH&fileNo=P9bXJSptmrkFyuJjseBCZQ=="
     }
    ],
    "links": [
@@ -1022,8 +1066,14 @@ window.GPU_GRANTS = {
     "(지원규모) H200 서버, B200 서버"
    ],
    "cost": [
-    "(산업계) H200 서버 1대 320만원/월, B200 서버 1대 640만원/월, 청년기업 50%할인",
-    "B200 — 80만원"
+    {
+     "audience": "학계·연구계",
+     "text": "무상, 단, 지원받은 자원을 활용한 연구결과를 공개하여야 함"
+    },
+    {
+     "audience": "산업계",
+     "text": "H200 서버 1대 320만원/월, B200 서버 1대 640만원/월, 청년기업 50%할인"
+    }
    ],
    "usage_period": {
     "text": "(지원기간) 협약체결일로부터 ~ 최대 ‘26. 12. 31.까지",
@@ -1054,23 +1104,23 @@ window.GPU_GRANTS = {
     },
     {
      "name": "(붙임1) 「첨단 GPU 활용 지원 사업」사용자 수시모집 공고문(산학연 대상).hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=SBw88jOaWwhRVYUC9E0ljA==&fileTy=ATTACH&fileNo=LzAVJJO^QNb57agcmUBKLw=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=m8dOEiOigSRCNI0xSe4Y3w==&fileTy=ATTACH&fileNo=XIKx8sUhryVgWL3vnwIpzQ=="
     },
     {
      "name": "(붙임2) 「첨단 GPU 활용 지원 사업」 사용자 수시모집 공고 안내서(산학연 대상).hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=1O29L9gVyheO*Zw4uqDaxA==&fileTy=ATTACH&fileNo=xMAXpwqiWfK4UirT76dmWg=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=4bc5Q6zNFsiNHNxDHuda^g==&fileTy=ATTACH&fileNo=UxLppfeMWjVZvrx0ExxbYw=="
     },
     {
      "name": "(붙임3) 「첨단 GPU 활용 지원 사업」 사업수행계획서(산학연 대상).hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=fAOkAp0N8jwnS81Xm8SV4Q==&fileTy=ATTACH&fileNo=Xp6WIiSccEP^l2wKfkr6Bw=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=9RuBT6hAL57dqkCcIK4EyQ==&fileTy=ATTACH&fileNo=yr4vZDEFMQ2^A0juBgEWvg=="
     },
     {
      "name": "(붙임4) 「첨단 GPU 활용 지원 사업」 제출 서류.hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=xq6oR*DU1fuau8Bc80EYtA==&fileTy=ATTACH&fileNo=wo1URn4KpYx6ahHwHgVUfg=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=ZvcHhOBkB4cKrytsVHOAdw==&fileTy=ATTACH&fileNo=l4F3jULhLgbQyATt8MivIg=="
     },
     {
      "name": "(붙임5) 관련 규정.Zip",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=IgUVAT4HKIgsSDf4zXukUw==&fileTy=ATTACH&fileNo=Iq3kCbwSSOZCc7otPpZwaQ=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=VvTynz2VdfEpXj4P6Qh*eQ==&fileTy=ATTACH&fileNo=IK^RU6RRuimUV5m7iPEutg=="
     }
    ],
    "links": [
@@ -1122,9 +1172,18 @@ window.GPU_GRANTS = {
     "선정규모 : 상반기 50~80개사 내외 (`26년 총 100개사 내외 선정 예정) ※ 평가에 따라 선정규모 변동될 수 있음"
    ],
    "cost": [
-    "(Track 1, 고도화 지원) 6천만원 / (Track 2, 초기·검증 지원) 1천만원",
-    "16개사 내외/연, 6천만원",
-    "84개사 내외/연, 1천만원"
+    {
+     "audience": "",
+     "text": "- (Track 1, 고도화 지원) 6천만원 / (Track 2, 초기·검증 지원) 1천만원"
+    },
+    {
+     "audience": "",
+     "text": "16개사 내외/연, 6천만원"
+    },
+    {
+     "audience": "",
+     "text": "84개사 내외/연, 1천만원"
+    }
    ],
    "usage_period": {
     "text": "사업기간 내(2026.06. ~ 2026.10.) 월 단위로 기재하며, 결과보고시 실제 서비스 사용기간으로 기산예정, 선정 후 자원사용이 없는 경우 자원이 회수될 수 있음",
@@ -1200,8 +1259,14 @@ window.GPU_GRANTS = {
     "지원규모 4개사 내외, 최대 6천만원 상당 35개사 내외, 최대 1천만원 상당"
    ],
    "cost": [
-    "(Track 1, 고도화 지원) 6천만원 상당 / (Track 2, 초기·검증 지원) 1천만원 상당",
-    "지원규모 4개사 내외, 최대 6천만원 상당 35개사 내외, 최대 1천만원 상당"
+    {
+     "audience": "",
+     "text": "(Track 1, 고도화 지원) 6천만원 상당 / (Track 2, 초기·검증 지원) 1천만원 상당"
+    },
+    {
+     "audience": "",
+     "text": "지원규모 4개사 내외, 최대 6천만원 상당 35개사 내외, 최대 1천만원 상당"
+    }
    ],
    "usage_period": {
     "text": "사업기간 내(2026.07. ~ 2026.10.) 월 단위로 기재하며, 결과보고시 실제 서비스 사용기간으로 기산예정, 선정 후 자원사용이 없는 경우 자원이 회수될 수 있음",

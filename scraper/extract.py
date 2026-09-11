@@ -6,6 +6,7 @@ field keeps the sentence it came from (`evidence`) so a human can check it, and
 """
 from __future__ import annotations
 
+import difflib
 import re
 
 from .common import parse_dt, parse_range
@@ -325,32 +326,107 @@ def _cost_score(line: str) -> int:
 
 _BARE_AMOUNT = re.compile(r"^[\d,]+\s*(?:만원|억원|원)(?:\s*/\s*월|/월|\s*\(월\))?$")
 
+# 공고는 지원 대상별로 부담금을 따로 적는다. 라벨이 줄 맨 앞에 괄호로 붙은 경우만
+# 신뢰한다 — 본문 아무 곳의 '기업' 두 글자를 대상 표기로 오인하지 않기 위해서다.
+_LABEL_HEAD = re.compile(r"^\s*[*※\-–—ㆍ·○ㅇ□]*\s*[(（\[]([^)）\]]{2,14})[)）\]]")
+_AUDIENCES: list[tuple[str, str]] = [
+    ("학계·연구계", r"학계\s*[·ㆍ,/]\s*연구계|산\s*[·ㆍ]\s*학\s*[·ㆍ]\s*연|학\s*[·ㆍ]\s*연"),
+    ("학계",       r"학계|대학"),
+    ("연구계",     r"연구계|연구소|출연연"),
+    ("산업계",     r"산업계|기업|스타트업|중소|벤처"),
+]
+# 학계를 먼저 보여준다 (이 대시보드를 보는 쪽이 대학·연구기관이다)
+_AUD_ORDER = {"학계": 0, "학계·연구계": 1, "연구계": 2, "산업계": 3, "": 4}
 
-def find_cost(text: str) -> list[str]:
-    """What the applicant pays: self-funding rates, credits, or 'free'."""
+
+_EXEMPT = re.compile(r"자부담|부담금|이용료|임차료")
+_EXEMPT_VERB = re.compile(r"제외|면제|미부과|부과하지|부과되지|무상")
+_ACADEMIC = re.compile(r"대학|학계|산학협력단")
+_RESEARCH = re.compile(r"연구계|출연연|연구소")
+
+
+def _audience_of(line: str) -> str:
+    """줄 맨 앞 괄호 라벨이 지원 대상이면 그 이름을 준다.
+
+    라벨이 없어도 '대학교(원)…는 자부담금 부여 대상에서 제외' 처럼 특정 대상의
+    부담금 규칙을 적은 문장은 그 대상으로 본다.
+    """
+    m = _LABEL_HEAD.match(line)
+    if m:
+        head = m.group(1)
+        for label, pattern in _AUDIENCES:
+            if re.search(pattern, head):
+                return label
+    if _EXEMPT.search(line) and _EXEMPT_VERB.search(line):
+        academic, research = _ACADEMIC.search(line), _RESEARCH.search(line)
+        if academic and research:
+            return "학계·연구계"
+        if academic:
+            return "학계"
+        if research:
+            return "연구계"
+    return ""
+
+
+def find_cost(text: str) -> list[dict]:
+    """지원 대상별 부담금. `{audience, text}` 를 학계 우선으로 돌려준다."""
     lines = [re.sub(r"\s+", " ", ln).strip() for ln in (text or "").split("\n")]
     lines = [ln for ln in lines if ln]
-    cands: list[tuple[int, int, str]] = []
+    cands: list[tuple[int, int, str, str]] = []
     for i, line in enumerate(lines):
         if len(line) > 300 or _is_toc(line) or not _COST_KEYS.search(line):
             continue
-        if not re.search(r"\d|무상", line):
+        if not re.search(r"\d|무상|면제", line):
             continue
         shown = line
-        if _BARE_AMOUNT.match(line):                     # a lone table cell: borrow its label
+        if _BARE_AMOUNT.match(line):                     # 표의 금액 칸 하나 — 라벨을 빌려온다
             for prev in reversed(lines[max(0, i - 3):i]):
                 if not _BARE_AMOUNT.match(prev) and len(prev) < 120 and re.search(r"[가-힣A-Za-z]", prev):
                     shown = f"{prev} — {line}"
                     break
-        cands.append((-_cost_score(line), i, shown))
-    out: list[str] = []
-    for neg, _, shown in sorted(cands):
-        if -neg <= 0 or shown in out:
+        aud = _audience_of(line)
+        cands.append((-_cost_score(line), i, aud, _strip_label(shown, aud)))
+
+    # 대상별로 가장 잘 적힌 줄을 고르고, 학계 → 연구계 → 산업계 → 무표기 순으로 낸다
+    best: dict[str, list[tuple[int, int, str]]] = {}
+    for neg, i, aud, shown in sorted(cands):
+        if -neg <= 0:
             continue
-        out.append(shown)
-        if len(out) == 3:
-            break
-    return out
+        rows = best.setdefault(aud, [])
+        cap = 3 if not aud else 2
+        if len(rows) >= cap or any(_near(shown, r[2]) for r in rows):
+            continue
+        rows.append((neg, i, shown))
+
+    out: list[dict] = []
+    labelled = any(a for a in best)
+    for aud in sorted(best, key=lambda a: (_AUD_ORDER.get(a, 9), a)):
+        if labelled and not aud:
+            continue          # 대상별로 적힌 줄이 있으면 표의 금액 조각은 군더더기다
+        for _, _, shown in best[aud]:
+            out.append({"audience": aud, "text": shown})
+    return out[:5]
+
+
+def _near(a: str, b: str) -> bool:
+    """'…연구결과를 공개하여야 함' / '…학계·연구계의 경우 연구결과를…' 같은 사실상 같은 문장.
+
+    금액이 다르면 같은 문장이 아니다 — 일반 기업 40만원/월과 청년 기업 20만원/월은
+    표의 다른 칸이고, 문장 모양만 거의 같다.
+    """
+    if re.findall(r"\d[\d,]*", a) != re.findall(r"\d[\d,]*", b):
+        return False
+    ka, kb = re.sub(r"\W", "", a), re.sub(r"\W", "", b)
+    if ka in kb or kb in ka:
+        return True
+    return difflib.SequenceMatcher(None, ka, kb).ratio() >= 0.8
+
+
+def _strip_label(line: str, audience: str) -> str:
+    """라벨은 따로 보여주므로 문장 앞의 '(산업계)' 는 덜어낸다."""
+    if not audience:
+        return _LEAD_MARK.sub("", line).strip()
+    return _LEAD_MARK.sub("", _LABEL_HEAD.sub("", line, count=1)).strip()
 
 
 # --------------------------------------------------------------------------- #
