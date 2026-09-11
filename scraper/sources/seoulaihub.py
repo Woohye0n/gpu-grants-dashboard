@@ -102,6 +102,7 @@ def _build(row: dict, deep: bool) -> dict:
         "closed_hint": bool(re.search(r"마감|종료|선정\s*결과", row["title"])),
         "audience": E.audience(row["title"], body[:2000]),
         "gpu_models": E.find_models(blob),
+        "unknown_models": E.find_unknown_models(blob),
         "gpu_specs": E.find_specs(blob),
         "scale": E.find_scale(blob),
         "cost": E.find_cost(blob),

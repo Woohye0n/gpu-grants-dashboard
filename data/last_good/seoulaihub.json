@@ -1,5 +1,5 @@
 {
- "saved_at": "2026-09-11 13:52",
+ "saved_at": "2026-09-11 14:03",
  "rows": [
   {
    "source": "seoulaihub",
@@ -21,6 +21,7 @@
     "A6000",
     "A6000 Ada"
    ],
+   "unknown_models": [],
    "gpu_specs": [
     {
      "model": "L4",
@@ -113,6 +114,7 @@
     "T4",
     "A10"
    ],
+   "unknown_models": [],
    "gpu_specs": [
     {
      "model": "A100",
@@ -179,6 +181,7 @@
     "A100",
     "H100"
    ],
+   "unknown_models": [],
    "gpu_specs": [
     {
      "model": "A100",

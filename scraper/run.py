@@ -148,6 +148,9 @@ def merge(programs: list[dict]) -> list[dict]:
             for m in q.get("gpu_models") or []:
                 if m not in base["gpu_models"]:
                     base["gpu_models"].append(m)
+            for u in q.get("unknown_models") or []:
+                if u["token"] not in {x["token"] for x in base.get("unknown_models") or []}:
+                    base.setdefault("unknown_models", []).append(u)
             for field in ("apply_start", "apply_end", "posted", "summary"):
                 if not base.get(field) and q.get(field):
                     base[field] = q[field]
@@ -312,6 +315,7 @@ def build(deep: bool = True) -> dict:
         "timezone": "Asia/Seoul (KST)",
         "sources": report,
         "stale_sources": [s["label"] for s in report if s.get("stale")],
+        "unknown_models": _unknown_digest(programs),
         "counts": {
             "total": len(programs),
             "open": sum(1 for p in programs if p["status"] == "open"),
@@ -321,6 +325,17 @@ def build(deep: bool = True) -> dict:
         },
         "programs": programs,
     }
+
+
+def _unknown_digest(programs: list[dict]) -> list[dict]:
+    """가속기 이름 같은데 목록에 없는 토큰 — 사람이 GPU_MODELS 에 한 줄 추가하라는 신호."""
+    seen: dict[str, dict] = {}
+    for p in programs:
+        for u in p.get("unknown_models") or []:
+            row = seen.setdefault(u["token"], {"token": u["token"], "line": u["line"], "programs": []})
+            if p["title"] not in row["programs"]:
+                row["programs"].append(p["title"][:60])
+    return sorted(seen.values(), key=lambda r: r["token"])
 
 
 def publish(payload: dict) -> None:
@@ -361,6 +376,9 @@ def main() -> int:
         else:
             state = f"FAIL — {s['error'][:80]}"
         print(f"  - {s['label']}: {state} ({s['count']}건)")
+    for u in payload.get("unknown_models") or []:
+        print(f"  ! 미확인 가속기 후보 '{u['token']}' — GPU_MODELS 에 추가가 필요할 수 있습니다")
+        print(f"      근거: {u['line'][:110]}")
     for p in payload["programs"]:
         if p["status"] in ("open", "upcoming"):
             dd = f"D-{p['dday']}" if (p.get("dday") or 0) >= 0 else ""

@@ -369,6 +369,24 @@
       box.appendChild(n);
     });
 
+    const unknown = DATA.unknown_models || [];
+    const ubox = $('unknownBox');
+    ubox.innerHTML = '';
+    if (!unknown.length) {
+      ubox.appendChild(el('p', 'hint',
+        '공고에 나온 가속기 이름이 모두 인식됐습니다. 모르는 기종이 나오면 여기에 표시됩니다.'));
+    } else {
+      unknown.forEach((u) => {
+        const row = el('p');
+        row.appendChild(el('span', 'chip gpu', u.token));
+        row.appendChild(el('span', null, ' ' + u.line));
+        row.appendChild(el('div', 'hint', u.programs.join(' · ')));
+        ubox.appendChild(row);
+      });
+      ubox.appendChild(el('p', 'hint',
+        'scraper/extract.py 의 GPU_MODELS 에 한 줄 추가하면 다음 수집부터 기종·수량이 잡힙니다.'));
+    }
+
     $('howbox').innerHTML = `
       <p><span class="k">수집 주기</span> 하루 1회 (기본 09:10 KST) — <code>update.sh</code></p>
       <p><span class="k">수집 범위</span> 각 게시판의 최근 공고를 훑어 GPU·고성능컴퓨팅 키워드가 있는 건만 추립니다.</p>

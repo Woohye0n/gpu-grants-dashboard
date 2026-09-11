@@ -96,6 +96,7 @@ def _build(row: dict, deep: bool) -> dict:
         "closed_hint": bool(re.search(r"접수\s*마감|점수마감|모집\s*종료", row["title"])),
         "audience": E.audience(row["title"], row["program"]),
         "gpu_models": E.find_models(blob),
+        "unknown_models": E.find_unknown_models(blob),
         "gpu_specs": E.find_specs(blob),
         "scale": E.find_scale(blob),
         "cost": E.find_cost(blob),

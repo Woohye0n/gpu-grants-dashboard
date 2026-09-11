@@ -37,7 +37,7 @@ GPU_MODELS: list[tuple[str, str]] = [
     (r"A10(?![0-9])",               "A10"),
     (r"MI300X?",                    "MI300X"),
     (r"MI250X?",                    "MI250"),
-    (r"Gaudi\s*[23]",               None),
+    (r"Gaudi\s*[23]|가우디\s*[23]",   None),
     (r"사피온\s*X?\d*",              "사피온"),
     (r"리벨리온|(?<![A-Za-z])ATOM\+?(?![A-Za-z])", "리벨리온 ATOM"),
     (r"딥엑스|DEEPX",                "DEEPX"),
@@ -427,6 +427,38 @@ def _strip_label(line: str, audience: str) -> str:
     if not audience:
         return _LEAD_MARK.sub("", line).strip()
     return _LEAD_MARK.sub("", _LABEL_HEAD.sub("", line, count=1)).strip()
+
+
+# 가속기 이름처럼 생겼는데 GPU_MODELS 에 없는 토큰. 새 기종(B300, GB300, MI355X …)이
+# 나오면 조용히 놓치는 대신 "이 줄을 목록에 추가하라"고 알리기 위한 장치다.
+_CANDIDATE = re.compile(r"(?<![A-Za-z0-9])(?:GB|RTX|MI|[A-Z])\d{2,4}[A-Za-z]{0,3}(?![A-Za-z0-9])")
+_GPU_CONTEXT = re.compile(r"GPU|가속기|그래픽|엔비디아|NVIDIA|AMD|인텔|장\)|\d\s*장|서버|노드", re.I)
+# 공고문에 흔한, 가속기가 아닌 것들
+_NOT_A_CHIP = re.compile(r"^(?:KS|ISO|IEC|TTA|VAT|NO|PC|IP|OS|SW|HW|AI|ML|DB|RM)\d", re.I)
+
+
+def find_unknown_models(text: str, limit: int = 6) -> list[dict]:
+    """알려진 목록에 없는 가속기 후보. `{token, line}` 목록."""
+    out: list[dict] = []
+    seen: set[str] = set()
+    known = {m.upper() for m in find_models(text)}
+    for raw in (text or "").split("\n"):
+        line = re.sub(r"\s+", " ", raw).strip()
+        if not line or len(line) > 300 or not _GPU_CONTEXT.search(line):
+            continue
+        for m in _CANDIDATE.finditer(line):
+            token = m.group(0).upper()
+            if token in seen or token in known or _NOT_A_CHIP.match(token):
+                continue
+            if _MODEL_RE.fullmatch(m.group(0)):          # 이미 아는 기종
+                continue
+            if re.search(r"(?:제|공고|호)\s*$", line[:m.start()][-3:]):
+                continue                                 # 공고번호 (제2026-0395호)
+            seen.add(token)
+            out.append({"token": token, "line": line[:160]})
+            if len(out) >= limit:
+                return out
+    return out
 
 
 # --------------------------------------------------------------------------- #
