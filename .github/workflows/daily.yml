@@ -1,0 +1,54 @@
+# 매일 공고를 수집해 docs/ 를 GitHub Pages 로 배포합니다.
+# Pages 는 configure-pages 가 자동으로 켭니다. 실패하면 Settings > Pages > Source 를
+# "GitHub Actions" 로 직접 바꿔 주세요.
+name: daily-collect
+
+on:
+  schedule:
+    - cron: "10 0 * * *"      # 00:10 UTC = 09:10 KST
+  workflow_dispatch:           # 수동 실행 버튼
+
+permissions:
+  contents: write              # 수집 결과 커밋
+  pages: write                 # Pages 배포
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  collect-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: 공고 수집
+        run: python -m scraper.run
+
+      - name: 수집 결과 커밋
+        run: |
+          git config user.name  "gpu-grants-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data.js docs/data.json data/history
+          git diff --staged --quiet || git commit -m "chore: $(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M KST') 공고 수집"
+          git push
+
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true   # Pages 가 꺼져 있으면 워크플로가 켭니다
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - id: deployment
+        uses: actions/deploy-pages@v4

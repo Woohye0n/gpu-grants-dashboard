@@ -1,0 +1,7 @@
+cache/
+logs/
+__pycache__/
+*.pyc
+# 파생물 — scraper/build_single_file.py 로 언제든 다시 만듭니다
+docs/standalone.html
+docs/artifact.html

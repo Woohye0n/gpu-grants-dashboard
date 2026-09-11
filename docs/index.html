@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GPU 지원사업 트래커</title>
+  <meta name="description" content="국내 GPU 지원사업 공고를 매일 한 번 수집해 한 화면에 모아 보는 대시보드" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>◆</text></svg>" />
+  <link rel="stylesheet" href="./style.css?v=1" />
+  <script src="./data.js?v=1" defer></script>
+  <script src="./app.js?v=1" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">◆</span>
+      <div>
+        <h1>GPU 지원사업 트래커</h1>
+        <div class="sub">국가 AI컴퓨팅자원 지원포털 · NIPA 사업공고 · 서울 AI 허브 공지사항 통합</div>
+      </div>
+    </div>
+    <div class="topctl">
+      <input type="search" id="q" placeholder="공고·사업명·GPU 검색…" />
+      <button id="refreshBtn" class="btn" title="data.json 다시 읽기">새로고침</button>
+      <span class="updated" id="updated">—</span>
+    </div>
+  </header>
+
+  <div id="banner" class="banner hidden"></div>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="open">진행중 <span id="openBadge" class="badge">0</span></button>
+    <button class="tab" data-tab="all">전체 공고 <span id="allBadge" class="badge">0</span></button>
+    <button class="tab" data-tab="table">표로 보기</button>
+    <button class="tab" data-tab="sources">수집 상태</button>
+  </nav>
+
+  <main>
+    <div class="totalsrow" id="totals"></div>
+
+    <div class="filterbar" id="filterbar">
+      <label>출처
+        <select id="fSource"><option value="">전체</option></select>
+      </label>
+      <label>GPU 기종
+        <select id="fGpu"><option value="">전체</option></select>
+      </label>
+      <label>모집 대상
+        <select id="fAud">
+          <option value="user">수요자(사용자) 모집</option>
+          <option value="">전체</option>
+          <option value="supplier">공급사·운영기관 모집</option>
+        </select>
+      </label>
+      <label>정렬
+        <select id="fSort">
+          <option value="deadline">마감 임박순</option>
+          <option value="posted">최근 공고순</option>
+          <option value="source">출처순</option>
+        </select>
+      </label>
+      <span class="hint" id="resultCount"></span>
+    </div>
+
+    <section id="tab-open" class="panel">
+      <div id="openCards" class="cards"></div>
+      <p class="hint" id="openHint"></p>
+    </section>
+
+    <section id="tab-all" class="panel hidden">
+      <div id="allCards" class="cards"></div>
+    </section>
+
+    <section id="tab-table" class="panel hidden">
+      <div id="tableWrap" class="tablewrap"></div>
+    </section>
+
+    <section id="tab-sources" class="panel hidden">
+      <h2>수집 대상 사이트</h2>
+      <div id="sourceCards" class="cards"></div>
+      <h2>수집 방식</h2>
+      <div class="emailbox" id="howbox"></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    하루 1회 자동 수집 · 표시 시각은 모두 KST · 숫자는 공고 원문/첨부(.hwp·.hwpx·.pdf)에서 자동 추출한 값이라
+    지원 조건은 반드시 <b>원문 공고</b>로 확인하세요.
+  </footer>
+  <div class="tip" id="tip"></div>
+</body>
+</html>
