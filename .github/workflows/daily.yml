@@ -17,11 +17,12 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true     # 새 실행이 멈춰 있는 이전 실행을 취소
 
 jobs:
   collect-and-deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -35,14 +36,17 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      # 러너는 해외 IP라 국내 사이트가 느리거나 막힐 수 있다. 시간 예산을 주고,
+      # 실패한 사이트는 직전 수집 결과를 그대로 쓰므로 배포는 계속 진행한다.
       - name: 공고 수집
-        run: python -m scraper.run
+        continue-on-error: true
+        run: python -m scraper.run --deadline-seconds 600
 
       - name: 수집 결과 커밋
         run: |
           git config user.name  "gpu-grants-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/data.js docs/data.json data/history
+          git add docs/data.js docs/data.json data/history data/last_good
           git diff --staged --quiet || git commit -m "chore: $(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M KST') 공고 수집"
           git push
 

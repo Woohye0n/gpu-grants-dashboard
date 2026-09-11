@@ -11,7 +11,7 @@ import re
 import urllib.parse
 
 from .. import extract as E
-from ..common import download, doc_text, get_text, html_to_text, parse_dt
+from ..common import out_of_time, download, doc_text, get_text, html_to_text, parse_dt
 
 SOURCE = "seoulaihub"
 SOURCE_LABEL = "서울 AI 허브"
@@ -31,6 +31,8 @@ def fetch(deep: bool = True, pages: int = PAGES) -> list[dict]:
     out: list[dict] = []
     seen: set[str] = set()
     for page in range(1, pages + 1):
+        if out_of_time():
+            break
         try:
             markup = get_text(BASE + BOARD.format(page=page))
         except RuntimeError:
@@ -39,6 +41,8 @@ def fetch(deep: bool = True, pages: int = PAGES) -> list[dict]:
         if not rows:
             break
         for row in rows:
+            if out_of_time():
+                break
             if row["bd"] in seen:
                 continue
             seen.add(row["bd"])

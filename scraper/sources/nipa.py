@@ -9,7 +9,7 @@ import html as _html
 import re
 
 from .. import extract as E
-from ..common import download, doc_text, get_text, html_to_text, parse_dt
+from ..common import out_of_time, download, doc_text, get_text, html_to_text, parse_dt
 
 SOURCE = "nipa"
 SOURCE_LABEL = "정보통신산업진흥원(NIPA)"
@@ -26,6 +26,8 @@ def fetch(deep: bool = True, pages: int = PAGES) -> list[dict]:
     out: list[dict] = []
     seen: set[str] = set()
     for page in range(1, pages + 1):
+        if out_of_time():
+            break
         try:
             markup = get_text(LIST.format(page=page))
         except RuntimeError:
@@ -34,6 +36,8 @@ def fetch(deep: bool = True, pages: int = PAGES) -> list[dict]:
         if not rows:
             break
         for row in rows:
+            if out_of_time():
+                break
             if row["nid"] in seen or not E.is_gpu_program(row["title"], row["program"]):
                 continue
             seen.add(row["nid"])

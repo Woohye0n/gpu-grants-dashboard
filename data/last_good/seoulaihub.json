@@ -1,0 +1,216 @@
+{
+ "saved_at": "2026-09-11 13:07",
+ "rows": [
+  {
+   "source": "seoulaihub",
+   "source_label": "서울 AI 허브",
+   "org": "서울특별시 · 서울 AI 허브",
+   "uid": "seoulaihub-00000001702026000049",
+   "title": "(~9/16) 서울 AI 허브 X 서울대학교병원 KHDP GPU 컴퓨팅 인프라 지원사업 참여기업 모집",
+   "program": "서울 AI 허브 X 서울대학교병원 KHDP GPU 컴퓨팅 인프라 지원사업",
+   "url": "https://www.seoulaihub.kr/board/board_basic/board_detail.asp?scrID=0000000170&pageNum=4&subNum=1&ssubNum=1&page=1&bd_num=00000001702026000049&act=view&s_string=",
+   "posted": "2026-09-02",
+   "apply_start": "2026-09-02",
+   "apply_end": "2026-09-16",
+   "closed_hint": false,
+   "audience": "user",
+   "gpu_models": [
+    "L4",
+    "L40S",
+    "A5000",
+    "A6000",
+    "A6000 Ada"
+   ],
+   "gpu_specs": [
+    {
+     "model": "L4",
+     "qty": "1대, 2대, 4대",
+     "qty_tokens": "1대 / 2대 / 4대",
+     "vram": "24GB",
+     "line": "NCP L4 24GB 1대, 2대, 4대"
+    },
+    {
+     "model": "L40S",
+     "qty": "1대, 2대, 4대",
+     "qty_tokens": "1대 / 2대 / 4대",
+     "vram": "48GB",
+     "line": "NCP L40S 48GB 1대, 2대, 4대"
+    },
+    {
+     "model": "A5000",
+     "qty": "1대, 2대, 4대",
+     "qty_tokens": "1대 / 2대 / 4대",
+     "vram": "24GB",
+     "line": "클리오니 A5000 24GB 1대, 2대, 4대"
+    },
+    {
+     "model": "A6000",
+     "qty": "1대, 2대, 4대",
+     "qty_tokens": "1대 / 2대 / 4대",
+     "vram": "48GB",
+     "line": "클리오니 A6000 48GB 1대, 2대, 4대"
+    },
+    {
+     "model": "A6000 Ada",
+     "qty": "1대, 2대, 4대",
+     "qty_tokens": "1대 / 2대 / 4대",
+     "vram": "48GB",
+     "line": "클리오니 A6000 Ada 48GB 1대, 2대, 4대"
+    }
+   ],
+   "scale": [
+    "Ⅱ. 지원내용(선정 규모) 총 5개사 ※ 평가에 따라 선정규모 변동될 수 있음",
+    "m (선정 규모) 총 5개사 ※ 평가에 따라 선정규모 변동될 수 있음"
+   ],
+   "cost": [
+    "(지원 내용) 기업당 최대 2,000만 원 상당 GPU 크레딧",
+    "m (지원 내용) 기업당 최대 2,000만 원 상당 GPU 크레딧"
+   ],
+   "usage_period": {
+    "text": "(지원 기간) 2026. 10. 12. ~ 2027. 1. 11. (약 3개월)",
+    "start": "2026-10-12",
+    "end": "2027-01-11"
+   },
+   "summary": "(~9/16) 서울 AI 허브 X 서울대학교병원 KHDP GPU 컴퓨팅 인프라 지원사업 참여기업 모집",
+   "attachments": [
+    {
+     "name": "[공고문]서울_AI_허브_X_서울대학교병원_KHDP_GPU_컴퓨팅_인프라_지원사업_참여기업_모집_공고.pdf",
+     "url": "https://www.seoulaihub.kr/include/download.asp?file_name=%5B%EA%B3%B5%EA%B3%A0%EB%AC%B8%5D%EC%84%9C%EC%9A%B8_AI_%ED%97%88%EB%B8%8C_X_%EC%84%9C%EC%9A%B8%EB%8C%80%ED%95%99%EA%B5%90%EB%B3%91%EC%9B%90_KHDP_GPU_%EC%BB%B4%ED%93%A8%ED%8C%85_%EC%9D%B8%ED%94%84%EB%9D%BC_%EC%A7%80%EC%9B%90%EC%82%AC%EC%97%85_%EC%B0%B8%EC%97%AC%EA%B8%B0%EC%97%85_%EB%AA%A8%EC%A7%91_%EA%B3%B5%EA%B3%A0.pdf&file_full_name=00000001702026000049_file1.pdf&folder=0000000170"
+    },
+    {
+     "name": "[붙임1_3]서울_AI_허브_X_서울대학교병원_KHDP_GPU_컴퓨팅_인프라_지원사업.hwpx",
+     "url": "https://www.seoulaihub.kr/include/download.asp?file_name=%5B%EB%B6%99%EC%9E%841_3%5D%EC%84%9C%EC%9A%B8_AI_%ED%97%88%EB%B8%8C_X_%EC%84%9C%EC%9A%B8%EB%8C%80%ED%95%99%EA%B5%90%EB%B3%91%EC%9B%90_KHDP_GPU_%EC%BB%B4%ED%93%A8%ED%8C%85_%EC%9D%B8%ED%94%84%EB%9D%BC_%EC%A7%80%EC%9B%90%EC%82%AC%EC%97%85.hwpx&file_full_name=00000001702026000049_file2.hwpx&folder=0000000170"
+    },
+    {
+     "name": "서울AI허브_KHDP_GPU_지원사업_포스터.jpg",
+     "url": "https://www.seoulaihub.kr/include/download.asp?file_name=%EC%84%9C%EC%9A%B8AI%ED%97%88%EB%B8%8C_KHDP_GPU_%EC%A7%80%EC%9B%90%EC%82%AC%EC%97%85_%ED%8F%AC%EC%8A%A4%ED%84%B0.jpg&file_full_name=00000001702026000049_file3.jpg&folder=0000000170"
+    }
+   ]
+  },
+  {
+   "source": "seoulaihub",
+   "source_label": "서울 AI 허브",
+   "org": "서울특별시 · 서울 AI 허브",
+   "uid": "seoulaihub-00000001702026000027",
+   "title": "[서울 AI 허브] 2026 하반기 서울 AI 허브 고성능 컴퓨팅 인프라 지원사업 참여기업 모집 (~7/3 18:00)",
+   "program": "2026 하반기 서울 AI 허브 고성능 컴퓨팅 인프라 지원사업",
+   "url": "https://www.seoulaihub.kr/board/board_basic/board_detail.asp?scrID=0000000170&pageNum=4&subNum=1&ssubNum=1&page=1&bd_num=00000001702026000027&act=view&s_string=",
+   "posted": "2026-06-01",
+   "apply_start": "2026-06-01T12:00",
+   "apply_end": "2026-07-03",
+   "closed_hint": false,
+   "audience": "user",
+   "gpu_models": [
+    "A100",
+    "H100",
+    "H200",
+    "B200",
+    "L4",
+    "L40S",
+    "V100",
+    "T4",
+    "A10"
+   ],
+   "gpu_specs": [
+    {
+     "model": "A100",
+     "qty": "2장",
+     "qty_tokens": "2장",
+     "vram": "",
+     "line": "□A100( 2장 )"
+    }
+   ],
+   "scale": [
+    "선정규모 : 하반기 39개사 내외 ※ 평가에 따라 선정규모 변동될 수 있음",
+    "지원규모 4개사 내외, 최대 6천만원 상당 35개사 내외, 최대 1천만원 상당",
+    " 선정규모 : 하반기 39개사 내외 ※ 평가에 따라 선정규모 변동될 수 있음"
+   ],
+   "cost": [
+    "(Track 1, 고도화 지원) 6천만원 상당 / (Track 2, 초기·검증 지원) 1천만원 상당",
+    "지원규모 4개사 내외, 최대 6천만원 상당 35개사 내외, 최대 1천만원 상당",
+    "- (Track 1, 고도화 지원) 6천만원 상당 / (Track 2, 초기·검증 지원) 1천만원 상당"
+   ],
+   "usage_period": {
+    "text": "사업기간 내(2026.07. ~ 2026.10.) 월 단위로 기재하며, 결과보고시 실제 서비스 사용기간으로 기산예정, 선정 후 자원사용이 없는 경우 자원이 회수될 수 있음",
+    "start": null,
+    "end": null
+   },
+   "summary": "[서울 AI 허브] 2026 하반기 서울 AI 허브 고성능 컴퓨팅 인프라 지원사업 참여기업 모집 (~7/3 18:00)",
+   "attachments": [
+    {
+     "name": "[수정공고문__붙임1_4]2026_하반기_서울_AI_허브_고성능_컴퓨팅_인프라_지원사업_참여기업_모집공고.hwp",
+     "url": "https://www.seoulaihub.kr/include/download.asp?file_name=%5B%EC%88%98%EC%A0%95%EA%B3%B5%EA%B3%A0%EB%AC%B8__%EB%B6%99%EC%9E%841_4%5D2026_%ED%95%98%EB%B0%98%EA%B8%B0_%EC%84%9C%EC%9A%B8_AI_%ED%97%88%EB%B8%8C_%EA%B3%A0%EC%84%B1%EB%8A%A5_%EC%BB%B4%ED%93%A8%ED%8C%85_%EC%9D%B8%ED%94%84%EB%9D%BC_%EC%A7%80%EC%9B%90%EC%82%AC%EC%97%85_%EC%B0%B8%EC%97%AC%EA%B8%B0%EC%97%85_%EB%AA%A8%EC%A7%91%EA%B3%B5%EA%B3%A0.hwp&file_full_name=00000001702026000027_file1.hwp&folder=0000000170"
+    },
+    {
+     "name": "[붙임5]_사업계획서_대면평가_발표_자료_양식____2026_하반기_AI_기업_고성능_컴퓨팅_인프라_지원사업.pptx",
+     "url": "https://www.seoulaihub.kr/include/download.asp?file_name=%5B%EB%B6%99%EC%9E%845%5D_%EC%82%AC%EC%97%85%EA%B3%84%ED%9A%8D%EC%84%9C_%EB%8C%80%EB%A9%B4%ED%8F%89%EA%B0%80_%EB%B0%9C%ED%91%9C_%EC%9E%90%EB%A3%8C_%EC%96%91%EC%8B%9D____2026_%ED%95%98%EB%B0%98%EA%B8%B0_AI_%EA%B8%B0%EC%97%85_%EA%B3%A0%EC%84%B1%EB%8A%A5_%EC%BB%B4%ED%93%A8%ED%8C%85_%EC%9D%B8%ED%94%84%EB%9D%BC_%EC%A7%80%EC%9B%90%EC%82%AC%EC%97%85.pptx&file_full_name=00000001702026000027_file2.pptx&folder=0000000170"
+    },
+    {
+     "name": "[붙임6_7]_제공자원_목록__자주묻는질문.pdf",
+     "url": "https://www.seoulaihub.kr/include/download.asp?file_name=%5B%EB%B6%99%EC%9E%846_7%5D_%EC%A0%9C%EA%B3%B5%EC%9E%90%EC%9B%90_%EB%AA%A9%EB%A1%9D__%EC%9E%90%EC%A3%BC%EB%AC%BB%EB%8A%94%EC%A7%88%EB%AC%B8.pdf&file_full_name=00000001702026000027_file3.pdf&folder=0000000170"
+    }
+   ]
+  },
+  {
+   "source": "seoulaihub",
+   "source_label": "서울 AI 허브",
+   "org": "서울특별시 · 서울 AI 허브",
+   "uid": "seoulaihub-00000001702026000018",
+   "title": "[서울 AI 허브] 2026 상반기 서울 AI 허브 고성능 컴퓨팅 인프라 지원사업 참여기업 모집 공고(~5/8)",
+   "program": "2026 상반기 서울 AI 허브 고성능 컴퓨팅 인프라 지원사업",
+   "url": "https://www.seoulaihub.kr/board/board_basic/board_detail.asp?scrID=0000000170&pageNum=4&subNum=1&ssubNum=1&page=1&bd_num=00000001702026000018&act=view&s_string=",
+   "posted": "2026-04-14",
+   "apply_start": "2026-04-14",
+   "apply_end": "2026-05-08",
+   "closed_hint": false,
+   "audience": "user",
+   "gpu_models": [
+    "A100",
+    "H100"
+   ],
+   "gpu_specs": [
+    {
+     "model": "A100",
+     "qty": "2장",
+     "qty_tokens": "2장",
+     "vram": "",
+     "line": "□A100( 2장 )"
+    }
+   ],
+   "scale": [
+    "선정규모 : 상반기 50~80개사 내외 (`26년 총 100개사 내외 선정 예정) ※ 평가에 따라 선정규모 변동될 수 있음",
+    "○ 선정규모 : 상반기 50~80개사 내외 (`26년 총 100개사 내외 선정 예정) ※ 평가에 따라 선정규모 변동될 수 있음○ 지원내용 : 클라우드 GPU 자원",
+    " 선정규모 : 상반기 50~80개사 내외 (`26년 총 100개사 내외 선정 예정)"
+   ],
+   "cost": [
+    "- (Track 1, 고도화 지원) 6천만원 / (Track 2, 초기·검증 지원) 1천만원",
+    "16개사 내외/연, 6천만원",
+    "84개사 내외/연, 1천만원"
+   ],
+   "usage_period": {
+    "text": "사업기간 내(2026.06. ~ 2026.10.) 월 단위로 기재하며, 결과보고시 실제 서비스 사용기간으로 기산예정, 선정 후 자원사용이 없는 경우 자원이 회수될 수 있음",
+    "start": null,
+    "end": null
+   },
+   "summary": "[서울 AI 허브] 2026 상반기 서울 AI 허브 고성능 컴퓨팅 인프라 지원사업 참여기업 모집 공고(~5/8)",
+   "attachments": [
+    {
+     "name": "[공고문__붙임1_4]2026년_AI_기업_고성능_컴퓨팅_인프라_지원사업_참여기업_모집공고.hwp",
+     "url": "https://www.seoulaihub.kr/include/download.asp?file_name=%5B%EA%B3%B5%EA%B3%A0%EB%AC%B8__%EB%B6%99%EC%9E%841_4%5D2026%EB%85%84_AI_%EA%B8%B0%EC%97%85_%EA%B3%A0%EC%84%B1%EB%8A%A5_%EC%BB%B4%ED%93%A8%ED%8C%85_%EC%9D%B8%ED%94%84%EB%9D%BC_%EC%A7%80%EC%9B%90%EC%82%AC%EC%97%85_%EC%B0%B8%EC%97%AC%EA%B8%B0%EC%97%85_%EB%AA%A8%EC%A7%91%EA%B3%B5%EA%B3%A0.hwp&file_full_name=00000001702026000018_file1.hwp&folder=0000000170"
+    },
+    {
+     "name": "[공고문__붙임1_4]2026년_AI_기업_고성능_컴퓨팅_인프라_지원사업_참여기업_모집공고.pdf",
+     "url": "https://www.seoulaihub.kr/include/download.asp?file_name=%5B%EA%B3%B5%EA%B3%A0%EB%AC%B8__%EB%B6%99%EC%9E%841_4%5D2026%EB%85%84_AI_%EA%B8%B0%EC%97%85_%EA%B3%A0%EC%84%B1%EB%8A%A5_%EC%BB%B4%ED%93%A8%ED%8C%85_%EC%9D%B8%ED%94%84%EB%9D%BC_%EC%A7%80%EC%9B%90%EC%82%AC%EC%97%85_%EC%B0%B8%EC%97%AC%EA%B8%B0%EC%97%85_%EB%AA%A8%EC%A7%91%EA%B3%B5%EA%B3%A0.pdf&file_full_name=00000001702026000018_file2.pdf&folder=0000000170"
+    },
+    {
+     "name": "[붙임5]_2026_AI_기업_고성능_컴퓨팅_인프라_지원사업_대면평가_양식.pptx",
+     "url": "https://www.seoulaihub.kr/include/download.asp?file_name=%5B%EB%B6%99%EC%9E%845%5D_2026_AI_%EA%B8%B0%EC%97%85_%EA%B3%A0%EC%84%B1%EB%8A%A5_%EC%BB%B4%ED%93%A8%ED%8C%85_%EC%9D%B8%ED%94%84%EB%9D%BC_%EC%A7%80%EC%9B%90%EC%82%AC%EC%97%85_%EB%8C%80%EB%A9%B4%ED%8F%89%EA%B0%80_%EC%96%91%EC%8B%9D.pptx&file_full_name=00000001702026000018_file3.pptx&folder=0000000170"
+    },
+    {
+     "name": "2026_상반기_고성능컴퓨팅지원사업_포스터_최종_.jpg",
+     "url": "https://www.seoulaihub.kr/include/download.asp?file_name=2026_%EC%83%81%EB%B0%98%EA%B8%B0_%EA%B3%A0%EC%84%B1%EB%8A%A5%EC%BB%B4%ED%93%A8%ED%8C%85%EC%A7%80%EC%9B%90%EC%82%AC%EC%97%85_%ED%8F%AC%EC%8A%A4%ED%84%B0_%EC%B5%9C%EC%A2%85_.jpg&file_full_name=00000001702026000018_file4.jpg&folder=0000000170"
+    }
+   ]
+  }
+ ]
+}

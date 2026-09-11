@@ -27,6 +27,28 @@ UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
 # attempted first and only downgraded per-host after a real SSLError.
 _NO_VERIFY: set[str] = set()
 
+# Wall-clock budget for one collection run. Korean government sites can be very
+# slow (or unreachable) from a foreign runner, so fetching must be able to give
+# up rather than hang a CI job for hours.
+_DEADLINE: float | None = None
+
+
+def set_deadline(seconds: float | None) -> None:
+    global _DEADLINE
+    _DEADLINE = (time.monotonic() + seconds) if seconds else None
+
+
+def out_of_time() -> bool:
+    return _DEADLINE is not None and time.monotonic() > _DEADLINE
+
+
+def time_left() -> float | None:
+    return None if _DEADLINE is None else max(0.0, _DEADLINE - time.monotonic())
+
+
+class OutOfTime(RuntimeError):
+    """Raised once the run has spent its budget; sources stop and report partial."""
+
 
 def now_kst() -> datetime:
     return datetime.now(KST)
@@ -37,8 +59,13 @@ def _host(url: str) -> str:
 
 
 def http_get(url: str, *, referer: str | None = None, binary: bool = False,
-             timeout: int = 40, retries: int = 3):
-    """GET with retries. Returns `requests.Response`."""
+             timeout: int = 25, retries: int = 2):
+    """GET with retries, inside the run's time budget. Returns `requests.Response`."""
+    if out_of_time():
+        raise OutOfTime(f"time budget spent before fetching {url}")
+    left = time_left()
+    if left is not None:
+        timeout = int(max(5, min(timeout, left)))
     headers = {"User-Agent": UA, "Accept-Language": "ko,en;q=0.8"}
     if referer:
         headers["Referer"] = referer
@@ -60,7 +87,11 @@ def http_get(url: str, *, referer: str | None = None, binary: bool = False,
             time.sleep(1.5 * (attempt + 1))
         except Exception as e:                # noqa: BLE001 - network flakiness
             last = e
-            time.sleep(1.5 * (attempt + 1))
+            if out_of_time():
+                break
+            time.sleep(1.0 * (attempt + 1))
+    if out_of_time():
+        raise OutOfTime(f"time budget spent on {url} ({last})")
     raise RuntimeError(f"GET failed after {retries} tries: {url} ({last})")
 
 
@@ -86,7 +117,9 @@ def download(url: str, *, referer: str | None = None, suffix: str = "",
     if os.path.exists(path) and os.path.getsize(path) > 0:
         return path
     try:
-        r = http_get(url, referer=referer, binary=True, timeout=90)
+        r = http_get(url, referer=referer, binary=True, timeout=60)
+    except OutOfTime:
+        raise
     except RuntimeError:
         return None
     if len(r.content) > max_mb * 1024 * 1024 or not r.content:

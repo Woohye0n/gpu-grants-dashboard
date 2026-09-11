@@ -1,0 +1,282 @@
+{
+ "saved_at": "2026-09-11 13:06",
+ "rows": [
+  {
+   "source": "aiinfrahub",
+   "source_label": "국가 AI컴퓨팅자원 지원포털",
+   "org": "과기정통부·NIPA·KAIT",
+   "uid": "aiinfrahub-05",
+   "title": "[접수마감] 「첨단 GPU 활용 지원 사업」사용자 수시 모집 공고(산·학·연 대상)",
+   "program": "「첨단 GPU 활용 지원 사업」수시 (산·학·연)",
+   "url": "https://aiinfrahub.kr/project/05",
+   "posted": "2026-03-31",
+   "apply_start": "2026-04-01T19:05",
+   "apply_end": "2026-07-09T17:00",
+   "closed_hint": true,
+   "audience": "user",
+   "gpu_models": [
+    "H200",
+    "B200"
+   ],
+   "gpu_specs": [
+    {
+     "model": "H200",
+     "qty": "최소 서버 2대(16장) ~ 최대 서버 32대(256장)",
+     "qty_tokens": "2대 / 16장 / 32대 / 256장",
+     "vram": "",
+     "line": "H200 — ㆍ 최소 서버 2대(16장) ~ 최대 서버 32대(256장)"
+    },
+    {
+     "model": "B200",
+     "qty": "최소 서버 2대(16장) ~ 최대 서버 16대(128장)",
+     "qty_tokens": "2대 / 16장 / 16대 / 128장",
+     "vram": "",
+     "line": "B200 — ㆍ 최소 서버 2대(16장) ~ 최대 서버 16대(128장)"
+    }
+   ],
+   "scale": [
+    "□ (지원규모) H200 서버, B200 서버"
+   ],
+   "cost": [
+    "* (산업계) H200 서버 1대 320만원/월, B200 서버 1대 640만원/월, 청년기업 50%할인",
+    "※ B200 서버 1대 640만원/월, 청년 기업* 50% 할인",
+    "B200 — 80만원"
+   ],
+   "usage_period": {
+    "text": "(지원기간) 협약체결일로부터 ~ 최대 ‘26. 12. 31.까지",
+    "start": null,
+    "end": "2026-12-31"
+   },
+   "summary": "현재 지원 가능한 GPU 자원이 모두 배정되어 수시모집 신청 접수가 종료되었습니다.",
+   "attachments": [
+    {
+     "name": "(붙임1) 「첨단 GPU 활용 지원 사업」사용자 수시모집 공고문(산학연 대상).hwp",
+     "url": "https://aiinfrahub.kr/api/attach/911?fileName=%28%EB%B6%99%EC%9E%841%29%20%E3%80%8C%EC%B2%A8%EB%8B%A8%20GPU%20%ED%99%9C%EC%9A%A9%20%EC%A7%80%EC%9B%90%20%EC%82%AC%EC%97%85%E3%80%8D%EC%82%AC%EC%9A%A9%EC%9E%90%20%EC%88%98%EC%8B%9C%EB%AA%A8%EC%A7%91%20%EA%B3%B5%EA%B3%A0%EB%AC%B8%28%EC%82%B0%ED%95%99%EC%97%B0%20%EB%8C%80%EC%83%81%29.hwp"
+    },
+    {
+     "name": "(붙임2) 「첨단 GPU 활용 지원 사업」 사용자 수시모집 공고 안내서(산학연 대상).hwp",
+     "url": "https://aiinfrahub.kr/api/attach/912?fileName=%28%EB%B6%99%EC%9E%842%29%20%E3%80%8C%EC%B2%A8%EB%8B%A8%20GPU%20%ED%99%9C%EC%9A%A9%20%EC%A7%80%EC%9B%90%20%EC%82%AC%EC%97%85%E3%80%8D%20%EC%82%AC%EC%9A%A9%EC%9E%90%20%EC%88%98%EC%8B%9C%EB%AA%A8%EC%A7%91%20%EA%B3%B5%EA%B3%A0%20%EC%95%88%EB%82%B4%EC%84%9C%28%EC%82%B0%ED%95%99%EC%97%B0%20%EB%8C%80%EC%83%81%29.hwp"
+    },
+    {
+     "name": "(붙임3) 「첨단 GPU 활용 지원 사업」 사업수행계획서(산학연 대상).hwp",
+     "url": "https://aiinfrahub.kr/api/attach/913?fileName=%28%EB%B6%99%EC%9E%843%29%20%E3%80%8C%EC%B2%A8%EB%8B%A8%20GPU%20%ED%99%9C%EC%9A%A9%20%EC%A7%80%EC%9B%90%20%EC%82%AC%EC%97%85%E3%80%8D%20%EC%82%AC%EC%97%85%EC%88%98%ED%96%89%EA%B3%84%ED%9A%8D%EC%84%9C%28%EC%82%B0%ED%95%99%EC%97%B0%20%EB%8C%80%EC%83%81%29.hwp"
+    },
+    {
+     "name": "(붙임4) 「첨단 GPU 활용 지원 사업」 제출 서류.hwp",
+     "url": "https://aiinfrahub.kr/api/attach/914?fileName=%28%EB%B6%99%EC%9E%844%29%20%E3%80%8C%EC%B2%A8%EB%8B%A8%20GPU%20%ED%99%9C%EC%9A%A9%20%EC%A7%80%EC%9B%90%20%EC%82%AC%EC%97%85%E3%80%8D%20%EC%A0%9C%EC%B6%9C%20%EC%84%9C%EB%A5%98.hwp"
+    },
+    {
+     "name": "(붙임5)  관련 규정.Zip",
+     "url": "https://aiinfrahub.kr/api/attach/915?fileName=%28%EB%B6%99%EC%9E%845%29%20%20%EA%B4%80%EB%A0%A8%20%EA%B7%9C%EC%A0%95.Zip"
+    }
+   ]
+  },
+  {
+   "source": "aiinfrahub",
+   "source_label": "국가 AI컴퓨팅자원 지원포털",
+   "org": "과기정통부·NIPA·KAIT",
+   "uid": "aiinfrahub-04",
+   "title": "[점수마감] 「첨단 GPU 활용 지원 사업」사용자 모집 공고 (산업계)",
+   "program": "「첨단 GPU 활용 지원 사업」(산업계)",
+   "url": "https://aiinfrahub.kr/project/04",
+   "posted": "2026-03-16",
+   "apply_start": "2026-03-16T18:00",
+   "apply_end": "2026-03-30T18:00",
+   "closed_hint": true,
+   "audience": "user",
+   "gpu_models": [
+    "B200"
+   ],
+   "gpu_specs": [
+    {
+     "model": "B200",
+     "qty": "2,000장",
+     "qty_tokens": "2,000장",
+     "vram": "",
+     "line": "□ (지원규모) ’25년 추경 정부 구매분 중 B200 2,000장 이상"
+    },
+    {
+     "model": "B200",
+     "qty": "서버 2대(16장) ~ 서버 16대(128장)",
+     "qty_tokens": "2대 / 16장 / 16대 / 128장",
+     "vram": "",
+     "line": "□ (지원규모) 각 과제별 B200 서버 2대(16장) ~ 서버 16대(128장)"
+    }
+   ],
+   "scale": [
+    "□ (지원규모) ’25년 추경 정부 구매분 중 B200 2,000장 이상",
+    "□ (지원규모) 각 과제별 B200 서버 2대(16장) ~ 서버 16대(128장)",
+    "ㅇ (지원 규모) B200 서버 2대(16장) ~ 서버 16대(128장)"
+   ],
+   "cost": [
+    "* (산업계) B200 서버 1대 640만원/월, 청년기업 50%할인",
+    "※ B200 서버 1대 640만원/월, 청년 기업* 50% 할인",
+    "B200 — 80만원"
+   ],
+   "usage_period": {
+    "text": "(지원기간) 협약체결일로부터 ~ ‘26. 7. 31.까지",
+    "start": null,
+    "end": "2026-07-31"
+   },
+   "summary": "「첨단 GPU 활용 지원 사업」사용자 모집(26-1차) 공고문(산업계 대상)",
+   "attachments": [
+    {
+     "name": "(붙임1) 「첨단 GPU 활용 지원 사업」사용자 모집(26-1차) 공고문(산업계 대상).hwp",
+     "url": "https://aiinfrahub.kr/api/attach/781?fileName=%28%EB%B6%99%EC%9E%841%29%20%E3%80%8C%EC%B2%A8%EB%8B%A8%20GPU%20%ED%99%9C%EC%9A%A9%20%EC%A7%80%EC%9B%90%20%EC%82%AC%EC%97%85%E3%80%8D%EC%82%AC%EC%9A%A9%EC%9E%90%20%EB%AA%A8%EC%A7%91%2826-1%EC%B0%A8%29%20%EA%B3%B5%EA%B3%A0%EB%AC%B8%28%EC%82%B0%EC%97%85%EA%B3%84%20%EB%8C%80%EC%83%81%29.hwp"
+    },
+    {
+     "name": "(붙임2) 「첨단 GPU 활용 지원 사업」 사용자 모집(26-1차) 공모 안내서(산업계 대상).hwp",
+     "url": "https://aiinfrahub.kr/api/attach/782?fileName=%28%EB%B6%99%EC%9E%842%29%20%E3%80%8C%EC%B2%A8%EB%8B%A8%20GPU%20%ED%99%9C%EC%9A%A9%20%EC%A7%80%EC%9B%90%20%EC%82%AC%EC%97%85%E3%80%8D%20%EC%82%AC%EC%9A%A9%EC%9E%90%20%EB%AA%A8%EC%A7%91%2826-1%EC%B0%A8%29%20%EA%B3%B5%EB%AA%A8%20%EC%95%88%EB%82%B4%EC%84%9C%28%EC%82%B0%EC%97%85%EA%B3%84%20%EB%8C%80%EC%83%81%29.hwp"
+    },
+    {
+     "name": "(붙임3) 「첨단 GPU 활용 지원 사업」 사업수행계획서(산업계 대상).hwp",
+     "url": "https://aiinfrahub.kr/api/attach/783?fileName=%28%EB%B6%99%EC%9E%843%29%20%E3%80%8C%EC%B2%A8%EB%8B%A8%20GPU%20%ED%99%9C%EC%9A%A9%20%EC%A7%80%EC%9B%90%20%EC%82%AC%EC%97%85%E3%80%8D%20%EC%82%AC%EC%97%85%EC%88%98%ED%96%89%EA%B3%84%ED%9A%8D%EC%84%9C%28%EC%82%B0%EC%97%85%EA%B3%84%20%EB%8C%80%EC%83%81%29.hwp"
+    },
+    {
+     "name": "(붙임4) 「첨단 GPU 활용 지원 사업」 제출 서류.hwp",
+     "url": "https://aiinfrahub.kr/api/attach/784?fileName=%28%EB%B6%99%EC%9E%844%29%20%E3%80%8C%EC%B2%A8%EB%8B%A8%20GPU%20%ED%99%9C%EC%9A%A9%20%EC%A7%80%EC%9B%90%20%EC%82%AC%EC%97%85%E3%80%8D%20%EC%A0%9C%EC%B6%9C%20%EC%84%9C%EB%A5%98.hwp"
+    },
+    {
+     "name": "(붙임5)  관련 규정.Zip",
+     "url": "https://aiinfrahub.kr/api/attach/785?fileName=%28%EB%B6%99%EC%9E%845%29%20%20%EA%B4%80%EB%A0%A8%20%EA%B7%9C%EC%A0%95.Zip"
+    }
+   ]
+  },
+  {
+   "source": "aiinfrahub",
+   "source_label": "국가 AI컴퓨팅자원 지원포털",
+   "org": "과기정통부·NIPA·KAIT",
+   "uid": "aiinfrahub-03",
+   "title": "[점수마감]「첨단 GPU 활용 지원 사업」베타서비스 참여자 모집 공고문",
+   "program": "「첨단 GPU 활용 지원 사업」",
+   "url": "https://aiinfrahub.kr/project/03",
+   "posted": "2025-12-22",
+   "apply_start": "2025-12-22T13:45",
+   "apply_end": "2025-12-26T15:00",
+   "closed_hint": true,
+   "audience": "user",
+   "gpu_models": [
+    "B200"
+   ],
+   "gpu_specs": [
+    {
+     "model": "B200",
+     "qty": "최소 2서버 ~ 16서버",
+     "qty_tokens": "2서버 / 16서버",
+     "vram": "",
+     "line": "B200 서버 수(대) — 최소 2서버 ~ 16서버"
+    },
+    {
+     "model": "B200",
+     "qty": "서버 64대(512장)",
+     "qty_tokens": "64대 / 512장",
+     "vram": "",
+     "line": "○ (지원규모) ’25년 추경 정부 구매분 중 B200 서버 64대(512장)"
+    }
+   ],
+   "scale": [
+    "○ (지원규모) ’25년 추경 정부 구매분 중 B200 서버 64대(512장)"
+   ],
+   "cost": [
+    "○ (비용) 자부담금 전액 면제(무상 지원)"
+   ],
+   "usage_period": {
+    "text": "",
+    "start": null,
+    "end": null
+   },
+   "summary": "과학기술정보통신부와 정보통신산업진흥원은 국가 AI 경쟁력 강화를 위해 구축중인 첨단 GPU 자원의 안정적이고 효율적인 배분·운영을 목적으로 「첨단 GPU 활용 지원 사업」 의 베타서비스 참여자를 모집하오니 많은 관심과 참여를 바랍니다.",
+   "attachments": [
+    {
+     "name": "(붙임) 「첨단 GPU 활용 지원 사업」 베타서비스 참여자 모집 공고문.hwp",
+     "url": "https://aiinfrahub.kr/api/attach/30?fileName=%28%EB%B6%99%EC%9E%84%29%20%E3%80%8C%EC%B2%A8%EB%8B%A8%20GPU%20%ED%99%9C%EC%9A%A9%20%EC%A7%80%EC%9B%90%20%EC%82%AC%EC%97%85%E3%80%8D%20%EB%B2%A0%ED%83%80%EC%84%9C%EB%B9%84%EC%8A%A4%20%EC%B0%B8%EC%97%AC%EC%9E%90%20%EB%AA%A8%EC%A7%91%20%EA%B3%B5%EA%B3%A0%EB%AC%B8.hwp"
+    }
+   ]
+  },
+  {
+   "source": "aiinfrahub",
+   "source_label": "국가 AI컴퓨팅자원 지원포털",
+   "org": "과기정통부·NIPA·KAIT",
+   "uid": "aiinfrahub-02",
+   "title": "[점수마감]「첨단 GPU 활용 지원 사업」사용자 모집 공고 (25-1차)",
+   "program": "「첨단 GPU 활용 지원 사업」",
+   "url": "https://aiinfrahub.kr/project/02",
+   "posted": "2025-12-22",
+   "apply_start": "2025-12-22T13:40",
+   "apply_end": "2026-01-28T15:00",
+   "closed_hint": true,
+   "audience": "user",
+   "gpu_models": [
+    "H200",
+    "B200"
+   ],
+   "gpu_specs": [
+    {
+     "model": "H200",
+     "qty": "최소 서버 2대(16장) ~ 최대 서버 32대(256장)",
+     "qty_tokens": "2대 / 16장 / 32대 / 256장",
+     "vram": "",
+     "line": "H200 — ㆍ 최소 서버 2대(16장) ~ 최대 서버 32대(256장)"
+    },
+    {
+     "model": "B200",
+     "qty": "최소 서버 2대(16장) ~ 최대 서버 16대(128장)",
+     "qty_tokens": "2대 / 16장 / 16대 / 128장",
+     "vram": "",
+     "line": "B200 — ㆍ 최소 서버 2대(16장) ~ 최대 서버 16대(128장)"
+    },
+    {
+     "model": "H200",
+     "qty": "서버 총 287대(2,296장)",
+     "qty_tokens": "287대 / 2,296장",
+     "vram": "",
+     "line": "□ (지원규모) ’25년 추경 정부 구매분 중 H200 서버 총 287대(2,296장), B200 서버 총 255대(2,040장)"
+    },
+    {
+     "model": "B200",
+     "qty": "서버 총 255대(2,040장)",
+     "qty_tokens": "2,296장 / 255대 / 2,040장",
+     "vram": "",
+     "line": "□ (지원규모) ’25년 추경 정부 구매분 중 H200 서버 총 287대(2,296장), B200 서버 총 255대(2,040장)"
+    }
+   ],
+   "scale": [
+    "□ (지원규모) ’25년 추경 정부 구매분 중 H200 서버 총 287대(2,296장), B200 서버 총 255대(2,040장)",
+    "ㅇ (지원 규모) H200 서버 2대(16장) ~ 서버 32대(256장)"
+   ],
+   "cost": [
+    "* (산업계) H200 서버 1대 320만원/월, B200 서버 1대 640만원/월, 청년기업 50%할인",
+    "H200 — 40만원",
+    "H200 — 320만원"
+   ],
+   "usage_period": {
+    "text": "(지원기간) 협약체결일로부터 3개월~ 12개월 이내 지원",
+    "start": null,
+    "end": null
+   },
+   "summary": "과학기술정보통신부와 정보통신산업진흥원은 국가 AI 경쟁력 강화를 위해 대규모로 구축된 첨단 GPU 자원을 활용하여, 산·학·연의 혁신적인 AI 연구 및 서비스 개발을 지원하고자 「첨단 GPU 활용 지원 사업」의 사용자를 모집하오니 많은 관심과 참여를 바랍니다.",
+   "attachments": [
+    {
+     "name": "(붙임1) [공고문] 「첨단 GPU 활용 지원 사업」사용자 모집(25-1차).hwp",
+     "url": "https://aiinfrahub.kr/api/attach/25?fileName=%28%EB%B6%99%EC%9E%841%29%20%5B%EA%B3%B5%EA%B3%A0%EB%AC%B8%5D%20%E3%80%8C%EC%B2%A8%EB%8B%A8%20GPU%20%ED%99%9C%EC%9A%A9%20%EC%A7%80%EC%9B%90%20%EC%82%AC%EC%97%85%E3%80%8D%EC%82%AC%EC%9A%A9%EC%9E%90%20%EB%AA%A8%EC%A7%91%2825-1%EC%B0%A8%29.hwp"
+    },
+    {
+     "name": "(붙임2) [공모안내서] 「첨단 GPU 활용 지원 사업」 사용자 모집(25-1차) 공모 안내서(산학연 대상).hwp",
+     "url": "https://aiinfrahub.kr/api/attach/26?fileName=%28%EB%B6%99%EC%9E%842%29%20%5B%EA%B3%B5%EB%AA%A8%EC%95%88%EB%82%B4%EC%84%9C%5D%20%E3%80%8C%EC%B2%A8%EB%8B%A8%20GPU%20%ED%99%9C%EC%9A%A9%20%EC%A7%80%EC%9B%90%20%EC%82%AC%EC%97%85%E3%80%8D%20%EC%82%AC%EC%9A%A9%EC%9E%90%20%EB%AA%A8%EC%A7%91%2825-1%EC%B0%A8%29%20%EA%B3%B5%EB%AA%A8%20%EC%95%88%EB%82%B4%EC%84%9C%28%EC%82%B0%ED%95%99%EC%97%B0%20%EB%8C%80%EC%83%81%29.hwp"
+    },
+    {
+     "name": "(붙임3) 「첨단 GPU 활용 지원 사업」 사업수행계획서(산학연용).hwp",
+     "url": "https://aiinfrahub.kr/api/attach/27?fileName=%28%EB%B6%99%EC%9E%843%29%20%E3%80%8C%EC%B2%A8%EB%8B%A8%20GPU%20%ED%99%9C%EC%9A%A9%20%EC%A7%80%EC%9B%90%20%EC%82%AC%EC%97%85%E3%80%8D%20%EC%82%AC%EC%97%85%EC%88%98%ED%96%89%EA%B3%84%ED%9A%8D%EC%84%9C%28%EC%82%B0%ED%95%99%EC%97%B0%EC%9A%A9%29.hwp"
+    },
+    {
+     "name": "(붙임4) 제출서류 양식.hwp",
+     "url": "https://aiinfrahub.kr/api/attach/28?fileName=%28%EB%B6%99%EC%9E%844%29%20%EC%A0%9C%EC%B6%9C%EC%84%9C%EB%A5%98%20%EC%96%91%EC%8B%9D.hwp"
+    },
+    {
+     "name": "(붙임5) 관련 규정.Zip",
+     "url": "https://aiinfrahub.kr/api/attach/29?fileName=%28%EB%B6%99%EC%9E%845%29%20%EA%B4%80%EB%A0%A8%20%EA%B7%9C%EC%A0%95.Zip"
+    }
+   ]
+  }
+ ]
+}

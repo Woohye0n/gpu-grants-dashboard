@@ -10,7 +10,7 @@ import re
 import urllib.parse
 
 from .. import extract as E
-from ..common import download, doc_text, get_json, get_text, html_to_text, iso_from_api
+from ..common import out_of_time, download, doc_text, get_json, get_text, html_to_text, iso_from_api
 
 SOURCE = "aiinfrahub"
 SOURCE_LABEL = "국가 AI컴퓨팅자원 지원포털"
@@ -26,6 +26,8 @@ def fetch(deep: bool = True) -> list[dict]:
     data = get_json(LIST_API, referer=BASE + "/project")
     out: list[dict] = []
     for item in data.get("projectDataList", []):
+        if out_of_time():
+            break
         pid = str(item.get("id", "")).strip()
         title = (item.get("title") or "").strip()
         program = (item.get("projectName") or "").strip()

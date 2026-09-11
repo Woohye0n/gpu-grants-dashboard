@@ -14,7 +14,7 @@ import sys
 import traceback
 from datetime import datetime, timedelta
 
-from .common import KST, ROOT, dday, now_kst
+from .common import KST, ROOT, dday, now_kst, out_of_time, set_deadline
 from .sources import aiinfrahub, nipa, seoulaihub
 
 SOURCES = [aiinfrahub, nipa, seoulaihub]
@@ -28,6 +28,9 @@ SOURCE_SITES = {
 KEEP_CLOSED_DAYS = 400
 DOCS = os.path.join(ROOT, "docs")
 HISTORY = os.path.join(ROOT, "data", "history")
+LAST_GOOD = os.path.join(ROOT, "data", "last_good")
+# 마지막 성공 수집을 이만큼 넘게 못 갱신하면 더는 들고 있지 않는다
+STALE_DROP_DAYS = 30
 
 
 # --------------------------------------------------------------------------- #
@@ -151,6 +154,8 @@ def merge(programs: list[dict]) -> list[dict]:
             if not (base.get("usage_period") or {}).get("text") and (q.get("usage_period") or {}).get("text"):
                 base["usage_period"] = q["usage_period"]
             base["closed_hint"] = base.get("closed_hint") or q.get("closed_hint")
+            if base.get("stale") and not q.get("stale"):   # a fresh copy wins
+                base["stale"], base["stale_since"] = False, ""
             base["attachments"] = (base.get("attachments") or []) + [
                 a for a in (q.get("attachments") or []) if a not in (base.get("attachments") or [])]
         out.append(base)
@@ -201,19 +206,69 @@ def apply_overrides(programs: list[dict]) -> list[dict]:
 # main
 # --------------------------------------------------------------------------- #
 def collect(deep: bool = True) -> tuple[list[dict], list[dict]]:
+    """Fetch every source. A site that breaks or blocks us keeps its last good
+    rows instead of silently disappearing from the board."""
     programs, report = [], []
     for mod in SOURCES:
         entry = {"key": mod.SOURCE, "label": mod.SOURCE_LABEL, "url": SOURCE_SITES[mod.SOURCE]}
+        rows, error = [], ""
         try:
             rows = mod.fetch(deep=deep)
-            programs.extend(rows)
-            entry.update(ok=True, count=len(rows), error="")
         except Exception as exc:                         # noqa: BLE001 - one bad site must not sink the run
-            entry.update(ok=False, count=0, error=f"{type(exc).__name__}: {exc}")
+            error = f"{type(exc).__name__}: {exc}"
             print(f"[warn] {mod.SOURCE} failed: {exc}", file=sys.stderr)
             traceback.print_exc(file=sys.stderr)
+
+        cached, cached_at = _load_last_good(mod.SOURCE)
+        if rows and not error:
+            _save_last_good(mod.SOURCE, rows)
+            entry.update(ok=True, stale=False, count=len(rows), error="", collected_at="")
+        elif cached:
+            if error:
+                reason = error
+            elif out_of_time():
+                reason = "수집 시간 초과 (사이트 응답이 없거나 매우 느립니다)"
+            else:
+                reason = "공고를 한 건도 읽지 못했습니다 (게시판 구조가 바뀌었을 수 있습니다)"
+            rows = [{**r, "stale": True, "stale_since": cached_at} for r in cached]
+            entry.update(ok=False, stale=True, count=len(rows), error=reason, collected_at=cached_at)
+            print(f"[warn] {mod.SOURCE}: {cached_at} 수집분을 그대로 사용합니다", file=sys.stderr)
+        else:
+            entry.update(ok=False, stale=False, count=0,
+                         error=error or "수집 결과 없음", collected_at="")
+        programs.extend(rows)
         report.append(entry)
     return programs, report
+
+
+def _last_good_path(source: str) -> str:
+    return os.path.join(LAST_GOOD, f"{source}.json")
+
+
+def _save_last_good(source: str, rows: list[dict]) -> None:
+    os.makedirs(LAST_GOOD, exist_ok=True)
+    payload = {"saved_at": now_kst().strftime("%Y-%m-%d %H:%M"), "rows": rows}
+    with open(_last_good_path(source), "w", encoding="utf-8") as fh:
+        json.dump(payload, fh, ensure_ascii=False, indent=1)
+
+
+def _load_last_good(source: str) -> tuple[list[dict], str]:
+    path = _last_good_path(source)
+    if not os.path.exists(path):
+        return [], ""
+    try:
+        with open(path, encoding="utf-8") as fh:
+            payload = json.load(fh)
+    except (OSError, ValueError):
+        return [], ""
+    saved_at = payload.get("saved_at", "")
+    try:
+        age = (now_kst().date() - datetime.strptime(saved_at[:10], "%Y-%m-%d").date()).days
+    except ValueError:
+        return [], ""
+    if age > STALE_DROP_DAYS:
+        return [], saved_at
+    return payload.get("rows") or [], saved_at
 
 
 def build(deep: bool = True) -> dict:
@@ -242,6 +297,7 @@ def build(deep: bool = True) -> dict:
         "generated_at_kst": today.strftime("%Y-%m-%d %H:%M"),
         "timezone": "Asia/Seoul (KST)",
         "sources": report,
+        "stale_sources": [s["label"] for s in report if s.get("stale")],
         "counts": {
             "total": len(programs),
             "open": sum(1 for p in programs if p["status"] == "open"),
@@ -271,8 +327,11 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="GPU 지원사업 공고 수집")
     ap.add_argument("--shallow", action="store_true", help="첨부파일을 열지 않고 목록만 수집")
     ap.add_argument("--dry-run", action="store_true", help="파일로 쓰지 않고 요약만 출력")
+    ap.add_argument("--deadline-seconds", type=int, default=0,
+                    help="전체 수집 시간 상한(초). 넘기면 남은 사이트는 직전 데이터를 씁니다")
     args = ap.parse_args()
 
+    set_deadline(args.deadline_seconds or None)
     payload = build(deep=not args.shallow)
     if not args.dry_run:
         publish(payload)
@@ -281,11 +340,18 @@ def main() -> int:
     print(f"[{payload['generated_at_kst']} KST] 총 {c['total']}건 "
           f"(모집중 {c['open']}, 마감임박 {c['closing_soon']}, 예정 {c['upcoming']}, 마감 {c['closed']})")
     for s in payload["sources"]:
-        print(f"  - {s['label']}: {'OK' if s['ok'] else 'FAIL ' + s['error']} ({s['count']}건)")
+        if s["ok"]:
+            state = "OK"
+        elif s.get("stale"):
+            state = f"STALE({s['collected_at']} 수집분 유지) — {s['error'][:80]}"
+        else:
+            state = f"FAIL — {s['error'][:80]}"
+        print(f"  - {s['label']}: {state} ({s['count']}건)")
     for p in payload["programs"]:
         if p["status"] in ("open", "upcoming"):
             dd = f"D-{p['dday']}" if (p.get("dday") or 0) >= 0 else ""
             print(f"  * [{p['status']:8s} {dd:>5s}] {p['title'][:52]} | {', '.join(p['gpu_models']) or '-'}")
+    # 직전 데이터를 살려 배포는 계속하되, 종료 코드로는 문제를 알린다
     return 0 if all(s["ok"] for s in payload["sources"]) else 1
 
 

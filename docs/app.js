@@ -127,6 +127,10 @@
     const chips = el('div', 'chips');
     (p.links || []).forEach((l) => chips.appendChild(el('span', 'chip src', l.label)));
     chips.appendChild(el('span', 'chip aud', p.audience === 'supplier' ? '공급사·운영기관 모집' : '수요자 모집'));
+    if (p.stale) {
+      bindTip(chips.appendChild(el('span', 'chip stale', `${day(p.stale_since) || '이전'} 기준`)),
+              '이 사이트를 이번에 읽지 못해 직전 수집 결과를 그대로 보여줍니다.');
+    }
     (p.gpu_models || []).forEach((m) => chips.appendChild(el('span', 'chip gpu', m)));
     if (!(p.gpu_models || []).length) chips.appendChild(el('span', 'chip', 'GPU 기종 미표기'));
     node.appendChild(chips);
@@ -304,12 +308,22 @@
   }
 
   function renderBanner() {
-    const soon = DATA.programs.filter((p) => p.closing_soon);
     const b = $('banner');
-    if (!soon.length) { b.classList.add('hidden'); return; }
+    const soon = DATA.programs.filter((p) => p.closing_soon);
+    const stale = DATA.stale_sources || [];
+    b.innerHTML = '';
+    b.classList.remove('warn');
+    if (!soon.length && !stale.length) { b.classList.add('hidden'); return; }
     b.classList.remove('hidden');
-    b.textContent = '마감 임박 ' + soon.length + '건 — ' +
-      soon.map((p) => `${p.program || p.title} (${ddayText(p)}, ~${day(p.apply_end)})`).join(' · ');
+    if (soon.length) {
+      b.appendChild(el('div', null, '마감 임박 ' + soon.length + '건 — ' +
+        soon.map((p) => `${p.program || p.title} (${ddayText(p)}, ~${day(p.apply_end)})`).join(' · ')));
+    }
+    if (stale.length) {
+      b.classList.add('warn');
+      b.appendChild(el('div', null,
+        `수집 실패 ${stale.length}곳 (${stale.join(', ')}) — 해당 사이트는 직전 수집 결과를 보여주는 중입니다.`));
+    }
   }
 
   function renderSources() {
@@ -326,13 +340,18 @@
       a.href = s.url; a.target = '_blank'; a.rel = 'noopener';
       left.appendChild(a);
       head.appendChild(left);
-      head.appendChild(el('span', `pill ${s.ok ? 'open' : 'closed'}`, s.ok ? '정상' : '실패'));
+      head.appendChild(el('span', `pill ${s.ok ? 'open' : (s.stale ? 'soon' : 'closed')}`,
+                          s.ok ? '정상' : (s.stale ? '직전 데이터 사용' : '실패')));
       n.appendChild(head);
       const kv = el('div', 'kv');
       kv.appendChild(el('div', 'k', 'GPU 공고'));
       kv.appendChild(el('div', 'v', `${s.count}건`));
+      if (s.collected_at) {
+        kv.appendChild(el('div', 'k', '수집 시각'));
+        kv.appendChild(el('div', 'v', s.collected_at + ' KST'));
+      }
       if (s.error) {
-        kv.appendChild(el('div', 'k', '오류'));
+        kv.appendChild(el('div', 'k', '사유'));
         kv.appendChild(el('div', 'v', s.error));
       }
       n.appendChild(kv);
