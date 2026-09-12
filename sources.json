@@ -32,6 +32,15 @@
       "list_url": "https://www.nia.or.kr/site/nia_kor/ex/bbs/List.do?cbIdx=78336",
       "page_param": "pageIndex",
       "pages": 2
+    },
+    {
+      "key": "aica_gj_kr",
+      "kind": "generic",
+      "label": "인공지능산업융합사업단(AICA)",
+      "list_url": "https://www.aica-gj.kr/sub.php?PID=0201",
+      "org": "광주광역시 · AICA",
+      "page_param": "page",
+      "pages": 3
     }
   ]
 }

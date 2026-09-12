@@ -13,7 +13,9 @@ from .common import parse_dt, parse_range
 
 # Longest-first: 'L40S' must win over 'L40', 'A6000 Ada' over 'A6000'.
 GPU_MODELS: list[tuple[str, str]] = [
+    (r"GB300",                      "GB300"),
     (r"GB200",                      "GB200"),
+    (r"B300",                       "B300"),
     (r"B200",                       "B200"),
     (r"B100",                       "B100"),
     (r"H200",                       "H200"),
@@ -41,6 +43,9 @@ GPU_MODELS: list[tuple[str, str]] = [
     (r"사피온\s*X?\d*",              "사피온"),
     (r"리벨리온|(?<![A-Za-z])ATOM\+?(?![A-Za-z])", "리벨리온 ATOM"),
     (r"딥엑스|DEEPX",                "DEEPX"),
+    # 광주 AI데이터센터(AICA)는 NVIDIA 가 아니라 Graphcore IPU 를 준다
+    (r"(?<![A-Za-z])BOW(?![A-Za-z])", "Bow(IPU)"),
+    (r"(?<![A-Za-z])IPU[-]?M?\d*(?![a-z])", "IPU"),
 ]
 _MODEL_RE = re.compile("|".join(f"(?:{p})" for p, _ in GPU_MODELS), re.I)
 
@@ -66,6 +71,10 @@ def _canon(match: str) -> str:
     return re.sub(r"\s+", " ", match).upper()
 
 
+# 왼쪽 이름은 오른쪽 중 하나가 같이 잡히면 군더더기다
+_SUBSUMED: dict[str, tuple[str, ...]] = {"IPU": ("Bow(IPU)",)}
+
+
 def find_models(text: str) -> list[str]:
     """Canonical GPU model names, in order of first appearance."""
     seen: list[str] = []
@@ -73,7 +82,9 @@ def find_models(text: str) -> list[str]:
         label = _canon(m.group(0))
         if label not in seen:
             seen.append(label)
-    return seen
+    # 포괄 이름은 구체적인 이름이 같이 잡혔을 때만 뺀다. 부분 문자열로 판단하면
+    # L4 가 L40S 에, A6000 이 A6000 Ada 에 먹혀 사라진다.
+    return [x for x in seen if not (set(_SUBSUMED.get(x, ())) & set(seen))]
 
 
 def _spec_score(line: str, paired: bool) -> int:
@@ -154,7 +165,7 @@ def find_specs(text: str, limit: int = 8, per_model: int = 2) -> list[dict]:
     return out
 
 
-_TIDY_L = re.compile(r"^[\s\-–—ㆍ·:：,、/_.…‥]+")
+_TIDY_L = re.compile(r"^[\s\-–—ㆍ·:：,、/_.…‥*×]+")
 _TIDY_R = re.compile(r"[\s,、·/]+$")
 
 
@@ -466,15 +477,21 @@ def find_unknown_models(text: str, limit: int = 6) -> list[dict]:
 # --------------------------------------------------------------------------- #
 STRONG = re.compile(
     r"GPU|고성능\s*컴퓨팅|AI\s*컴퓨팅|컴퓨팅\s*(자원|인프라)|연산\s*자원|그래픽\s*처리\s*장치"
-    r"|H100|H200|A100|B200|GB200|L40S|슈퍼컴퓨|NPU\s*(자원|지원|인프라)", re.I)
+    r"|AI\s*데이터\s*센터|H100|H200|A100|B200|GB200|L40S|슈퍼컴퓨|NPU\s*(자원|지원|인프라)", re.I)
 NEGATIVE = re.compile(r"입찰|용역|채용|낙찰|계약\s*체결|결과\s*(공고|발표)|선정\s*결과"
                       r"|성과\s*공유|공유회|보고회|설명회|간담회|세미나|워크숍|웨비나|강연")
 SUPPLIER = re.compile(r"공급사|공급\s*기업|운영기관|수행기관|위탁기관|구축\s*·?\s*운용|확보\s*·?\s*구축")
 
 
-def is_gpu_program(*fields: str) -> bool:
-    blob = " ".join(f for f in fields if f)
-    return bool(STRONG.search(blob)) and not NEGATIVE.search(blob)
+def is_gpu_program(title: str, *extra: str) -> bool:
+    """제목에 제외 신호가 없고, 제목이나 함께 준 텍스트에 GPU 신호가 있으면 수집한다.
+
+    제외 신호(입찰·채용·결과공고)는 **제목에만** 본다. 본문에는 사이트 메뉴의 '채용공고'
+    같은 것이 섞여 들어와, 멀쩡한 공고를 엉뚱하게 떨어뜨린다 (AICA 에서 실제로 그랬다).
+    """
+    if NEGATIVE.search(title or ""):
+        return False
+    return any(STRONG.search(t) for t in (title, *extra) if t)
 
 
 def audience(*fields: str) -> str:

@@ -120,6 +120,37 @@ def probe(url: str, min_rows: int = 5) -> dict:
             "row_count": len(detected), "rows": detected}
 
 
+BOARD_WORDS = re.compile(r"공지|공고|알림|소식|게시|보도|뉴스|사업안내|모집|notice|board|bbs", re.I)
+
+
+def suggest_boards(url: str, limit: int = 8) -> list[dict]:
+    """목록을 못 읽었을 때, 이 사이트 안에서 게시판처럼 보이는 주소를 찾아준다.
+
+    사람들이 흔히 사이트 첫 화면 주소를 넣기 때문이다 — 거기서 공지사항·사업공고로
+    가는 링크를 짚어주면 한 번에 끝난다.
+    """
+    try:
+        soup = BeautifulSoup(get_text(url), "lxml")
+    except Exception:                                    # noqa: BLE001
+        return []
+    host = urllib.parse.urlparse(url).netloc
+    out, seen = [], set()
+    for a in soup.select("a[href]"):
+        text = a.get_text(" ", strip=True)
+        href = urllib.parse.urljoin(url, a["href"])
+        if urllib.parse.urlparse(href).netloc != host or href in seen:
+            continue
+        if not (BOARD_WORDS.search(text) or BOARD_WORDS.search(href)):
+            continue
+        if SKIP_HREF.match(a["href"]) or len(text) > 30:
+            continue
+        seen.add(href)
+        out.append({"text": text or href, "url": href})
+        if len(out) >= limit:
+            break
+    return out
+
+
 def main() -> int:
     if len(sys.argv) < 2:
         print(__doc__)
@@ -133,6 +164,13 @@ def main() -> int:
     print(f"목록 URL : {result['url']}")
     print(f"행 구조   : {result['signature'] or '찾지 못함'}")
     print(f"읽은 행   : {result['row_count']}개\n")
+    if not result["row_count"]:
+        hints = suggest_boards(sys.argv[1])
+        if hints:
+            print("게시판으로 보이는 주소들 (이 중 하나를 넣어보세요):")
+            for h in hints:
+                print(f"  - {h['text'][:24]:26s} {h['url']}")
+        return 1
     for row in result["rows"][:12]:
         link = row["url"] or (f"(JS id {row['js_id']})" if row["js_id"] else "(링크 없음)")
         print(f"  [{row['posted'] or '날짜?':10s}] {row['title'][:62]}")

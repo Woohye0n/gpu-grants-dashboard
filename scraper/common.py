@@ -251,7 +251,9 @@ def pdf_text(path: str) -> str:
         except ImportError:
             import fitz as pymupdf                       # older releases
         with pymupdf.open(path) as doc:
-            return "\n".join(page.get_text("text") for page in doc)
+            # sort=True 로 읽어야 한국 공공기관 PDF 에서 한글·숫자가 서로 다른 줄로
+            # 쪼개지지 않는다 ('2026' / 'AI' / '년' 이 따로 나오던 문제)
+            return "\n".join(page.get_text("text", sort=True) for page in doc)
     except Exception:                                    # noqa: BLE001
         from pypdf import PdfReader
         return "\n".join((p.extract_text() or "") for p in PdfReader(path).pages)

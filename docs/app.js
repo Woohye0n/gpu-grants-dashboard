@@ -31,6 +31,57 @@
     return t ? `${d} ${t}` : d;
   };
   const view = (p) => (p.status === 'open' && p.closing_soon ? 'soon' : p.status);
+
+  /* ---- 상태·D-day 는 보는 시점에 계산한다 ------------------------------------
+     수집할 때 계산해 JSON 에 박아두면, 수집이 멈춘 날 카운트다운도 같이 멈춰서
+     낡은 데이터가 멀쩡해 보인다 (2026-09-12 에 실제로 그랬다). 날짜는 공고 기준인
+     KST 벽시계 값이므로, 보는 사람의 시간대와 무관하게 KST 로 환산해 비교한다. */
+  const KST_MS = 9 * 3600 * 1000;
+
+  function kstInstant(text, endOfDay) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?/.exec(text || '');
+    if (!m) return null;
+    const hh = m[4] !== undefined ? +m[4] : (endOfDay ? 23 : 0);
+    const mm = m[5] !== undefined ? +m[5] : (endOfDay ? 59 : 0);
+    return Date.UTC(+m[1], +m[2] - 1, +m[3], hh, mm) - KST_MS;
+  }
+
+  function daysUntil(text) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(text || '');
+    if (!m) return null;
+    const now = new Date(Date.now() + KST_MS);
+    const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+    return Math.round((Date.UTC(+m[1], +m[2] - 1, +m[3]) - today) / 86400000);
+  }
+
+  function liveStatus(p) {
+    const now = Date.now();
+    const end = kstInstant(p.apply_end, true);
+    const start = kstInstant(p.apply_start, false);
+    let status;
+    if (p.closed_hint) status = 'closed';
+    else if (end !== null && now > end) status = 'closed';
+    else if (start !== null && now < start) status = 'upcoming';
+    else if (end !== null) status = 'open';
+    else status = 'unknown';
+    const dd = (status === 'open' || status === 'upcoming') ? daysUntil(p.apply_end) : null;
+    return { status: status, dday: dd,
+             closing_soon: status === 'open' && dd !== null && dd <= 7 };
+  }
+
+  function decorateLive() {
+    const rows = DATA.programs || [];
+    rows.forEach((p) => Object.assign(p, liveStatus(p)));
+    const c = { total: rows.length, open: 0, upcoming: 0, unknown: 0, closed: 0, closing_soon: 0 };
+    rows.forEach((p) => { c[p.status] = (c[p.status] || 0) + 1; if (p.closing_soon) c.closing_soon++; });
+    DATA.counts = c;
+  }
+
+  /** 마지막 수집이 며칠 지났나 (KST 날짜 기준). */
+  function collectionAgeDays() {
+    const d = daysUntil((DATA.generated_at_kst || '').slice(0, 10));
+    return d === null ? null : -d;
+  }
   const nz = (v, fallback) => (v === null || v === undefined ? fallback : v);
   const isAcademic = (a) => /학계|연구계/.test(a || '');
   // 비용은 {audience, text} 목록이다. 예전 스냅샷(문자열)도 그대로 읽는다.
@@ -322,10 +373,18 @@
     const b = $('banner');
     const soon = DATA.programs.filter((p) => p.closing_soon);
     const stale = DATA.stale_sources || [];
+    const age = collectionAgeDays();
+    const late = age !== null && age >= 2;
     b.innerHTML = '';
     b.classList.remove('warn');
-    if (!soon.length && !stale.length) { b.classList.add('hidden'); return; }
+    if (!soon.length && !stale.length && !late) { b.classList.add('hidden'); return; }
     b.classList.remove('hidden');
+    if (late) {
+      b.classList.add('warn');
+      b.appendChild(el('div', null,
+        `마지막 수집이 ${age}일 전(${DATA.generated_at_kst} KST)입니다 — 자동 수집이 멈췄을 수 있습니다. ` +
+        '아래 공고 내용은 그때 기준이고, 마감까지 남은 날짜만 오늘 기준으로 다시 셉니다.'));
+    }
     if (soon.length) {
       b.appendChild(el('div', null, '마감 임박 ' + soon.length + '건 — ' +
         soon.map((p) => `${p.program || p.title} (${ddayText(p)}, ~${day(p.apply_end)})`).join(' · ')));
@@ -525,6 +584,7 @@
     try {
       const r = await fetch('./data.json?t=' + Date.now(), { cache: 'no-store' });
       DATA = await r.json();
+      decorateLive();
       fillFilters();
       render();
     } catch (e) {
@@ -532,6 +592,7 @@
     }
   });
 
+  decorateLive();
   fillFilters();
   wireAddSource();
   render();

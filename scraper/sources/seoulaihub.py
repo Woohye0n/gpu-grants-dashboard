@@ -51,7 +51,7 @@ def fetch(deep: bool = True, pages: int = PAGES) -> list[dict]:
                 continue
             item = _build(row, deep=deep or strong)
             # a title without 'GPU' still qualifies if the body is really about GPUs
-            if strong or (item["_body"].count("GPU") >= 3 and E.is_gpu_program(item["_body"][:4000])):
+            if strong or (item["_body"].count("GPU") >= 3 and E.is_gpu_program(row["title"], item["_body"][:4000])):
                 item.pop("_body")
                 out.append(item)
     return out

@@ -36,9 +36,14 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      # 의존성 하나가 빠지면 수집이 통째로 죽는다. 여기서 먼저 크게 실패시킨다.
+      - name: 의존성 자가점검
+        run: python -c "import scraper.run, scraper.probe, scraper.add_source; print('imports OK')"
+
       # 러너는 해외 IP라 국내 사이트가 느리거나 막힐 수 있다. 시간 예산을 주고,
       # 실패한 사이트는 직전 수집 결과를 그대로 쓰므로 배포는 계속 진행한다.
       - name: 공고 수집
+        id: collect
         continue-on-error: true
         run: python -m scraper.run --deadline-seconds 900
 
@@ -58,3 +63,11 @@ jobs:
           path: docs
       - id: deployment
         uses: actions/deploy-pages@v4
+
+      # 배포는 끝냈더라도 수집이 깨졌으면 잡을 실패로 남긴다 — 안 그러면 조용히 낡은
+      # 데이터가 계속 나간다 (2026-09-12 에 실제로 그랬다).
+      - name: 수집 실패를 잡 결과에 반영
+        if: steps.collect.outcome == 'failure'
+        run: |
+          echo "::error::공고 수집 단계가 실패했습니다. 배포는 직전 데이터로 진행됐습니다."
+          exit 1

@@ -11,14 +11,17 @@ import re
 import urllib.parse
 
 from .. import extract as E
+from bs4 import BeautifulSoup
+
 from ..common import download, doc_text, get_text, html_to_text, out_of_time
 from ..probe import probe
 
 # 목록에서 실제로 몇 줄을 읽었는지. 0건이 '못 읽음'인지 '해당 공고 없음'인지 가른다.
 LAST_SCAN: dict[str, int] = {}
 
-_DOC_LINK = re.compile(r'href="([^"]+\.(?:hwpx|hwp|pdf))"', re.I)
-_DOC_ANY = re.compile(r'<a[^>]+href="([^"]+)"[^>]*>([^<]{4,120}\.(?:hwpx|hwp|pdf))\s*(?:\([^)]*\))?\s*</a>', re.I)
+# 첨부는 확장자가 링크 주소가 아니라 링크 '글자' 에만 있는 경우가 흔하다
+# (예: boardDownload.php?fileIdx=2135 → 글자는 '…공고문.pdf').
+_DOC_EXT = re.compile(r"\.(hwpx|hwp|pdf)(?:\b|$)", re.I)
 
 
 def fetch_config(cfg: dict, deep: bool = True) -> list[dict]:
@@ -111,17 +114,25 @@ def _detail(url: str) -> tuple[str, list[dict], str]:
     body = html_to_text(page)[:20000]
 
     found: list[dict] = []
-    for href, name in _DOC_ANY.findall(page):
-        found.append({"name": _html.unescape(name.strip()),
-                      "url": urllib.parse.urljoin(url, _html.unescape(href))})
-    for href in _DOC_LINK.findall(page):
+    try:
+        soup = BeautifulSoup(page, "lxml")
+    except Exception:                                    # noqa: BLE001
+        soup = None
+    for a in (soup.select("a[href]") if soup else []):
+        text = a.get_text(" ", strip=True)
+        href = a["href"]
+        if href.lower().startswith(("javascript:", "mailto:", "#")):
+            continue
+        if not (_DOC_EXT.search(text) or _DOC_EXT.search(href)):
+            continue
         full = urllib.parse.urljoin(url, _html.unescape(href))
-        if full not in {a["url"] for a in found}:
-            found.append({"name": full.rsplit("/", 1)[-1], "url": full})
+        if full in {x["url"] for x in found}:
+            continue
+        found.append({"name": (text or full.rsplit("/", 1)[-1])[:160], "url": full})
 
     texts = []
     for att in found:
-        ext = re.search(r"\.(hwpx|hwp|pdf)$", att["name"], re.I) or re.search(r"\.(hwpx|hwp|pdf)$", att["url"], re.I)
+        ext = _DOC_EXT.search(att["name"]) or _DOC_EXT.search(att["url"])
         if not ext:
             continue
         path = download(att["url"], referer=url, suffix="." + ext.group(1).lower())

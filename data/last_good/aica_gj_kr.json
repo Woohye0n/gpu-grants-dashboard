@@ -1,0 +1,528 @@
+{
+ "saved_at": "2026-09-12 20:20",
+ "rows": [
+  {
+   "source": "aica_gj_kr",
+   "source_label": "인공지능산업융합사업단(AICA)",
+   "org": "광주광역시 · AICA",
+   "uid": "aica_gj_kr-httpswwwaica-gjkrsubphpPID0201pagecatego",
+   "title": "2026년 『AI 데이터센터 서비스』 이용자 정기모집(추가 2차) 공고",
+   "program": "인공지능산업융합사업단(AICA)",
+   "url": "https://www.aica-gj.kr/sub.php?PID=0201&page=&category=&searchText=&searchType=&action=Read&idx=2920",
+   "posted": "2026-09-11",
+   "apply_start": "2026-09-11",
+   "apply_end": "2026-09-22T14:00",
+   "closed_hint": false,
+   "audience": "user",
+   "gpu_models": [
+    "Bow(IPU)"
+   ],
+   "unknown_models": [],
+   "gpu_specs": [
+    {
+     "model": "Bow(IPU)",
+     "qty": "8장",
+     "qty_tokens": "8장",
+     "vram": "",
+     "line": "1트랙 BOW BOW*8장 동적(Backend.ai) 기본 50TB"
+    }
+   ],
+   "scale": [],
+   "cost": [
+    {
+     "audience": "산업계",
+     "text": "BOW 자원은 무상지원으로 별도 이용료 없음"
+    }
+   ],
+   "usage_period": {
+    "text": "지원기간 협약체결일 ~ ’26. 12.",
+    "start": null,
+    "end": null
+   },
+   "summary": "인공지능산업융합사업단(AICA)에서는 AI데이터센터에서 확보한 컴퓨팅 자원을 활용할 이용자 모집을 추진하오니 관심 있는 분들의 많은 지원 바랍니다.",
+   "attachments": [
+    {
+     "name": "1. [공고문] 2026년 AI 데이터센터 서비스 이용자 정기모집(추가 2차) 공고문.pdf",
+     "url": "https://www.aica-gj.kr/mod/board/boardDownload.php?fileIdx=2135&boardNo=business"
+    }
+   ]
+  },
+  {
+   "source": "aica_gj_kr",
+   "source_label": "인공지능산업융합사업단(AICA)",
+   "org": "광주광역시 · AICA",
+   "uid": "aica_gj_kr-httpswwwaica-gjkrsubphpPID0201pagecatego",
+   "title": "2026년 국가 AI 데이터센터 고도화 시험·평가 모집 공고",
+   "program": "인공지능산업융합사업단(AICA)",
+   "url": "https://www.aica-gj.kr/sub.php?PID=0201&page=&category=&searchText=&searchType=&action=Read&idx=2893",
+   "posted": "2026-08-06",
+   "apply_start": "2026-08-06",
+   "apply_end": "2026-08-19",
+   "closed_hint": false,
+   "audience": "user",
+   "gpu_models": [
+    "B300"
+   ],
+   "unknown_models": [],
+   "gpu_specs": [
+    {
+     "model": "B300",
+     "qty": "1 기존 자원 사용 플랫폼과 신규자원 “Clunix” 플랫폼 간 기능·사용성 비교 -",
+     "qty_tokens": "1 기",
+     "vram": "",
+     "line": "4 B300에서 오히려 성능이 하락하거나 실패한 케이스 및 그 원인 ④ 시험·평가계획 — 1 기존 자원 사용 플랫폼과 신규자원 “Clunix” 플랫폼 간 기능·사용성 비교 -"
+    },
+    {
+     "model": "B300",
+     "qty": "8장",
+     "qty_tokens": "8장",
+     "vram": "",
+     "line": "B300 B300*8장 고정할당 기본 10TB SSD 제공"
+    }
+   ],
+   "scale": [],
+   "cost": [
+    {
+     "audience": "",
+     "text": "B300의 기업분담금은 640만원(월 기준)이며, 패널티 시 이용기간을 산정하여 부과"
+    }
+   ],
+   "usage_period": {
+    "text": "o (지원기간) ’26. 9. ~ 12. * 지원기간은 선정·협약일정에 따라 일부 변동 가능",
+    "start": null,
+    "end": null
+   },
+   "summary": "AI데이터센터에서 확보한 컴퓨팅 자원을 활용할 이용자 모집을 추진하오니 관심 있는 분들의 많은 지원 바랍니다.",
+   "attachments": [
+    {
+     "name": "[공고문] [2026년] 국가 AI데이터센터 고도화 이용자 시험· 평가 모집 공고문.pdf",
+     "url": "https://www.aica-gj.kr/mod/board/boardDownload.php?fileIdx=2088&boardNo=business"
+    }
+   ]
+  },
+  {
+   "source": "aica_gj_kr",
+   "source_label": "인공지능산업융합사업단(AICA)",
+   "org": "광주광역시 · AICA",
+   "uid": "aica_gj_kr-httpswwwaica-gjkrsubphpPID0201pagecatego",
+   "title": "2026년 국가 AI데이터센터 고도화 사업 이용자 추가모집(상시3차) 공고",
+   "program": "인공지능산업융합사업단(AICA)",
+   "url": "https://www.aica-gj.kr/sub.php?PID=0201&page=&category=&searchText=&searchType=&action=Read&idx=2883",
+   "posted": "2026-07-20",
+   "apply_start": "2026-07-16",
+   "apply_end": "2026-08-05",
+   "closed_hint": false,
+   "audience": "user",
+   "gpu_models": [
+    "B200"
+   ],
+   "unknown_models": [],
+   "gpu_specs": [
+    {
+     "model": "B200",
+     "qty": "8장",
+     "qty_tokens": "8장",
+     "vram": "",
+     "line": "2트랙 B200 8장 고정 및 동적할당"
+    }
+   ],
+   "scale": [],
+   "cost": [
+    {
+     "audience": "",
+     "text": "2트랙 B200 80만원/1장 40만원/1장"
+    },
+    {
+     "audience": "",
+     "text": "구분 가속기 기업분담금 할인 적용(50%) 비고"
+    },
+    {
+     "audience": "",
+     "text": "(할인대상) 청년기업 또는 지역기업(관) 의 경우 50% 적용"
+    }
+   ],
+   "usage_period": {
+    "text": "o (지원기간) 협약체결일 ~ ’26. 12월(또는 예산소진시까지) ※ 트랙별상이",
+    "start": null,
+    "end": null
+   },
+   "summary": "2026년 국가 AI데이터센터 고도화 사업 이용자 추가모집(상시 3차)공고 (2트랙)",
+   "attachments": [
+    {
+     "name": "1. [공고문] 2026년 국가 AI데이터센터 고도화 사업 이용자 추가모집(상시3차) 공고문.pdf",
+     "url": "https://www.aica-gj.kr/mod/board/boardDownload.php?fileIdx=2073&boardNo=business"
+    }
+   ]
+  },
+  {
+   "source": "aica_gj_kr",
+   "source_label": "인공지능산업융합사업단(AICA)",
+   "org": "광주광역시 · AICA",
+   "uid": "aica_gj_kr-httpswwwaica-gjkrsubphpPID0201pagecatego",
+   "title": "2026년 국가 AI데이터센터 고도화 사업 이용자 추가모집(상시) 공고",
+   "program": "인공지능산업융합사업단(AICA)",
+   "url": "https://www.aica-gj.kr/sub.php?PID=0201&page=&category=&searchText=&searchType=&action=Read&idx=2859",
+   "posted": "2026-06-09",
+   "apply_start": "2026-06-09",
+   "apply_end": null,
+   "closed_hint": false,
+   "audience": "user",
+   "gpu_models": [
+    "H100",
+    "B200"
+   ],
+   "unknown_models": [],
+   "gpu_specs": [
+    {
+     "model": "H100",
+     "qty": "8장",
+     "qty_tokens": "8장",
+     "vram": "",
+     "line": "1트랙 H100 8장 고정 및 동적할당"
+    },
+    {
+     "model": "B200",
+     "qty": "8장",
+     "qty_tokens": "8장",
+     "vram": "",
+     "line": "2트랙 B200 8장 고정 및 동적할당"
+    }
+   ],
+   "scale": [],
+   "cost": [
+    {
+     "audience": "",
+     "text": "1트랙 H100 40만원/1장 20만원/1장"
+    },
+    {
+     "audience": "",
+     "text": "2트랙 B200 80만원/1장 40만원/1장"
+    },
+    {
+     "audience": "",
+     "text": "구분 가속기 기업분담금 할인 적용(50%) 비고"
+    }
+   ],
+   "usage_period": {
+    "text": "o (지원기간) 협약체결일 ~ ’26. 12월(또는 예산소진시까지) ※ 트랙별상이",
+    "start": null,
+    "end": null
+   },
+   "summary": "인공지능산업융합사업단(AICA)에서는 인공지능 연구·개발·서비스에 특화된 고성능 GPU를 활용할 이용자 모집을 추진하오니 관심 있는 분들의 많은 지원 바랍니다.",
+   "attachments": [
+    {
+     "name": "[공고문] 2026년 국가 AI데이터센터 고도화 사업 이용자 추가모집(상시) 공고문.pdf",
+     "url": "https://www.aica-gj.kr/mod/board/boardDownload.php?fileIdx=2054&boardNo=business"
+    }
+   ]
+  },
+  {
+   "source": "aica_gj_kr",
+   "source_label": "인공지능산업융합사업단(AICA)",
+   "org": "광주광역시 · AICA",
+   "uid": "aica_gj_kr-httpswwwaica-gjkrsubphpPID0201page2categ",
+   "title": "2026년 AI데이터센터 서비스 이용자 하반기 정기모집 공고",
+   "program": "인공지능산업융합사업단(AICA)",
+   "url": "https://www.aica-gj.kr/sub.php?PID=0201&page=2&category=&searchText=&searchType=&action=Read&idx=2843",
+   "posted": "2026-05-20",
+   "apply_start": "2026-05-20",
+   "apply_end": "2025-06-10T14:00",
+   "closed_hint": false,
+   "audience": "user",
+   "gpu_models": [
+    "T4",
+    "A100",
+    "H100",
+    "Bow(IPU)"
+   ],
+   "unknown_models": [],
+   "gpu_specs": [
+    {
+     "model": "T4",
+     "qty": "8장",
+     "qty_tokens": "8장",
+     "vram": "",
+     "line": "T4 T4*8장"
+    },
+    {
+     "model": "A100",
+     "qty": "4장",
+     "qty_tokens": "4장",
+     "vram": "",
+     "line": "A100*4장"
+    },
+    {
+     "model": "A100",
+     "qty": "8장",
+     "qty_tokens": "8장",
+     "vram": "",
+     "line": "A100*8장"
+    },
+    {
+     "model": "H100",
+     "qty": "1장",
+     "qty_tokens": "1장",
+     "vram": "",
+     "line": "1트랙 H100*1장"
+    },
+    {
+     "model": "H100",
+     "qty": "4장",
+     "qty_tokens": "4장",
+     "vram": "",
+     "line": "H100 H100*4장"
+    },
+    {
+     "model": "Bow(IPU)",
+     "qty": "8장",
+     "qty_tokens": "8장",
+     "vram": "",
+     "line": "BOW BOW*8장"
+    }
+   ],
+   "scale": [],
+   "cost": [
+    {
+     "audience": "",
+     "text": "자원별자부담금기준: H100(40만원/1장), HPC(40만원/1장)"
+    },
+    {
+     "audience": "",
+     "text": "2트랙 HPC (1~6PF) 1PF 기준 640만원/월 320만원/월 최대 6PF"
+    },
+    {
+     "audience": "",
+     "text": "3트랙 H100*2 (134TF) 80만원/월 40만원/월"
+    }
+   ],
+   "usage_period": {
+    "text": "o (지원기간) ’26. 7. ~ ’26. 12. ※ 트랙별종료기간상이",
+    "start": null,
+    "end": null
+   },
+   "summary": "인공지능산업융합사업단(AICA)에서는 AI데이터센터에서 확보한 컴퓨팅자원을 활용할 이용자 모집을 추진하오니 관심있는 분들의 많은 지원 바랍니다.",
+   "attachments": [
+    {
+     "name": "1. [공고문] 2026년 AI 데이터센터 서비스 하반기 이용자 정기모집 공고문.pdf",
+     "url": "https://www.aica-gj.kr/mod/board/boardDownload.php?fileIdx=2046&boardNo=business"
+    }
+   ]
+  },
+  {
+   "source": "aica_gj_kr",
+   "source_label": "인공지능산업융합사업단(AICA)",
+   "org": "광주광역시 · AICA",
+   "uid": "aica_gj_kr-httpswwwaica-gjkrsubphpPID0201page2categ",
+   "title": "2026년 국가 AI데이터센터 고도화 사업 이용자 정기모집 공고",
+   "program": "인공지능산업융합사업단(AICA)",
+   "url": "https://www.aica-gj.kr/sub.php?PID=0201&page=2&category=&searchText=&searchType=&action=Read&idx=2829",
+   "posted": "2026-04-01",
+   "apply_start": "2026-04-01",
+   "apply_end": "2026-04-22",
+   "closed_hint": false,
+   "audience": "user",
+   "gpu_models": [
+    "H100",
+    "B200",
+    "B300",
+    "H200"
+   ],
+   "unknown_models": [],
+   "gpu_specs": [
+    {
+     "model": "B200",
+     "qty": "➀ (기본자원) 가속기 1식 및 스토리지(기본 10TB)제공",
+     "qty_tokens": "1식",
+     "vram": "",
+     "line": "※ 정부예산, 공급사선정결과등에따라자원타입(예, B200→B300) 및지원건수는변동 — ➀ (기본자원) 가속기 1식 및 스토리지(기본 10TB)제공"
+    },
+    {
+     "model": "B300",
+     "qty": "➀ (기본자원) 가속기 1식 및 스토리지(기본 10TB)제공",
+     "qty_tokens": "1식",
+     "vram": "",
+     "line": "※ 정부예산, 공급사선정결과등에따라자원타입(예, B200→B300) 및지원건수는변동 — ➀ (기본자원) 가속기 1식 및 스토리지(기본 10TB)제공"
+    },
+    {
+     "model": "B200",
+     "qty": "2트랙 8장 고정 및 동적할당",
+     "qty_tokens": "8장",
+     "vram": "",
+     "line": "B200 — 2트랙 8장 고정 및 동적할당"
+    },
+    {
+     "model": "H100",
+     "qty": "8장",
+     "qty_tokens": "8장",
+     "vram": "",
+     "line": "1트랙 H100 8장 고정 및 동적할당"
+    }
+   ],
+   "scale": [],
+   "cost": [
+    {
+     "audience": "",
+     "text": "1트랙 H100 40만원/1장 20만원/1장"
+    },
+    {
+     "audience": "",
+     "text": "2트랙 B200 또는 B300 80만원/1장 40만원/1장 최대 6PF"
+    },
+    {
+     "audience": "",
+     "text": "3트랙 HPC (1~6PF) 40만원/1장 20만원/1장 H100 기준"
+    }
+   ],
+   "usage_period": {
+    "text": "o (지원기간) 협약체결일 ~ ’26. 12월(또는 예산소진시까지) ※ 트랙별상이",
+    "start": null,
+    "end": null
+   },
+   "summary": "인공지능산업융합사업단(AICA)에서는 인공지능 연구·개발·서비스에 특화된 고성능 GPU를 활용할 이용자 모집을 추진하오니 관심 있는 분들의 많은 지원 바랍니다.",
+   "attachments": [
+    {
+     "name": "[공고문] 2026년 국가 AI데이터센터 고도화 사업 이용자 정기모집 공고문.pdf",
+     "url": "https://www.aica-gj.kr/mod/board/boardDownload.php?fileIdx=2029&boardNo=business"
+    }
+   ]
+  },
+  {
+   "source": "aica_gj_kr",
+   "source_label": "인공지능산업융합사업단(AICA)",
+   "org": "광주광역시 · AICA",
+   "uid": "aica_gj_kr-httpswwwaica-gjkrsubphpPID0201page2categ",
+   "title": "2026년 국가 AI데이터센터 고도화 사업 공급사 모집 공고",
+   "program": "인공지능산업융합사업단(AICA)",
+   "url": "https://www.aica-gj.kr/sub.php?PID=0201&page=2&category=&searchText=&searchType=&action=Read&idx=2795",
+   "posted": "2026-03-09",
+   "apply_start": "2026-03-06",
+   "apply_end": "2026-03-26T14:00",
+   "closed_hint": false,
+   "audience": "supplier",
+   "gpu_models": [
+    "H100",
+    "H200",
+    "B200",
+    "B300"
+   ],
+   "unknown_models": [],
+   "gpu_specs": [
+    {
+     "model": "H100",
+     "qty": "등 368장",
+     "qty_tokens": "1개 / 368장",
+     "vram": "",
+     "line": "□ (선정기업 수) 1개 이상 공급사(H100 등 368장 이상 제공 가능 기업)"
+    },
+    {
+     "model": "H100",
+     "qty": "최소 368장",
+     "qty_tokens": "368장",
+     "vram": "",
+     "line": "H100 최소 368장 이상"
+    },
+    {
+     "model": "B200",
+     "qty": "8장",
+     "qty_tokens": "8장",
+     "vram": "",
+     "line": "트랙 2 B200 8장 등 단일노드 공급사 선정 결과에"
+    }
+   ],
+   "scale": [],
+   "cost": [
+    {
+     "audience": "",
+     "text": "280만원 이하 620만원 이하 20"
+    },
+    {
+     "audience": "",
+     "text": "280만원 초과 ~ 300만원 이하 620만원 초과 ~ 640만원 이하 19"
+    },
+    {
+     "audience": "",
+     "text": "300만원 초과 ~ 320만원 이하 640만원 초과 ~ 660만원 이하 18"
+    }
+   ],
+   "usage_period": {
+    "text": "(사업기간) 협약 체결일 ~ 2026. 12. 31.",
+    "start": null,
+    "end": "2026-12-31"
+   },
+   "summary": "인공지능산업융합사업단에서는 인공지능 연구·개발·서비스에 특화된 고성능 GPU 제공을 통해",
+   "attachments": [
+    {
+     "name": "1. 「2026년 국가 AI데이터센터 고도화」 사업 공급사 모집 공고문.pdf",
+     "url": "https://www.aica-gj.kr/mod/board/boardDownload.php?fileIdx=2017&boardNo=business"
+    },
+    {
+     "name": "붙임1. 「2026년 국가 AI데이터센터 고도화」 사업 공급사 모집 공모안내서.pdf",
+     "url": "https://www.aica-gj.kr/mod/board/boardDownload.php?fileIdx=2018&boardNo=business"
+    }
+   ]
+  },
+  {
+   "source": "aica_gj_kr",
+   "source_label": "인공지능산업융합사업단(AICA)",
+   "org": "광주광역시 · AICA",
+   "uid": "aica_gj_kr-httpswwwaica-gjkrsubphpPID0201page3categ",
+   "title": "2026년 AI데이터센터 서비스 이용자 정기모집(추가1차) 공고",
+   "program": "인공지능산업융합사업단(AICA)",
+   "url": "https://www.aica-gj.kr/sub.php?PID=0201&page=3&category=&searchText=&searchType=&action=Read&idx=2781",
+   "posted": "2026-01-26",
+   "apply_start": "2026-02-04",
+   "apply_end": null,
+   "closed_hint": false,
+   "audience": "user",
+   "gpu_models": [
+    "T4",
+    "Bow(IPU)",
+    "A100",
+    "H100"
+   ],
+   "unknown_models": [],
+   "gpu_specs": [
+    {
+     "model": "Bow(IPU)",
+     "qty": "➀ (기본자원) 가속기 1식 및 스토리지(기본 50TB)제공 ※ 백업공간별도",
+     "qty_tokens": "1식",
+     "vram": "",
+     "line": "BOW Backend.ai 솔루션 기반 동적할당 제공하여 컨테 — ➀ (기본자원) 가속기 1식 및 스토리지(기본 50TB)제공 ※ 백업공간별도"
+    },
+    {
+     "model": "T4",
+     "qty": "8장",
+     "qty_tokens": "8장",
+     "vram": "",
+     "line": "T4 T4*8장 동적(GPU Live) 기본 50TB"
+    },
+    {
+     "model": "Bow(IPU)",
+     "qty": "8장",
+     "qty_tokens": "8장",
+     "vram": "",
+     "line": "+백업 20TB BOW BOW*8장 동적(backend.ai)"
+    }
+   ],
+   "scale": [],
+   "cost": [
+    {
+     "audience": "산업계",
+     "text": "무상/유상 자원을 나누어 부과"
+    }
+   ],
+   "usage_period": {
+    "text": "o (지원기간) ’26. 1. ~ ’26. 12. ※ 트랙별종료기간상이",
+    "start": null,
+    "end": null
+   },
+   "summary": "인공지능산업융합사업단(AICA)에서는 2026년 AI 데이터센터 서비스 이용자 정기모집 잔여자원에 대한 추가 이용자 모집을 추진하오니 관심 있는 분들의 많은 지원 바랍니다.",
+   "attachments": [
+    {
+     "name": "1. [공고문] 2026년 AI 데이터센터 서비스 이용자 정기모집(추가 1차) 공고문_수정.pdf",
+     "url": "https://www.aica-gj.kr/mod/board/boardDownload.php?fileIdx=2013&boardNo=business"
+    }
+   ]
+  }
+ ]
+}

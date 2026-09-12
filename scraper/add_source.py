@@ -108,16 +108,29 @@ def _make_key(cfg: dict, parsed) -> str:
 
 def check_reachable(cfg: dict) -> dict:
     """실제로 읽어본다. 이게 이 스크립트의 핵심이다."""
-    from .probe import probe
+    from .probe import probe, suggest_boards
     try:
         found = probe(cfg["list_url"])
     except Exception as exc:                             # noqa: BLE001
         raise Rejected(f"목록을 열지 못했습니다: {type(exc).__name__}: {exc}") from exc
     if not found["row_count"]:
-        raise Rejected(
-            "목록은 열렸지만 게시글 줄을 찾지 못했습니다. "
-            "공고가 여러 줄 보이는 **목록** 페이지 주소인지 확인해 주세요 "
-            "(상세 페이지나 로그인이 필요한 페이지는 읽을 수 없습니다).")
+        lines = ["목록은 열렸지만 게시글 줄을 찾지 못했습니다."]
+        if not urllib.parse.urlparse(cfg["list_url"]).path.strip("/"):
+            lines.append("")
+            lines.append("넣어주신 건 **사이트 첫 화면** 주소입니다. "
+                         "공지사항·사업공고 게시판으로 들어가서, "
+                         "공고가 여러 줄 보이는 **목록 페이지**의 주소를 넣어주세요.")
+        hints = suggest_boards(cfg["list_url"])
+        if hints:
+            lines.append("")
+            lines.append("이 사이트에서 게시판으로 보이는 주소들입니다. 이 중 하나를 넣어보세요:")
+            lines.append("")
+            for h in hints:
+                lines.append(f"- [{h['text']}]({h['url']})")
+        else:
+            lines.append("")
+            lines.append("상세 페이지나, 목록을 자바스크립트로만 그리는 페이지는 읽을 수 없습니다.")
+        raise Rejected("\n".join(lines))
     return found
 
 
