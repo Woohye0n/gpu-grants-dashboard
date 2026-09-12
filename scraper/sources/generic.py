@@ -43,6 +43,11 @@ def fetch_config(cfg: dict, deep: bool = True) -> list[dict]:
             first_error = first_error or f"{type(exc).__name__}: {exc}"
             break
         if not found["row_count"]:
+            shape = found.get("shape") or {}
+            first_error = first_error or (
+                f"행 없음 — 받은 페이지: {shape.get('html_chars', 0)}자, "
+                f"링크 {shape.get('links', 0)}개, 표 {shape.get('tables', 0)}개 / "
+                f"첫 글자들: {shape.get('text_head', '')[:100]}")
             break
         scanned += found["row_count"]
         for row in found["rows"]:
@@ -61,7 +66,7 @@ def fetch_config(cfg: dict, deep: bool = True) -> list[dict]:
         # 왜 못 읽었는지가 중요하다. 가져오기 자체가 막힌 것(해외 IP 차단·타임아웃)과
         # 페이지는 왔는데 행을 못 찾은 것은 대응이 다르다.
         if first_error:
-            raise RuntimeError(f"목록 페이지를 가져오지 못했습니다 — {first_error}")
+            raise RuntimeError(f"목록을 읽지 못했습니다 — {first_error}")
         raise RuntimeError("목록 페이지는 열렸지만 게시글 줄을 찾지 못했습니다 "
                            "(목록 URL 이 맞는지, 로그인이 필요한 페이지는 아닌지 확인하세요)")
     return out

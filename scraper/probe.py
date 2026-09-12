@@ -117,7 +117,12 @@ def probe(url: str, min_rows: int = 5) -> dict:
             "row_text": row_text[:200],
         })
     return {"url": url, "signature": best, "id_arg_index": id_pos,
-            "row_count": len(detected), "rows": detected}
+            "row_count": len(detected), "rows": detected,
+            # 못 읽었을 때 '어떤 페이지가 왔는지' 를 남긴다. 같은 주소라도 요청한
+            # 곳(국내/해외 IP)에 따라 다른 페이지가 오는 일이 있다.
+            "shape": {"html_chars": len(html), "links": len(soup.select("a")),
+                      "tables": len(soup.select("table")),
+                      "text_head": re.sub(r"\s+", " ", soup.get_text(" ", strip=True))[:160]}}
 
 
 BOARD_WORDS = re.compile(r"공지|공고|알림|소식|게시|보도|뉴스|사업안내|모집|notice|board|bbs", re.I)
