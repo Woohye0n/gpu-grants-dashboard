@@ -122,7 +122,15 @@ def probe(url: str, min_rows: int = 5) -> dict:
             # 곳(국내/해외 IP)에 따라 다른 페이지가 오는 일이 있다.
             "shape": {"html_chars": len(html), "links": len(soup.select("a")),
                       "tables": len(soup.select("table")),
-                      "text_head": re.sub(r"\s+", " ", soup.get_text(" ", strip=True))[:160]}}
+                      "text_head": re.sub(r"\s+", " ", soup.get_text(" ", strip=True))[:160],
+                      "challenge": bool(CHALLENGE.search(
+                          re.sub(r"\s+", " ", soup.get_text(" ", strip=True))[:2000]))}}
+
+
+# 사이트가 자동 수집을 막을 때 내려주는 페이지들. 우회하지 않고, 그렇다고 말한다.
+CHALLENGE = re.compile(
+    r"자동등록방지|보안절차|prove that you are human|captcha|are you a robot"
+    r"|비정상적인 접근|접근이 차단|access denied|attention required", re.I)
 
 
 BOARD_WORDS = re.compile(r"공지|공고|알림|소식|게시|보도|뉴스|사업안내|모집|notice|board|bbs", re.I)

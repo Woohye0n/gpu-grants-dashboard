@@ -390,9 +390,17 @@
         soon.map((p) => `${p.program || p.title} (${ddayText(p)}, ~${day(p.apply_end)})`).join(' · ')));
     }
     if (stale.length) {
-      b.classList.add('warn');
-      b.appendChild(el('div', null,
-        `수집 실패 ${stale.length}곳 (${stale.join(', ')}) — 해당 사이트는 직전 수집 결과를 보여주는 중입니다.`));
+      const blocked = (DATA.sources || []).filter((s) => s.stale && s.ci_blocked).map((s) => s.label);
+      const broken = stale.filter((n) => !blocked.includes(n));
+      if (broken.length) {
+        b.classList.add('warn');
+        b.appendChild(el('div', null,
+          `수집 실패 ${broken.length}곳 (${broken.join(', ')}) — 해당 사이트는 직전 수집 결과를 보여주는 중입니다.`));
+      }
+      if (blocked.length) {
+        b.appendChild(el('div', null,
+          `${blocked.join(', ')}: 사이트가 자동 수집을 막아 직전 수집 결과를 씁니다 (알려진 제약).`));
+      }
     }
   }
 
@@ -410,8 +418,9 @@
       a.href = s.url; a.target = '_blank'; a.rel = 'noopener';
       left.appendChild(a);
       head.appendChild(left);
-      head.appendChild(el('span', `pill ${s.ok ? 'open' : (s.stale ? 'soon' : 'closed')}`,
-                          s.ok ? '정상' : (s.stale ? '직전 데이터 사용' : '실패')));
+      const label = s.ok ? '정상'
+        : (s.ci_blocked ? '사이트가 자동수집 차단' : (s.stale ? '직전 데이터 사용' : '실패'));
+      head.appendChild(el('span', `pill ${s.ok ? 'open' : (s.stale ? 'soon' : 'closed')}`, label));
       n.appendChild(head);
       const kv = el('div', 'kv');
       kv.appendChild(el('div', 'k', 'GPU 공고'));
@@ -419,6 +428,10 @@
       if (s.collected_at) {
         kv.appendChild(el('div', 'k', '수집 시각'));
         kv.appendChild(el('div', 'v', s.collected_at + ' KST'));
+      }
+      if (s.note) {
+        kv.appendChild(el('div', 'k', '참고'));
+        kv.appendChild(el('div', 'v', s.note));
       }
       if (s.error) {
         kv.appendChild(el('div', 'k', '사유'));

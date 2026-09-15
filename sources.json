@@ -5,7 +5,8 @@
     "list_url   : 게시판 목록 페이지",
     "page_param : 2페이지 이후를 부르는 쿼리 이름 (없으면 1페이지만)",
     "detail_url : 목록이 링크 대신 JS 로 글을 열 때, {id} 를 글 번호로 바꿔 쓸 상세 주소",
-    "repo : '사이트 추가' 폼이 이슈를 열 GitHub 저장소"
+    "repo : '사이트 추가' 폼이 이슈를 열 GitHub 저장소",
+    "ci_blocked : GitHub 러너에서 막히는 것이 알려진 사이트 (실패가 아니라 예상된 제약으로 표시)"
   ],
   "repo": "Woohye0n/gpu-grants-dashboard",
   "sources": [
@@ -40,7 +41,9 @@
       "list_url": "https://www.aica-gj.kr/sub.php?PID=0201",
       "org": "광주광역시 · AICA",
       "page_param": "page",
-      "pages": 3
+      "pages": 3,
+      "ci_blocked": true,
+      "note": "GitHub 러너에는 자동등록방지 페이지가 내려옵니다. 국내 망에서 수집한 직전 데이터를 씁니다."
     }
   ]
 }

@@ -113,8 +113,24 @@ def check_reachable(cfg: dict) -> dict:
         found = probe(cfg["list_url"])
     except Exception as exc:                             # noqa: BLE001
         raise Rejected(f"목록을 열지 못했습니다: {type(exc).__name__}: {exc}") from exc
+    if found.get("shape", {}).get("challenge"):
+        raise Rejected(
+            "이 사이트가 **자동 수집을 막고 있습니다.** 사람 확인(자동등록방지) 페이지가 대신 내려옵니다.\n\n"
+            f"받은 페이지: {found['shape'].get('html_chars', 0)}자 — "
+            f"\"{found['shape'].get('text_head', '')[:90]}\"\n\n"
+            "사이트가 의도적으로 세운 접근 통제라 우회하지 않습니다. "
+            "이 사이트는 GitHub 러너에서 수집할 수 없고, 해당 사이트가 정상 응답하는 망에서 "
+            "수집해 올리는 방법만 가능합니다.")
     if not found["row_count"]:
+        shape = found.get("shape") or {}
         lines = ["목록은 열렸지만 게시글 줄을 찾지 못했습니다."]
+        lines.append("")
+        lines.append(f"받은 페이지: {shape.get('html_chars', 0)}자, 링크 {shape.get('links', 0)}개, "
+                     f"표 {shape.get('tables', 0)}개")
+        if shape.get("html_chars", 0) < 3000 and shape.get("links", 0) < 5:
+            lines.append("")
+            lines.append("**껍데기만 내려오는 자바스크립트 앱**으로 보입니다. 브라우저에서는 목록이 보여도 "
+                         "서버가 주는 HTML 에는 글이 없어서, 이 방식으로는 읽을 수 없습니다.")
         if not urllib.parse.urlparse(cfg["list_url"]).path.strip("/"):
             lines.append("")
             lines.append("넣어주신 건 **사이트 첫 화면** 주소입니다. "
@@ -132,6 +148,19 @@ def check_reachable(cfg: dict) -> dict:
             lines.append("상세 페이지나, 목록을 자바스크립트로만 그리는 페이지는 읽을 수 없습니다.")
         raise Rejected("\n".join(lines))
     return found
+
+
+def _existing(cfg: dict) -> dict | None:
+    """같은 키나 같은 목록 주소가 이미 sources.json 에 있나."""
+    try:
+        with open(SOURCES_FILE, encoding="utf-8") as fh:
+            rows = json.load(fh).get("sources") or []
+    except (OSError, ValueError):
+        return None
+    for row in rows:
+        if row.get("key") == cfg["key"] or row.get("list_url") == cfg["list_url"]:
+            return row
+    return None
 
 
 def add(cfg: dict) -> tuple[bool, dict]:
@@ -167,6 +196,15 @@ def main() -> int:
     lines: list[str] = []
     try:
         cfg = validate(extract_config(body))
+        already = _existing(cfg)
+        if already:
+            print_only = (f"ℹ️ **{already.get('label') or cfg['label']}** 는 이미 수집 대상입니다 "
+                          f"(키 `{already['key']}`). 새로 추가할 것이 없습니다.")
+            if args.report_file:
+                with open(args.report_file, "w", encoding="utf-8") as fh:
+                    fh.write(print_only)
+            print(print_only)
+            return 0
         found = check_reachable(cfg)
         titles = "\n".join(f"  - {r['title'][:70]}" for r in found["rows"][:5])
         if args.dry_run:

@@ -44,8 +44,11 @@ jobs:
       # 실패한 사이트는 직전 수집 결과를 그대로 쓰므로 배포는 계속 진행한다.
       - name: 공고 수집
         id: collect
-        continue-on-error: true
-        run: python -m scraper.run --deadline-seconds 900
+        run: |
+          set +e
+          python -m scraper.run --deadline-seconds 900
+          echo "code=$?" >> "$GITHUB_OUTPUT"
+          exit 0
 
       - name: 수집 결과 커밋
         run: |
@@ -64,10 +67,18 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v4
 
-      # 배포는 끝냈더라도 수집이 깨졌으면 잡을 실패로 남긴다 — 안 그러면 조용히 낡은
-      # 데이터가 계속 나간다 (2026-09-12 에 실제로 그랬다).
-      - name: 수집 실패를 잡 결과에 반영
-        if: steps.collect.outcome == 'failure'
+      # 배포까지 끝낸 뒤에 판정한다. 대비책이 받아낸 저하(=직전 데이터 사용)는 경고로,
+      # 아무것도 못 가져온 진짜 고장만 실패로 남긴다. 둘을 같게 두면 매일 빨간불이라
+      # 정작 고장났을 때 알아챌 수 없다.
+      - name: 수집 결과 판정
+        if: always()
         run: |
-          echo "::error::공고 수집 단계가 실패했습니다. 배포는 직전 데이터로 진행됐습니다."
-          exit 1
+          code="${{ steps.collect.outputs.code }}"
+          if [ "${code:-2}" -ge 2 ]; then
+            echo "::error::공고 수집 실패 (exit ${code:-2}). 배포는 직전 데이터로 진행했습니다."
+            exit 1
+          elif [ "$code" = "1" ]; then
+            echo "::warning::일부 사이트를 읽지 못해 직전 데이터를 사용했습니다. 대시보드 '수집 상태' 탭을 보세요."
+          else
+            echo "모든 사이트 정상 수집"
+          fi

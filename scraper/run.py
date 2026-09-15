@@ -260,7 +260,9 @@ def collect(deep: bool = True) -> tuple[list[dict], list[dict]]:
         key = cfg["key"]
         label, site = _describe(cfg)
         entry = {"key": key, "label": label, "url": site,
-                 "kind": cfg.get("kind", "generic")}
+                 "kind": cfg.get("kind", "generic"),
+                 "ci_blocked": bool(cfg.get("ci_blocked")),
+                 "note": cfg.get("note", "")}
         rows, error = [], ""
         try:
             if cfg.get("kind") == "builtin":
@@ -429,8 +431,18 @@ def main() -> int:
         if p["status"] in ("open", "upcoming"):
             dd = f"D-{p['dday']}" if (p.get("dday") or 0) >= 0 else ""
             print(f"  * [{p['status']:8s} {dd:>5s}] {p['title'][:52]} | {', '.join(p['gpu_models']) or '-'}")
-    # 직전 데이터를 살려 배포는 계속하되, 종료 코드로는 문제를 알린다
-    return 0 if all(s["ok"] for s in payload["sources"]) else 1
+    # 종료 코드로 '대비책이 받아낸 저하' 와 '진짜 고장' 을 구분한다. 둘을 같게 두면
+    # 매일 빨간불이 켜져서, 정작 고장났을 때 알아챌 수 없다 (2026-09-15 에 그랬다).
+    hard = [s for s in payload["sources"] if not s["ok"] and not s.get("stale")
+            and s["count"] == 0 and "GPU 관련 공고는 없었" not in (s.get("error") or "")]
+    degraded = [s for s in payload["sources"] if s.get("stale")]
+    if hard:
+        print(f"[hard] 수집 실패: {', '.join(s['label'] for s in hard)}", file=sys.stderr)
+        return 2
+    if degraded:
+        print(f"[degraded] 직전 데이터 사용: {', '.join(s['label'] for s in degraded)}", file=sys.stderr)
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
