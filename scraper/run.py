@@ -424,6 +424,33 @@ def _unknown_digest(programs: list[dict]) -> list[dict]:
     return sorted(seen.values(), key=lambda r: r["token"])
 
 
+_ASSET_Q = re.compile(r'((?:href|src)="\./(app\.js|style\.css|data\.js))\?v=[^"]*"')
+
+
+def stamp_assets() -> str:
+    """index.html 의 ?v= 를 파일 내용 해시로 바꾼다.
+
+    고정값(?v=1)으로 두면 파일을 고쳐도 브라우저가 캐시된 옛 js/css 를 계속 쓴다.
+    실제로 그래서 고친 화면이 반영되지 않았다 — 내용이 바뀌면 주소도 바뀌어야 한다.
+    """
+    import hashlib
+    h = hashlib.sha1()
+    for name in ("app.js", "style.css", "data.js"):
+        path = os.path.join(DOCS, name)
+        if os.path.exists(path):
+            with open(path, "rb") as fh:
+                h.update(fh.read())
+    tag = h.hexdigest()[:10]
+    index = os.path.join(DOCS, "index.html")
+    with open(index, encoding="utf-8") as fh:
+        html = fh.read()
+    new = _ASSET_Q.sub(lambda m: f'{m.group(1)}?v={tag}"', html)
+    if new != html:
+        with open(index, "w", encoding="utf-8") as fh:
+            fh.write(new)
+    return tag
+
+
 def publish(payload: dict) -> None:
     os.makedirs(DOCS, exist_ok=True)
     os.makedirs(HISTORY, exist_ok=True)
@@ -436,6 +463,7 @@ def publish(payload: dict) -> None:
     stamp = datetime.fromisoformat(payload["generated_at"]).astimezone(KST).strftime("%Y-%m-%d")
     with open(os.path.join(HISTORY, f"{stamp}.json"), "w", encoding="utf-8") as fh:
         fh.write(blob)
+    stamp_assets()          # data.js 도 바뀌므로 매 수집마다 새 해시가 된다
 
 
 def main() -> int:
