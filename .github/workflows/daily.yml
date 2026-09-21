@@ -40,6 +40,14 @@ jobs:
       - name: 의존성 자가점검
         run: python -c "import scraper.run, scraper.probe, scraper.add_source; print('imports OK')"
 
+      # AI 사용량 스냅샷은 원본 저장소가 5분마다 발행한다. 프론트는 평소 raw 에서
+      # 직접 읽고, 원본이 private 이 되면 이 사본으로 내려온다 — 그래서 받아 둔다.
+      - name: AI 사용량 스냅샷 동기화
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.AI_SNAPSHOT_TOKEN }}
+        run: python -m scraper.sync_ai_snapshot
+
       # 러너는 해외 IP라 국내 사이트가 느리거나 막힐 수 있다. 시간 예산을 주고,
       # 실패한 사이트는 직전 수집 결과를 그대로 쓰므로 배포는 계속 진행한다.
       - name: 공고 수집
@@ -57,6 +65,7 @@ jobs:
           # index.html 은 수집 때마다 ?v= 해시가 다시 찍히므로 같이 커밋한다
           # (안 하면 저장소와 배포본의 자산 버전이 어긋난다)
           git add docs/data.js docs/data.json docs/index.html data/history data/last_good
+          git add docs/ai/index.html docs/ai/data/dashboard.json
           git diff --staged --quiet || git commit -m "chore: $(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M KST') 공고 수집"
           git push
 

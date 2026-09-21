@@ -211,3 +211,17 @@ td.num { text-align: right; font-variant-numeric: tabular-nums; }
   .kv { grid-template-columns: 66px 1fr; }
   main { padding: 14px; }
 }
+
+/* 사이트 전환 — GPU 지원사업 / AI 사용량 두 페이지를 잇는다.
+   두 페이지가 각자 style.css 를 쓰므로 같은 규칙을 양쪽에 둔다. */
+.sitenav { display: flex; gap: 4px; align-items: center; }
+.sitenav a {
+  color: var(--muted); font-size: 13px; font-weight: 600; text-decoration: none;
+  padding: 6px 12px; border-radius: 999px; border: 1px solid transparent;
+  white-space: nowrap;
+}
+.sitenav a:hover { color: var(--text); background: var(--panel2); text-decoration: none; }
+.sitenav a.on {
+  color: var(--text); background: var(--panel2); border-color: var(--border);
+}
+@media (max-width: 560px) { .sitenav { order: 3; width: 100%; } }

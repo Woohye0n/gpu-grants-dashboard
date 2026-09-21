@@ -1,10 +1,24 @@
-# GPU 지원사업 트래커
+# AIDAS 대시보드 — GPU 지원사업 · AI 사용량
+
+정적 사이트 하나에 두 화면이 들어 있습니다. 상단에서 서로 오갑니다.
+
+| 화면 | 경로 | 내용 | 데이터 출처 |
+|---|---|---|---|
+| **GPU 지원사업** | `/` | 기관별 GPU 지원사업 공고 — 기종·수량·마감·사용기간 | 이 저장소가 직접 수집 (하루 1회) |
+| **AI 사용량** | `/ai/` | 연구실 Claude Code·Codex 토큰 사용량 | 중앙 서버가 발행하는 스냅샷 (5분 주기) |
+
+아래 문서는 **GPU 지원사업** 쪽 이야기입니다. AI 사용량 화면은 맨 아래 "AI 사용량 화면" 절을 보세요.
+
+---
+
+## GPU 지원사업
 
 여러 기관이 따로 올리는 **GPU 지원사업 공고**를 하루 한 번 모아, 한 화면에서
-"어떤 GPU를 몇 장, 언제까지 신청해서, 언제까지 쓸 수 있는지"를 보여주는 정적 대시보드입니다.
+"어떤 GPU를 몇 장, 언제까지 신청해서, 언제까지 쓸 수 있는지"를 보여줍니다.
 
 ```
-docs/index.html   대시보드 (정적 HTML/CSS/JS, 외부 의존성 없음)
+docs/index.html   GPU 지원사업 화면 (정적 HTML/CSS/JS, 외부 의존성 없음)
+docs/ai/          AI 사용량 화면 (index.html · app.js · style.css · vendor/chart.umd.min.js)
 docs/data.js      대시보드가 읽는 수집 결과  ← scraper 가 갱신
 docs/data.json    같은 내용의 JSON (새로고침 버튼·외부 연동용)
 scraper/          수집기
@@ -133,3 +147,60 @@ python -m scraper.probe "https://example.kr/board/list"
   (`scraper/sources/*.py` 의 `PAGES` 로 조정).
 * 이 서버는 일부 사이트의 인증서 체인이 끊겨 있어 `aiinfrahub.kr` 은 검증 실패 시 1회 우회합니다
   (`scraper/common.py` 의 `_NO_VERIFY`). 다른 망에서는 그대로 검증합니다.
+
+
+---
+
+## AI 사용량 화면 (`/ai/`)
+
+연구실의 Claude Code·Codex 토큰 사용량 대시보드입니다. 원래
+[`AIDASLab/aidas-ai-monitoring-dashboard`](https://github.com/AIDASLab/aidas-ai-monitoring-dashboard)
+에 있던 화면을 이 사이트로 옮겨, 한 주소에서 GPU 공고와 함께 보게 했습니다.
+
+### 데이터가 흐르는 길
+
+```
+GPU 서버들 (ai-monitoring-send)   각 서버에 설치되는 송신 에이전트
+   │ scp → NAS inbox
+   ▼
+중앙 서버 ADS-A100                monitoring.db + backend (별도 저장소, 비공개)
+   │ publish.py (cron 5분)
+   ▼
+AIDASLab/aidas-ai-monitoring-dashboard   data/dashboard.json 스냅샷
+   │
+   ▼
+이 사이트 /ai/                    프론트만 이식. 데이터는 위에서 읽어온다
+```
+
+**수집 파이프라인은 그대로 두었습니다.** 중앙 서버의 cron도, 발행 경로도 건드리지
+않았습니다. 이식한 것은 화면(프론트)뿐입니다.
+
+### 데이터를 어디서 읽나 — 2단계
+
+`docs/ai/app.js` 가 순서대로 시도합니다.
+
+1. `raw.githubusercontent.com/AIDASLab/aidas-ai-monitoring-dashboard/<SHA>/data/dashboard.json`
+   — `main` 을 커밋 SHA 로 풀어 불변 URL 로 받습니다(브랜치 URL 은 몇 분간 캐시됨).
+2. 실패하면 `./data/dashboard.json` — 이 저장소에 함께 두는 사본
+
+사본은 수집 워크플로가 매일 갱신합니다(`scraper/sync_ai_snapshot.py`).
+
+```bash
+python3 -m scraper.sync_ai_snapshot                 # 공개 저장소
+GH_TOKEN=<토큰> python3 -m scraper.sync_ai_snapshot  # 비공개로 바뀐 뒤
+```
+
+> **원본 저장소를 private 으로 돌리면** 브라우저는 1번 경로를 읽지 못합니다(인증이
+> 없으므로). 그때는 2번 사본이 **유일한 데이터원**이 되고, 신선도는 하루 1회가 됩니다.
+> 워크플로가 사본을 계속 받아오려면 저장소 시크릿 `AI_SNAPSHOT_TOKEN` 에
+> 원본 저장소 `contents:read` 권한의 토큰을 넣어 주세요.
+
+### 왜 한 페이지로 합치지 않았나
+
+두 화면이 CSS 클래스 이름 **29개**를 공유하면서(`card` `cards` `chip` `panel` `tab`
+`badge` `banner` `btn` `kv` …) 규칙은 서로 다릅니다. GPU 화면이 이 대시보드의 디자인
+시스템을 그대로 가져다 썼기 때문입니다. 한 페이지에 두 CSS 를 올리면 서로를 덮습니다.
+
+서브페이지로 나누면 충돌이 **0** 이고, CSS 변수 11개(`--bg` `--panel` `--accent` …)가
+이미 값까지 같아서 두 화면이 한 사이트로 읽힙니다. 나중에 한 페이지로 합치고 싶으면
+그때 클래스에 접두사를 붙여 옮기면 됩니다.

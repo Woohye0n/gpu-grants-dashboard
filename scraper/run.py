@@ -424,31 +424,45 @@ def _unknown_digest(programs: list[dict]) -> list[dict]:
     return sorted(seen.values(), key=lambda r: r["token"])
 
 
-_ASSET_Q = re.compile(r'((?:href|src)="\./(app\.js|style\.css|data\.js))\?v=[^"]*"')
+_ASSET_Q = re.compile(r'((?:href|src)="\./([\w./-]+\.(?:js|css)))\?v=[^"]*"')
+
+# 각 페이지와 그 페이지가 싣는 자산. 내용이 바뀌면 ?v= 도 바뀌어야 한다.
+_PAGES = [
+    ("index.html", ["app.js", "style.css", "data.js"]),
+    (os.path.join("ai", "index.html"),
+     [os.path.join("ai", "app.js"), os.path.join("ai", "style.css"),
+      os.path.join("ai", "data", "dashboard.json")]),
+]
 
 
-def stamp_assets() -> str:
-    """index.html 의 ?v= 를 파일 내용 해시로 바꾼다.
+def stamp_assets() -> dict:
+    """각 페이지의 ?v= 를 그 페이지 자산의 내용 해시로 바꾼다.
 
     고정값(?v=1)으로 두면 파일을 고쳐도 브라우저가 캐시된 옛 js/css 를 계속 쓴다.
     실제로 그래서 고친 화면이 반영되지 않았다 — 내용이 바뀌면 주소도 바뀌어야 한다.
     """
     import hashlib
-    h = hashlib.sha1()
-    for name in ("app.js", "style.css", "data.js"):
-        path = os.path.join(DOCS, name)
-        if os.path.exists(path):
-            with open(path, "rb") as fh:
-                h.update(fh.read())
-    tag = h.hexdigest()[:10]
-    index = os.path.join(DOCS, "index.html")
-    with open(index, encoding="utf-8") as fh:
-        html = fh.read()
-    new = _ASSET_Q.sub(lambda m: f'{m.group(1)}?v={tag}"', html)
-    if new != html:
-        with open(index, "w", encoding="utf-8") as fh:
-            fh.write(new)
-    return tag
+
+    tags = {}
+    for page, assets in _PAGES:
+        index = os.path.join(DOCS, page)
+        if not os.path.exists(index):
+            continue
+        h = hashlib.sha1()
+        for name in assets:
+            path = os.path.join(DOCS, name)
+            if os.path.exists(path):
+                with open(path, "rb") as fh:
+                    h.update(fh.read())
+        tag = h.hexdigest()[:10]
+        with open(index, encoding="utf-8") as fh:
+            html = fh.read()
+        new_html = _ASSET_Q.sub(lambda m: f'{m.group(1)}?v={tag}"', html)
+        if new_html != html:
+            with open(index, "w", encoding="utf-8") as fh:
+                fh.write(new_html)
+        tags[page] = tag
+    return tags
 
 
 def publish(payload: dict) -> None:
