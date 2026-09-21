@@ -55,6 +55,11 @@ select, input[type=text], input[type=number] {
   border-bottom: 1px solid var(--red); color: #ffb4ae; font-weight: 600;
 }
 .banner.hidden { display: none; }
+/* 한도 초과(빨강)와 달리 '데이터가 낡았다'는 경고다 — GPU 화면의 배너와 같은 색 */
+.banner.stale {
+  background: rgba(210,153,34,.14); border-bottom-color: var(--yellow);
+  color: #f0cd7a; font-size: 13px; display: flex; flex-direction: column; gap: 4px;
+}
 
 /* tabs */
 .tabs { display: flex; gap: 4px; padding: 0 16px; background: var(--panel);

@@ -5,7 +5,7 @@
 | 화면 | 경로 | 내용 | 데이터 출처 |
 |---|---|---|---|
 | **GPU 지원사업** | `/` | 기관별 GPU 지원사업 공고 — 기종·수량·마감·사용기간 | 이 저장소가 직접 수집 (하루 1회) |
-| **AI 사용량** | `/ai/` | 연구실 Claude Code·Codex 토큰 사용량 | 중앙 서버가 발행하는 스냅샷 (5분 주기) |
+| **AI 사용량** | `/ai/` | 연구실 Claude Code·Codex 토큰 사용량 | NAS inbox 를 이 저장소가 직접 집계 (5분 주기) · 사내 전용 |
 
 아래 문서는 **GPU 지원사업** 쪽 이야기입니다. AI 사용량 화면은 맨 아래 "AI 사용량 화면" 절을 보세요.
 
@@ -21,10 +21,14 @@ docs/index.html   GPU 지원사업 화면 (정적 HTML/CSS/JS, 외부 의존성 
 docs/ai/          AI 사용량 화면 (index.html · app.js · style.css · vendor/chart.umd.min.js)
 docs/data.js      대시보드가 읽는 수집 결과  ← scraper 가 갱신
 docs/data.json    같은 내용의 JSON (새로고침 버튼·외부 연동용)
+docs/ai/data/     AI 사용량 스냅샷  ← ai_store + ai_bundle 이 만듦 (커밋 안 함)
 scraper/          수집기
+sources.json      수집 대상 사이트
 overrides.json    자동 추출이 틀렸을 때 손으로 고치는 파일
-update.sh         하루 1회 실행 진입점
-daily_loop.sh     cron 이 없는 서버용 데몬 (매일 09:10 KST)
+ai_snapshot.json  AI 사용량 설정 (inbox 경로·집계 계정·사람 규칙·알림 기준)
+data/ai/usage.db  AI 사용량 집계 DB (로컬 산출물, 커밋 안 함)
+update.sh         하루 1회 실행 진입점 (공고 수집 + 스냅샷 동기화)
+daily_loop.sh     cron 이 없는 서버용 데몬 (스냅샷 5분 · 수집 매일 09:10 KST)
 data/history/     날짜별 스냅샷 (공고 변화 추적용)
 ```
 
@@ -46,15 +50,17 @@ python -m scraper.run --dry-run    # 파일을 쓰지 않고 결과만 출력
 
 ### 하루 한 번 자동 실행
 
-* **cron 이 있는 서버**
+* **cron 이 있는 서버** — `./deploy/setup_on_server.sh` 가 아래 두 줄을 등록합니다.
   ```cron
-  10 0 * * *  /home/jovyan/data-1/woohyeon/gpu-grants-dashboard/update.sh   # 00:10 UTC = 09:10 KST
+  10 09 * * *  <저장소 경로>/update.sh                                   # 공고 수집 (09:10 KST)
+  */5 * * * *  cd <저장소 경로> && .venv/bin/python -m scraper.sync_ai_snapshot --quiet
   ```
-* **cron 이 없는 서버(이 서버가 그렇습니다)**
+* **cron 이 없는 서버(이 서버가 그렇습니다)** — 데몬 하나가 둘 다 돕니다.
   ```bash
   setsid nohup ./daily_loop.sh > /dev/null 2>&1 &   # 시작
   ./stop_daily.sh                                    # 중지
   ```
+  `RUN_AT_KST`(기본 09:10)로 수집 시각을, `SYNC_EVERY_MIN`(기본 5)으로 스냅샷 주기를 바꿉니다.
 * **GitHub Pages 로 공개** — `.github/workflows/daily.yml` 이 매일 09:10 KST 에 수집하고
   `docs/` 를 Pages 로 배포합니다. 저장소 Settings → Pages → Source 를 **GitHub Actions** 로 두세요.
 
@@ -163,7 +169,14 @@ cd gpu-grants-dashboard
 ./deploy/serve.sh 8080               # 띄우기
 ```
 
+설치 스크립트가 등록하는 것: 공고 수집 매일 1회(`RUN_AT`), AI 스냅샷 동기화 `SYNC_EVERY`
+분마다(기본 5). cron 이 없으면 `daily_loop.sh` 데몬 하나가 둘 다 돕니다.
+
 nginx 를 쓴다면 `root <경로>/docs;` 만 잡으면 됩니다. 별도 빌드는 없습니다.
+
+**다른 저장소나 외부 서비스가 필요하지 않습니다.** GPU 공고는 이 저장소가 직접 수집하고,
+AI 사용량은 `ai_snapshot.json` 이 가리키는 곳(사내 NAS 경로면 사내에서만)에서 받아옵니다.
+그 경로가 없어도 동봉된 사본으로 화면은 뜹니다.
 
 ### 국내 서버에 올리면 막혔던 곳이 풀립니다
 
@@ -179,47 +192,149 @@ GitHub 러너(해외 IP)에서는 두 곳이 차단됩니다. 국내 서버에�
 
 ## AI 사용량 화면 (`/ai/`)
 
-연구실의 Claude Code·Codex 토큰 사용량 대시보드입니다. 원래
-[`AIDASLab/aidas-ai-monitoring-dashboard`](https://github.com/AIDASLab/aidas-ai-monitoring-dashboard)
-에 있던 화면을 이 사이트로 옮겨, 한 주소에서 GPU 공고와 함께 보게 했습니다.
+연구실의 Claude Code·Codex 토큰 사용량 대시보드입니다. 원래 다른 저장소에 있던 화면을
+이 사이트로 옮겨, 한 주소에서 GPU 공고와 함께 보게 했습니다.
 
 ### 데이터가 흐르는 길
 
 ```
-GPU 서버들 (ai-monitoring-send)   각 서버에 설치되는 송신 에이전트
-   │ scp → NAS inbox
+각 사용자의 송신기 (ai-monitoring-send)   사람마다 자기 홈에 하나씩
+   │ scp / 마운트 쓰기
    ▼
-중앙 서버 ADS-A100                monitoring.db + backend (별도 저장소, 비공개)
-   │ publish.py (cron 5분)
+NAS inbox/<노드>/batch-*.json.gz          송신기가 5분마다 떨군다
+   │ scraper/ai_store.py  (증분 수집 → data/ai/usage.db)
+   │ scraper/ai_bundle.py (집계 → 스냅샷)
    ▼
-AIDASLab/aidas-ai-monitoring-dashboard   data/dashboard.json 스냅샷
-   │
-   ▼
-이 사이트 /ai/                    프론트만 이식. 데이터는 위에서 읽어온다
+docs/ai/data/dashboard.json               화면이 읽는 건 이것뿐
 ```
 
-**수집 파이프라인은 그대로 두었습니다.** 중앙 서버의 cron도, 발행 경로도 건드리지
-않았습니다. 이식한 것은 화면(프론트)뿐입니다.
+**중간에 남의 손이 없습니다.** 예전에는 다른 사람의 중앙 서버가 스냅샷을 만들어
+다른 깃헙 저장소로 발행하고, 이 사이트가 그걸 받아 썼습니다. 2026-09-16 에 그
+발행이 멈췄는데 **송신기도 inbox 도 멀쩡했고**, 화면만 4.5일 동안 과거에 멈춰
+있었습니다. 중간에 아무도 안 보는 칸이 하나 있으면 언젠가 거기서 멈춥니다.
 
-### 데이터를 어디서 읽나 — 2단계
+지금은 입력이 **NAS inbox 하나**입니다. 그 디렉토리는 송신기들이 직접 쓰고,
+이 저장소가 직접 읽습니다. 설정은 `ai_snapshot.json` 의 `inbox` 한 줄입니다.
 
-`docs/ai/app.js` 가 순서대로 시도합니다.
+### 무엇을 어떻게 세나
 
-1. `raw.githubusercontent.com/AIDASLab/aidas-ai-monitoring-dashboard/<SHA>/data/dashboard.json`
-   — `main` 을 커밋 SHA 로 풀어 불변 URL 로 받습니다(브랜치 URL 은 몇 분간 캐시됨).
-2. 실패하면 `./data/dashboard.json` — 이 저장소에 함께 두는 사본
+`scraper/ai_store.py` 가 아직 안 읽은 배치만 SQLite 에 넣습니다.
 
-사본은 수집 워크플로가 매일 갱신합니다(`scraper/sync_ai_snapshot.py`).
+* **턴 단위(`usage`)** — 창(5시간/주간) 계산용. `retain_days`(기본 30) 지나면 버립니다.
+* **세션 누적(`session_totals`)** — 화면의 세션 표와 "누적" 토큰. 행이 세션 수로
+  묶이므로 오래 돌려도 커지지 않습니다.
+* `uuid` 가 턴의 정체성이라 송신기가 재시작해 같은 배치를 다시 보내도 두 번 세지
+  않습니다. **계정을 증명하지 못한 기록(`assumed`)은 세지 않습니다** — 송신기가
+  그렇게 표시해 보냅니다(실제 배치 레코드의 99.99%가 이쪽입니다. 같은 턴을 매
+  주기 다시 보내기 때문이고, 새로 생긴 턴만 귀속됩니다).
+
+`scraper/ai_bundle.py` 가 그걸 화면이 읽는 모양으로 만듭니다. 창은 **지금부터
+거꾸로 세는 롤링**입니다 — 한도 리셋 시각에 맞춰 자르는 것도 해봤지만, 사용량 API
+인증이 실패하면 `resets_at` 이 며칠씩 낡은 채 남아 조용히 대부분을 버립니다
+(실측: 같은 데이터로 롤링 392건 / 리셋 정렬 29건, 중앙 백엔드는 404건).
+
+### 처음 켤 때 — 누적을 이어받기
+
+inbox 는 송신기마다 72시간만 남기므로, 그냥 시작하면 "누적"이 0부터 다시 셉니다.
+이전 스냅샷이 있으면 기준선으로 깔 수 있습니다(그 시점 이전 턴은 이미 센 것으로
+보고 건너뛰므로 이중 계산이 없습니다).
 
 ```bash
-python3 -m scraper.sync_ai_snapshot                 # 공개 저장소
-GH_TOKEN=<토큰> python3 -m scraper.sync_ai_snapshot  # 비공개로 바뀐 뒤
+python -m scraper.sync_ai_snapshot --rebuild --seed <예전 dashboard.json>
+python -m scraper.sync_ai_snapshot            # 이후엔 증분 (0.3초)
 ```
 
-> **원본 저장소를 private 으로 돌리면** 브라우저는 1번 경로를 읽지 못합니다(인증이
-> 없으므로). 그때는 2번 사본이 **유일한 데이터원**이 되고, 신선도는 하루 1회가 됩니다.
-> 워크플로가 사본을 계속 받아오려면 저장소 시크릿 `AI_SNAPSHOT_TOKEN` 에
-> 원본 저장소 `contents:read` 권한의 토큰을 넣어 주세요.
+**주간(7일) 수치는 일주일에 걸쳐 차오릅니다.** inbox 에 그만큼의 과거가 없기
+때문입니다. 스냅샷의 `summary.data_since` 가 언제부터의 데이터인지 알려 줍니다.
+
+### 송신기가 없는 사람은 안 잡힙니다
+
+집계되는 것은 **NAS inbox 에 들어온 것뿐**입니다. 송신기를 안 돌리는 사용자의
+사용량은 어디에도 나타나지 않습니다.
+
+옮겨오면서 실측해 보니 한 계정이 그랬습니다 — 중앙 백엔드가 자기 서버의 홈을
+직접 읽어 집계하던 몫이라 NAS 를 거치지 않았고, 그래서 여기서는 0 으로 보입니다
+(claude 랩계정 5시간은 중앙 404건 / 여기 392건으로 거의 같지만, codex 랩계정은
+중앙 300건 / 여기 0건). **그 사용자도 다른 사람들처럼 송신기를 돌리면 채워집니다.**
+설치 안내는 `ai-monitoring-send` 의 `ROLLOUT.md` 에 있습니다.
+
+### 공개 사이트에 반영되는 길
+
+```
+사내 서버 (5분마다 cron)
+   │ deploy/publish_pages.sh  → 집계 → 숫자가 바뀌었을 때만
+   ▼
+저장소의 ai-data 브랜치        커밋 1개짜리 고아 브랜치 (force-push)
+   │ .github/workflows/pages.yml  (push 트리거, 수집 없이 배포만 ~1분)
+   ▼
+https://woohye0n.github.io/gpu-grants-dashboard/ai/
+```
+
+* **왜 고아 브랜치인가** — 5분마다 160KB JSON 을 `main` 에 쌓으면 1년이면 저장소가
+  수 GB 가 되고 코드 이력이 그 사이에 묻힙니다. `ai-data` 는 언제나 커밋 1개라
+  저장소가 커지지 않고, 배포할 때만 그 파일을 꺼내 `docs/ai/data/` 에 넣습니다.
+* **왜 배포 워크플로를 나눴나** — 예전에는 push 가 `daily.yml`(공고 수집, 최대 15분)
+  전체를 돌렸습니다. 스냅샷 발행마다 그게 도는 것은 낭비이고 화면 반영도 늦습니다.
+  `pages.yml` 은 배포만 해서 1분이면 끝납니다. `daily.yml` 은 수집·커밋만 하고,
+  그 커밋이 다시 `pages.yml` 을 트리거합니다.
+* **바뀐 게 없으면 발행하지 않습니다** — `generated_at` 은 매번 달라지므로, 합계·
+  계정별 창·사람별·한도·알림 수만 뽑아 지문을 만들어 비교합니다. 밤새 아무도
+  안 썼으면 배포도 돌지 않습니다.
+
+```bash
+./deploy/publish_pages.sh          # 집계 + (바뀌었으면) 발행
+FORCE=1 ./deploy/publish_pages.sh  # 안 바뀌었어도 발행
+```
+
+**인증은 저장소 Deploy key 하나입니다** (계정 전체 권한이 아니라 이 저장소 쓰기만).
+서버의 `~/.ssh/id_ed25519_gpugrants.pub` 를 저장소 Settings → Deploy keys 에
+**Allow write access** 체크해서 등록하면 그때부터 자동으로 올라갑니다. 등록 전에는
+발행만 실패하고(로그에 그렇게 남습니다) **사내 사이트는 영향 없이 계속 최신**입니다.
+
+> 이 스냅샷에는 랩 구성원 이름, 계정 이메일, 세션 작업 디렉토리 경로가 들어 있고
+> Pages 는 공개입니다. `ai-data` 브랜치도 공개 저장소의 일부라 그대로 내려받을 수
+> 있습니다. 공개를 원치 않는 항목이 생기면 `scraper/ai_bundle.py` 에서 빼면 됩니다.
+
+### 사내에서만 보기
+
+공개 배포와 무관하게, 이 서버가 자기 `docs/` 를 그대로 서빙합니다.
+
+```bash
+PORT=8808 ./deploy/keepalive.sh    # 안 떠 있으면 띄운다 (cron 이 5분마다 확인)
+```
+
+### 브라우저는 바깥으로 나가지 않습니다
+
+`docs/ai/app.js` 가 읽는 것은 **같은 출처의 `./data/dashboard.json` 하나뿐**입니다.
+예전에는 브라우저가 스냅샷을 발행하는 다른 저장소를 `raw.githubusercontent.com` 과
+GitHub API 로 직접 읽었습니다. 그래서
+
+* 이 사이트가 **그 저장소 없이는 돌지 않았고**,
+* 무인증 GitHub API 한도(시간당 60회 — 연구실이 IP 하나를 쓰니 약 2명)에 걸리면
+  탭마다 옛 커밋 SHA 에 고정된 채, 그 사실을 화면에 알리지도 못했습니다.
+
+받아오는 일은 이제 서버가 합니다. 브라우저는 받아둔 사본만 봅니다.
+
+### 멈추면 어느 쪽이 멈췄는지 말합니다
+
+스냅샷이 30분 넘게 낡으면 상단에 배너가 뜹니다. 동기화 기록(`docs/ai/data/sync.json`,
+커밋하지 않습니다)을 함께 읽어 **원인을 구분해서** 적습니다.
+
+| 상황 | 화면에 뜨는 말 |
+|---|---|
+| inbox 를 못 읽음 | 이 서버가 스냅샷을 받아오지 못하고 있습니다 — 〈이유〉 |
+| 집계가 아예 안 돎 | 동기화 자체가 N시간 전부터 돌지 않았습니다 — daily_loop / cron 을 확인하세요 |
+| 스냅샷이 없음 (공개 배포본) | 사용량 데이터는 연구실 안에서만 봅니다 |
+| 송신기가 다 죽음 | 데이터가 N일 전 기준입니다 — inbox 에 새 배치가 없습니다 |
+
+숫자만 보면 멀쩡해 보이는데 며칠 전 것일 수 있습니다. GPU 화면의 D-day 를 브라우저가
+매번 다시 세는 것과 같은 이유입니다.
+
+### 사본이 깨지거나 뒤로 가지 않습니다
+
+받아온 스냅샷은 **형태를 확인한 뒤에만**(`generated_at` 과 `summary` 가 있는지) 덮어쓰고,
+가진 사본보다 오래된 것이면 쓰지 않습니다. 쓰기는 임시 파일에 한 뒤 갈아끼우므로,
+웹서버가 읽는 도중에 반쪽 JSON 이 나가는 일도 없습니다.
 
 ### 왜 한 페이지로 합치지 않았나
 

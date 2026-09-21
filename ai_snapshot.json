@@ -1,0 +1,181 @@
+{
+  "_readme": [
+    "AI 사용량 화면(docs/ai/)이 쓰는 설정입니다. 이 저장소가 직접 스냅샷을 만듭니다.",
+    "",
+    "inbox      : 송신기(ai-monitoring-send)들이 배치를 떨구는 NAS 디렉토리.",
+    "             여기만 읽으면 다른 서버의 프로세스도, 다른 깃헙 저장소도 필요 없습니다.",
+    "sources    : inbox 를 못 쓸 때의 대비책 — 이미 만들어진 스냅샷을 복사해 옵니다",
+    "             (파일 경로 또는 http(s) 주소).",
+    "tracking   : 집계할 계정(allowed_accounts)과 집계 시작 시점(count_from_ms).",
+    "people     : 세션의 작업 디렉토리(cwd)로 사람을 가르는 규칙. 위에서부터 먼저 맞는 것.",
+    "alerts     : 한도 초과 기록 기준. 실제 발송은 하지 않고 화면 '알림' 탭에 남깁니다.",
+    "retain_days: 턴 단위 기록 보관 기간(창 계산용). 세션 누적은 계속 남습니다.",
+    "",
+    "값은 그동안 중앙 서버가 쓰던 설정을 그대로 옮겨온 것입니다."
+  ],
+  "inbox": "/mnt/nas/yunseok/ai-monitoring/inbox",
+  "sources": [],
+  "retain_days": 30,
+  "tracking": {
+    "allowed_accounts": [
+      "aidaslab.snu@gmail.com",
+      "aidaslab2.snu@gmail.com"
+    ],
+    "account_status": {
+      "claude:aidaslab2.snu@gmail.com": "suspended"
+    },
+    "count_from_ms": 1785314647206
+  },
+  "people": {
+    "rules": [
+      {
+        "owner": "yunseok",
+        "cwd_glob": "*/yunseok*"
+      },
+      {
+        "owner": "sieun",
+        "cwd_glob": "*/sieun*"
+      },
+      {
+        "owner": "woohyeon",
+        "cwd_glob": "*/woohyeon*"
+      },
+      {
+        "owner": "jhkim",
+        "cwd_glob": "*/jhkim*"
+      },
+      {
+        "owner": "yongha",
+        "cwd_glob": "*/yongha*"
+      },
+      {
+        "owner": "jusang",
+        "cwd_glob": "*/jusang*"
+      },
+      {
+        "owner": "jaeik",
+        "cwd_glob": "*/jaeik*"
+      },
+      {
+        "owner": "yejoon",
+        "cwd_glob": "*/yejoon*"
+      },
+      {
+        "owner": "csjihwanh",
+        "cwd_glob": "*/csjihwanh*"
+      },
+      {
+        "owner": "woohyeon",
+        "cwd_glob": "*/ARPA*"
+      },
+      {
+        "owner": "sieun",
+        "cwd_glob": "*omnibench*"
+      },
+      {
+        "owner": "kdg6245",
+        "cwd_glob": "*/kdg6245*"
+      },
+      {
+        "owner": "minu0426",
+        "cwd_glob": "*/minu0426*"
+      },
+      {
+        "owner": "jake",
+        "cwd_glob": "*/jake*"
+      },
+      {
+        "owner": "skjinlee",
+        "cwd_glob": "*/skjinlee*"
+      },
+      {
+        "owner": "wjkim",
+        "cwd_glob": "*/wjkim*"
+      },
+      {
+        "owner": "hgkim",
+        "host": "hgkim_AIDAS_A100"
+      },
+      {
+        "owner": "dynin",
+        "cwd_glob": "*dynin_v2_adaptation*"
+      },
+      {
+        "owner": "jake",
+        "host": "kakao-b200-3",
+        "provider": "codex",
+        "cwd_glob": "/home/jovyan"
+      },
+      {
+        "owner": "dynin",
+        "host": "kakao-b200-3",
+        "provider": "claude",
+        "cwd_glob": "/home/jovyan"
+      },
+      {
+        "owner": "dynin",
+        "host": "kakao-b200-3",
+        "provider": "claude",
+        "cwd_glob": "/home/jovyan/data"
+      }
+    ],
+    "sessions": {}
+  },
+  "alerts": {
+    "default_cooldown_minutes": 30,
+    "thresholds": [
+      {
+        "name": "5h-80%",
+        "window": "five_hour",
+        "provider": "claude",
+        "account": "*",
+        "metric": "utilization",
+        "limit": 80,
+        "cooldown_minutes": 30
+      },
+      {
+        "name": "weekly-80%",
+        "window": "seven_day",
+        "account": "*",
+        "metric": "utilization",
+        "limit": 80,
+        "cooldown_minutes": 120
+      },
+      {
+        "name": "weekly-fable-80%",
+        "window": "seven_day_fable",
+        "provider": "claude",
+        "account": "*",
+        "metric": "utilization",
+        "limit": 80,
+        "cooldown_minutes": 120
+      }
+    ]
+  },
+  "email": {
+    "enabled": false
+  },
+  "collect": {
+    "interval_seconds": 300,
+    "session_live_seconds": 360,
+    "config_dirs": [
+      "~/.claude-lab1",
+      "~/.claude-lab2"
+    ],
+    "codex_dirs": [
+      "~/.codex-lab1",
+      "~/.codex-lab2"
+    ]
+  },
+  "nas": {
+    "enabled": true,
+    "dropdir": "/mnt/nas/yunseok/ai-monitoring",
+    "ignore_hosts": [
+      "NIPA-NHN-B200_RND1",
+      "NIPA-NHN-B200_RND2",
+      "NIPA-NHN-B200_AIIS",
+      "kakao-b200",
+      "servername"
+    ]
+  }
+}

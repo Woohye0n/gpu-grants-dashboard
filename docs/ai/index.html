@@ -4,9 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AIDAS AI 모니터링</title>
-  <link rel="stylesheet" href="./style.css?v=db70ac3436" />
+  <link rel="stylesheet" href="./style.css?v=032ff40831" />
   <script src="./vendor/chart.umd.min.js" defer></script>
-  <script src="./app.js?v=db70ac3436" defer></script>
+  <script src="./app.js?v=032ff40831" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -43,6 +43,7 @@
   </header>
 
   <div id="breachBanner" class="banner hidden"></div>
+  <div id="staleBanner" class="banner stale hidden"></div>
 
   <nav class="tabs">
     <button class="tab active" data-tab="overview">개요</button>
@@ -61,9 +62,10 @@
       <div id="accounts" class="cards"></div>
     </section>
 
-    <!-- NOTE: 인원별(per-person) 데이터는 이 공개 사이트에 표시하지 않습니다.
-         중앙 대시보드 또는 scripts/people-report.py 로만 조회합니다.
-         publish.py 가 PUBLISH_PEOPLE(기본 exclude)로 스냅샷에서도 제거합니다. -->
+    <!-- NOTE: 인원별 데이터와 세션 작업 경로가 들어 있으므로, 이 스냅샷은
+         공개 배포본(GitHub Pages)에 싣지 않습니다 — 저장소에서 제외돼 있어
+         그쪽에서는 "데이터가 없습니다" 로 뜹니다. 사내 서버에서만 보입니다.
+         (스냅샷은 scraper/ai_store.py + ai_bundle.py 가 NAS inbox 로 만듭니다) -->
 
     <!-- LIVE -->
     <section id="tab-live" class="panel hidden">
@@ -114,6 +116,6 @@
     </section>
   </main>
 
-  <footer class="foot">AIDAS AI Monitoring · GitHub Pages 정적 스냅샷 (읽기 전용) · 데이터는 중앙 서버가 주기적으로 publish</footer>
+  <footer class="foot">AIDAS AI Monitoring · 정적 스냅샷 (읽기 전용) · 중앙 서버가 발행한 스냅샷을 이 사이트가 주기적으로 받아 둡니다</footer>
 </body>
 </html>

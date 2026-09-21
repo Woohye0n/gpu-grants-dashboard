@@ -1,31 +1,25 @@
-# 매일 공고를 수집해 docs/ 를 GitHub Pages 로 배포합니다.
-# Pages 는 configure-pages 가 자동으로 켭니다. 실패하면 Settings > Pages > Source 를
-# "GitHub Actions" 로 직접 바꿔 주세요.
+# 매일 GPU 지원사업 공고를 수집해 커밋합니다. **배포는 하지 않습니다** —
+# 이 커밋이 push 되면 pages.yml 이 배포합니다. 그래서 코드 변경으로도, 사내
+# 서버의 스냅샷 발행으로도 같은 한 경로로 배포됩니다.
+# Pages 가 꺼져 있으면 pages.yml 의 configure-pages 가 켭니다.
 name: daily-collect
 
 on:
-  push:
-    branches: [main]           # 코드가 바뀌면 바로 다시 배포
   schedule:
     - cron: "10 0 * * *"      # 00:10 UTC = 09:10 KST
   workflow_dispatch:           # 수동 실행 버튼
 
 permissions:
   contents: write              # 수집 결과 커밋
-  pages: write                 # Pages 배포
-  id-token: write
 
 concurrency:
-  group: pages
+  group: daily-collect
   cancel-in-progress: true     # 새 실행이 멈춰 있는 이전 실행을 취소
 
 jobs:
-  collect-and-deploy:
+  collect:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -40,13 +34,11 @@ jobs:
       - name: 의존성 자가점검
         run: python -c "import scraper.run, scraper.probe, scraper.add_source; print('imports OK')"
 
-      # AI 사용량 스냅샷은 원본 저장소가 5분마다 발행한다. 프론트는 평소 raw 에서
-      # 직접 읽고, 원본이 private 이 되면 이 사본으로 내려온다 — 그래서 받아 둔다.
-      - name: AI 사용량 스냅샷 동기화
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ secrets.AI_SNAPSHOT_TOKEN }}
-        run: python -m scraper.sync_ai_snapshot
+      # AI 사용량 스냅샷은 **여기서 만들지 않는다.** 입력이 사내 NAS inbox 이고,
+      # 무엇보다 그 내용(랩 구성원 이름, 세션 작업 경로, 계정 이메일)은 공개
+      # Pages 에 올릴 것이 아니다. 사내 서버가 5분마다 만들어 자기 docs/ 에만 둔다.
+      # 그래서 이 파일은 커밋도 배포도 하지 않는다 — Pages 의 /ai/ 는 "사내에서
+      # 보라" 고 말한다.
 
       # 러너는 해외 IP라 국내 사이트가 느리거나 막힐 수 있다. 시간 예산을 주고,
       # 실패한 사이트는 직전 수집 결과를 그대로 쓰므로 배포는 계속 진행한다.
@@ -65,20 +57,11 @@ jobs:
           # index.html 은 수집 때마다 ?v= 해시가 다시 찍히므로 같이 커밋한다
           # (안 하면 저장소와 배포본의 자산 버전이 어긋난다)
           git add docs/data.js docs/data.json docs/index.html data/history data/last_good
-          git add docs/ai/index.html docs/ai/data/dashboard.json
+          git add docs/ai/index.html
           git diff --staged --quiet || git commit -m "chore: $(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M KST') 공고 수집"
           git push
 
-      - uses: actions/configure-pages@v5
-        with:
-          enablement: true   # Pages 가 꺼져 있으면 워크플로가 켭니다
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs
-      - id: deployment
-        uses: actions/deploy-pages@v4
-
-      # 배포까지 끝낸 뒤에 판정한다. 대비책이 받아낸 저하(=직전 데이터 사용)는 경고로,
+      # 결과를 판정한다. 대비책이 받아낸 저하(=직전 데이터 사용)는 경고로,
       # 아무것도 못 가져온 진짜 고장만 실패로 남긴다. 둘을 같게 두면 매일 빨간불이라
       # 정작 고장났을 때 알아챌 수 없다.
       - name: 수집 결과 판정
@@ -86,7 +69,7 @@ jobs:
         run: |
           code="${{ steps.collect.outputs.code }}"
           if [ "${code:-2}" -ge 2 ]; then
-            echo "::error::공고 수집 실패 (exit ${code:-2}). 배포는 직전 데이터로 진행했습니다."
+            echo "::error::공고 수집 실패 (exit ${code:-2}). 직전 데이터가 그대로 배포됩니다."
             exit 1
           elif [ "$code" = "1" ]; then
             echo "::warning::일부 사이트를 읽지 못해 직전 데이터를 사용했습니다. 대시보드 '수집 상태' 탭을 보세요."

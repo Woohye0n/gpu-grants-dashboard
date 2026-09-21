@@ -426,12 +426,14 @@ def _unknown_digest(programs: list[dict]) -> list[dict]:
 
 _ASSET_Q = re.compile(r'((?:href|src)="\./([\w./-]+\.(?:js|css)))\?v=[^"]*"')
 
-# 각 페이지와 그 페이지가 싣는 자산. 내용이 바뀌면 ?v= 도 바뀌어야 한다.
+# 각 페이지와 그 페이지가 ?v= 로 싣는 자산. 내용이 바뀌면 ?v= 도 바뀌어야 한다.
+# AI 스냅샷(ai/data/dashboard.json)은 여기 없다 — app.js 가 ?t= 와 no-store 로 따로
+# 받으므로 캐시 무효화가 필요 없고, 5분마다 바뀌는 파일을 섞으면 동기화할 때마다
+# index.html 이 다시 쓰여 작업트리만 더러워진다.
 _PAGES = [
     ("index.html", ["app.js", "style.css", "data.js"]),
     (os.path.join("ai", "index.html"),
-     [os.path.join("ai", "app.js"), os.path.join("ai", "style.css"),
-      os.path.join("ai", "data", "dashboard.json")]),
+     [os.path.join("ai", "app.js"), os.path.join("ai", "style.css")]),
 ]
 
 

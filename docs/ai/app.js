@@ -50,91 +50,37 @@ function pctClass(pct) {
 }
 
 // ---- static data source ---------------------------------------------------
-// The whole dashboard is driven by one JSON snapshot. api() is a thin shim so
-// the rest of the code reads exactly like the live version did.
-// Resolve main to its immutable commit SHA first, then fetch the snapshot from
-// that SHA. raw.githubusercontent.com caches branch URLs for several minutes
-// even with a timestamp query, while a commit URL is immutable and fresh as
-// soon as the push is visible. The ref lookup is throttled locally to stay well
-// below GitHub's unauthenticated API limit.
-const GITHUB_REPO = "AIDASLab/aidas-ai-monitoring-dashboard";
-const GITHUB_REF_URL = `https://api.github.com/repos/${GITHUB_REPO}/git/ref/heads/main`;
-const DATA_URL = `https://raw.githubusercontent.com/${GITHUB_REPO}/main/data/dashboard.json`;
-const DATA_URL_FALLBACK = "./data/dashboard.json";
-const REF_REFRESH_MS = 120 * 1000;
-// How long a ref may keep standing in when the API stops answering. Past this
-// the branch URL — minutes stale at worst — beats a SHA that could be days old.
-const REF_MAX_AGE_MS = 10 * 60 * 1000;
-const REF_CACHE_KEY = "aidas-dashboard-snapshot-ref";
+// 화면 전체가 스냅샷 하나로 굴러간다. api() 는 그 스냅샷을 예전 라이브 대시보드의
+// /api/* 모양으로 돌려주는 얇은 껍데기다.
+//
+// 읽는 곳은 **같은 출처의 이 파일 하나뿐**이다. 예전에는 브라우저가 스냅샷을 발행하는
+// 다른 저장소(raw.githubusercontent + GitHub API)를 직접 읽었다. 그러면 이 사이트가 그
+// 저장소 없이는 돌지 않고, 무인증 API 한도(시간당 60회 — 연구실이 IP 하나를 쓰니 약 2명)
+// 에 걸리면 탭마다 옛 커밋에 고정되기까지 했다. 받아오는 일은 이제 서버에서
+// scraper/sync_ai_snapshot.py 가 하고, 그 결과가 data/sync.json 에 남는다.
+const DATA_URL = "./data/dashboard.json";
+const SYNC_URL = "./data/sync.json";
+// 중앙 서버는 5분 주기로 발행한다. 이만큼 지나면 멈춘 것으로 보고 배너를 띄운다.
+const STALE_AFTER_MS = 30 * 60 * 1000;
 let BUNDLE = null;
-let snapshotRef = null;
-
-function snapshotUrl(sha) {
-  return `https://raw.githubusercontent.com/${GITHUB_REPO}/${sha}/data/dashboard.json`;
-}
-
-function loadSavedRef() {
-  try {
-    // localStorage is shared by tabs, avoiding one GitHub API lookup per tab.
-    const saved = JSON.parse(localStorage.getItem(REF_CACHE_KEY) || "null");
-    if (saved && /^[0-9a-f]{40}$/i.test(saved.sha) && Number.isFinite(saved.checkedAt))
-      return saved;
-  } catch (_) { /* storage can be disabled */ }
-  return null;
-}
-
-function saveRef(ref) {
-  try { localStorage.setItem(REF_CACHE_KEY, JSON.stringify(ref)); } catch (_) { /* ignore */ }
-}
-
-async function resolveSnapshotRef() {
-  const now = Date.now();
-  snapshotRef = snapshotRef || loadSavedRef();
-  if (snapshotRef && now - snapshotRef.checkedAt < REF_REFRESH_MS) return snapshotRef.sha;
-
-  try {
-    const res = await fetch(`${GITHUB_REF_URL}?t=${now}`, {
-      cache: "no-store",
-      headers: { Accept: "application/vnd.github+json" },
-    });
-    if (!res.ok) throw new Error(`GitHub ref -> ${res.status}`);
-    const ref = await res.json();
-    const sha = ref && ref.object && ref.object.sha;
-    if (!/^[0-9a-f]{40}$/i.test(sha || "")) throw new Error("GitHub ref returned an invalid SHA");
-    snapshotRef = { sha, checkedAt: now };
-    saveRef(snapshotRef);
-    return sha;
-  } catch (e) {
-    // A recent immutable snapshot is safer than a branch URL while the API is
-    // briefly unavailable: it stays a valid, internally consistent view.
-    // But the cached SHA has no expiry of its own, and the commit URL built
-    // from it answers 200 forever — so an API that stays unreachable (the lab
-    // shares one IP, and 60 unauthenticated calls per hour is ~2 viewers) used
-    // to pin every tab to whatever snapshot was current when it broke, with
-    // nothing on screen to say so. Past REF_MAX_AGE_MS, fail over to the
-    // branch URL instead, which is at worst a few minutes behind.
-    if (snapshotRef && snapshotRef.sha && now - snapshotRef.checkedAt < REF_MAX_AGE_MS)
-      return snapshotRef.sha;
-    throw e;
-  }
-}
+let SYNC = null;
 
 async function loadBundle() {
-  let lastErr;
-  const urls = [];
-  try { urls.push(snapshotUrl(await resolveSnapshotRef())); } catch (e) { lastErr = e; }
-  // Keep both legacy fallbacks: branch raw is useful if GitHub's API is
-  // unavailable, and the Pages copy keeps a locally deployed site usable.
-  urls.push(DATA_URL, DATA_URL_FALLBACK);
-  for (const url of [...new Set(urls)]) {
-    try {
-      const res = await fetch(url + "?t=" + Date.now(), { cache: "no-store" });
-      if (!res.ok) throw new Error("dashboard.json (" + url + ") -> " + res.status);
-      BUNDLE = await res.json();
-      return BUNDLE;
-    } catch (e) { lastErr = e; }
+  const res = await fetch(DATA_URL + "?t=" + Date.now(), { cache: "no-store" });
+  if (!res.ok) {
+    const err = new Error(DATA_URL + " -> " + res.status);
+    // 공개 배포본에는 이 파일을 일부러 넣지 않는다 — 랩 구성원 이름과 작업 경로가
+    // 들어 있기 때문이다. "고장" 이 아니라 "여기서는 안 본다" 라고 말해야 한다.
+    err.absent = res.status === 404;
+    throw err;
   }
-  throw lastErr;
+  BUNDLE = await res.json();
+  // 동기화 기록은 있으면 쓰고 없으면 만다 — 배포본에 따라 없을 수 있다.
+  try {
+    const r = await fetch(SYNC_URL + "?t=" + Date.now(), { cache: "no-store" });
+    SYNC = r.ok ? await r.json() : null;
+  } catch (e) { SYNC = null; }
+  return BUNDLE;
 }
 
 async function api(path) {
@@ -327,6 +273,29 @@ function renderBanner(s) {
     b.classList.remove("hidden");
     b.textContent = "⚠ 한도 초과: " + breaches.join("  |  ");
   } else b.classList.add("hidden");
+}
+
+// 스냅샷이 늙으면 배너로 말한다 — 그리고 **어느 쪽이 멈췄는지**까지 말한다.
+// 숫자만 보면 멀쩡해 보이는데 며칠 전 것일 수 있고, 그때 고칠 곳은 이 서버의 집계와
+// 각 서버의 송신기 중 하나다. 둘을 구분해 주지 않으면 화면이 거짓말을 하는 셈이다.
+// (실제로 발행이 4.5일 멈춘 동안 화면은 아무 말도 하지 않았다.)
+function renderStale() {
+  const b = $("#staleBanner");
+  const gen = BUNDLE && BUNDLE.generated_at;
+  if (gen && Date.now() - gen < STALE_AFTER_MS) { b.classList.add("hidden"); return; }
+  const lines = [gen
+    ? `데이터가 ${ago(gen)} 기준입니다 — 자동 갱신이 멈춰 있습니다.`
+    : "스냅샷에 생성 시각이 없습니다."];
+  if (!SYNC)
+    lines.push("집계 기록이 없습니다 — 이 배포본은 사내 수집 서버가 아닙니다.");
+  else if (!SYNC.ok)
+    lines.push(`이 서버가 집계를 만들지 못하고 있습니다 — ${esc(SYNC.error || "원인 미상")}`);
+  else if (SYNC.checked_at && Date.now() - SYNC.checked_at > STALE_AFTER_MS)
+    lines.push(`집계 자체가 ${ago(SYNC.checked_at)}부터 돌지 않았습니다 — daily_loop / cron 을 확인하세요.`);
+  else
+    lines.push(`집계는 ${ago(SYNC.checked_at)}에 정상이었습니다 — 각 서버의 송신기가 새 기록을 보내지 않고 있습니다.`);
+  b.innerHTML = lines.map((t) => `<div>${t}</div>`).join("");
+  b.classList.remove("hidden");
 }
 
 // ---- live + sessions ------------------------------------------------------
@@ -600,10 +569,22 @@ async function refresh() {
     const gen = BUNDLE.generated_at;
     $("#updated").textContent = "데이터 기준 "
       + new Date(gen).toLocaleString("ko-KR", { hour12: false }) + ` (${ago(gen)})`;
+    renderStale();
     await render();
   } catch (e) {
     console.error(e);
-    $("#updated").textContent = "데이터 로드 실패 (아직 publish 전?)";
+    const b = $("#staleBanner");
+    if (e && e.absent) {
+      $("#updated").textContent = "이 배포본에는 데이터가 없습니다";
+      b.innerHTML = "<div>사용량 데이터는 연구실 안에서만 봅니다 — "
+        + "랩 구성원 이름과 세션 작업 경로가 들어 있어 공개 배포본에는 싣지 않습니다.</div>"
+        + "<div>사내 서버에 올라간 같은 페이지에서 확인하세요.</div>";
+    } else {
+      $("#updated").textContent = "데이터 로드 실패";
+      b.innerHTML = `<div>스냅샷(${esc(DATA_URL)})을 읽지 못했습니다 — `
+        + `${esc((e && e.message) || e)}</div>`;
+    }
+    b.classList.remove("hidden");
   }
 }
 

@@ -1,0 +1,64 @@
+# docs/ 를 GitHub Pages 로 배포한다. 수집은 하지 않는다.
+#
+# 왜 daily.yml 과 나누나: AI 사용량 스냅샷은 사내 서버가 5분마다 새로 만들어
+# 발행한다. 그때마다 daily.yml(공고 수집, 최대 15분)이 통째로 도는 것은 낭비고,
+# 배포가 수집 뒤에 줄을 서느라 화면 반영도 늦어진다. 배포만 하는 이 워크플로는
+# 1분이면 끝난다.
+name: pages
+
+on:
+  push:
+    branches: [main, ai-data]   # 코드 변경 · 스냅샷 발행 둘 다
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 배포는 한 번에 하나만. 새 스냅샷이 오면 진행 중인 옛 배포는 취소한다.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main            # ai-data 가 트리거여도 사이트 본체는 main 이다
+
+      # AI 사용량 스냅샷은 main 에 두지 않는다. 5분마다 바뀌는 160KB JSON 을
+      # 코드 이력에 쌓으면 저장소가 금방 수 GB 가 되기 때문에, 커밋 하나짜리
+      # 고아 브랜치(ai-data)에 force-push 하고 배포할 때만 꺼내 온다.
+      # 아직 한 번도 발행되지 않았으면 조용히 건너뛴다 — 그 경우 /ai/ 는
+      # "데이터가 없습니다" 라고 스스로 말한다.
+      - name: AI 사용량 스냅샷 주입
+        run: |
+          if git fetch --depth 1 origin ai-data 2>/dev/null; then
+            mkdir -p docs/ai/data
+            git show FETCH_HEAD:dashboard.json > docs/ai/data/dashboard.json
+            echo "스냅샷 $(wc -c < docs/ai/data/dashboard.json) bytes"
+            python3 - <<'EOF'
+          import datetime, json
+          d = json.load(open("docs/ai/data/dashboard.json"))
+          t = datetime.datetime.fromtimestamp(d["generated_at"] / 1000, datetime.timezone.utc)
+          print("스냅샷 기준", t.strftime("%F %H:%M"), "UTC")
+          EOF
+          else
+            echo '::notice::ai-data 브랜치가 아직 없습니다 — /ai/ 는 데이터 없음으로 표시됩니다'
+          fi
+
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - id: deployment
+        uses: actions/deploy-pages@v4

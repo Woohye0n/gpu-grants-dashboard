@@ -5,3 +5,10 @@ __pycache__/
 # 파생물 — scraper/build_single_file.py 로 언제든 다시 만듭니다
 docs/standalone.html
 docs/artifact.html
+# 스냅샷 동기화 기록 — 배포된 곳마다 다른 값이라 커밋하지 않습니다
+docs/ai/data/sync.json
+# AI 사용량 집계 DB — 서버마다 다른 로컬 상태입니다
+data/ai/
+# AI 사용량 스냅샷 — 서버가 직접 만드는 로컬 산출물입니다.
+# 공개 Pages 에 랩 구성원 이름·작업 경로가 올라가지 않도록 커밋하지 않습니다.
+docs/ai/data/dashboard.json
