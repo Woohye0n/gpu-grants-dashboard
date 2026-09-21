@@ -117,6 +117,30 @@
         "host": "kakao-b200-3",
         "provider": "claude",
         "cwd_glob": "/home/jovyan/data"
+      },
+      {
+        "owner": "mintaek",
+        "cwd_glob": "*/mintaek*"
+      },
+      {
+        "owner": "hj153lee",
+        "cwd_glob": "*/hj153lee*"
+      },
+      {
+        "owner": "gunchoi",
+        "cwd_glob": "*/gunchoi*"
+      },
+      {
+        "owner": "steve97",
+        "cwd_glob": "*/steve97*"
+      },
+      {
+        "owner": "hgkim",
+        "cwd_glob": "*/hgkim*"
+      },
+      {
+        "owner": "hoeun",
+        "cwd_glob": "*/hoeun*"
       }
     ],
     "sessions": {}
