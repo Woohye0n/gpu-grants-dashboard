@@ -128,4 +128,4 @@ chmod +x "$WORK/dist"/*.sh "$WORK/dist"/scripts/*.sh 2>/dev/null
 
 # ---- 3) 전원 설치 ----------------------------------------------------------
 say "3/3  설치"
-exec "$WORK/dist/scripts/bootstrap.sh" "$@"
+exec bash "$WORK/dist/scripts/bootstrap.sh" "$@"
