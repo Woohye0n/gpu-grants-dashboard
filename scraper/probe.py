@@ -27,6 +27,15 @@ TITLE_TAIL = re.compile(
     r"\s*20\d{2}[.\-/]\d{1,2}[.\-/]\d{1,2}.*$|\s*조회\s*[\d,]+.*$", re.I)
 
 
+# 세션 id 가 경로에 박히는 서버(JSP 계열)가 있다. 매 요청마다 값이 바뀌므로 그대로 두면
+# 같은 공고가 날마다 새 글로 잡힌다.
+_SESSION_ID = re.compile(r";(?:jsessionid|phpsessid|sessionid)=[^?/;]*", re.I)
+
+
+def clean_url(u: str) -> str:
+    return _SESSION_ID.sub("", u or "")
+
+
 def _signature(a) -> str:
     """링크가 놓인 자리를 태그/클래스 경로로 요약한다. 같은 목록 행은 같은 값이 나온다."""
     parts = []
@@ -56,15 +65,26 @@ def _clean_title(node) -> str:
 
 
 def _row_text(a) -> str:
+    """이 링크가 속한 '한 줄' 의 텍스트.
+
+    후보가 <a> 면 날짜가 형제 셀에 있으므로 부모로 올라가야 하지만, 후보가 행 자체
+    (<tr data-key=...>)면 올라가는 순간 <tbody> 전체가 잡혀 **모든 행이 첫 행의 날짜를
+    갖게 된다.** 그래서 자기 자신이 이미 날짜를 품고 있으면 거기서 멈춘다.
+    """
+    own = a.get_text(" ", strip=True)
+    if DATE_RE.search(own):
+        return own
     node = a
     for _ in range(4):
         node = node.parent
         if node is None:
             break
         text = node.get_text(" ", strip=True)
-        if len(text) > len(a.get_text(strip=True)) + 8:
+        if DATE_RE.search(text):
             return text
-    return a.get_text(" ", strip=True)
+        if len(text) > len(own) + 8:
+            return text
+    return own
 
 
 def probe(url: str, min_rows: int = 5) -> dict:
@@ -72,9 +92,15 @@ def probe(url: str, min_rows: int = 5) -> dict:
     soup = BeautifulSoup(html, "lxml")
     groups: dict[str, list] = defaultdict(list)
 
-    # <a> 뿐 아니라 onclick 으로 상세를 여는 행도 본다 (goDetail('...') 류 ASP 게시판)
+    # <a>, onclick(goDetail('...') 류), 그리고 data-* 에 글 번호만 담고 클릭 핸들러를
+    # jQuery 로 위임하는 행(<tr class="gjsh" data-key="154">)까지 본다.
     candidates = list(soup.select("a")) + [
         n for n in soup.select("[onclick]") if n.name != "a"]
+    seen_ids = {id(n) for n in candidates}
+    for n in soup.select("[data-key], [data-idx], [data-no], [data-seq], [data-id], [data-num]"):
+        if id(n) not in seen_ids:
+            candidates.append(n)
+            seen_ids.add(id(n))
     for a in candidates:
         title = a.get_text(" ", strip=True)
         href = (a.get("href") or "").strip()
@@ -85,6 +111,12 @@ def probe(url: str, min_rows: int = 5) -> dict:
         # goDetail('000...'), go_view(179192,78336) 처럼 식별자만 주는 게시판도 받는다.
         # 인자가 여럿이면 어느 것이 글 번호인지는 나중에 '행마다 달라지는 쪽'으로 고른다.
         args = re.findall(r"""['"(,\s](\d{4,})['")\,]""", onclick)
+        if not args:                                     # data-key="154" 처럼 속성에만 있는 경우
+            for attr in ("data-key", "data-idx", "data-no", "data-seq", "data-id", "data-num"):
+                v = (a.get(attr) or "").strip()
+                if v.isdigit():
+                    args = [v]
+                    break
         if SKIP_HREF.match(href) and not args:
             continue
         groups[_signature(a)].append(
@@ -111,7 +143,7 @@ def probe(url: str, min_rows: int = 5) -> dict:
         m = DATE_RE.search(row_text)
         detected.append({
             "title": title,
-            "url": urllib.parse.urljoin(url, href) if href and not SKIP_HREF.match(href) else "",
+            "url": clean_url(urllib.parse.urljoin(url, href)) if href and not SKIP_HREF.match(href) else "",
             "js_id": jsid,
             "posted": f"{m.group(1)}-{int(m.group(2)):02d}-{int(m.group(3)):02d}" if m else "",
             "row_text": row_text[:200],

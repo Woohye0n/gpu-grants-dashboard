@@ -6,7 +6,8 @@
     "page_param : 2페이지 이후를 부르는 쿼리 이름 (없으면 1페이지만)",
     "detail_url : 목록이 링크 대신 JS 로 글을 열 때, {id} 를 글 번호로 바꿔 쓸 상세 주소",
     "repo : '사이트 추가' 폼이 이슈를 열 GitHub 저장소",
-    "ci_blocked : GitHub 러너에서 막히는 것이 알려진 사이트 (실패가 아니라 예상된 제약으로 표시)"
+    "ci_blocked : GitHub 러너에서 막히는 것이 알려진 사이트 (실패가 아니라 예상된 제약으로 표시)",
+    "file_url : href='#' 이고 onclick 에만 저장 파일명이 있는 게시판의 다운로드 주소. {name} 자리에 파일명이 들어간다"
   ],
   "repo": "Woohye0n/gpu-grants-dashboard",
   "sources": [
@@ -44,6 +45,25 @@
       "pages": 3,
       "ci_blocked": true,
       "note": "GitHub 러너에는 자동등록방지 페이지가 내려옵니다. 국내 망에서 수집한 직전 데이터를 씁니다."
+    },
+    {
+      "key": "kisti",
+      "kind": "generic",
+      "label": "한국과학기술정보연구원(KISTI)",
+      "org": "과기정통부 · KISTI",
+      "list_url": "https://www.kisti.re.kr/notifications/post/notice",
+      "file_url": "https://www.kisti.re.kr/fatt/{name}",
+      "pages": 3
+    },
+    {
+      "key": "ksc",
+      "kind": "generic",
+      "label": "국가슈퍼컴퓨팅센터(KSC)",
+      "org": "KISTI 국가슈퍼컴퓨팅본부",
+      "list_url": "https://www.ksc.re.kr/notice/gjsh/gjsh/include/list",
+      "detail_url": "https://www.ksc.re.kr/notice/gjsh/gjsh/view?gjshkey={id}",
+      "page_param": "page",
+      "pages": 3
     }
   ]
 }

@@ -13,17 +13,18 @@ from .common import parse_dt, parse_range
 
 # Longest-first: 'L40S' must win over 'L40', 'A6000 Ada' over 'A6000'.
 GPU_MODELS: list[tuple[str, str]] = [
+    (r"GH200",                      "GH200"),   # Grace Hopper — H200 과 다른 칩이다
     (r"GB300",                      "GB300"),
     (r"GB200",                      "GB200"),
-    (r"B300",                       "B300"),
-    (r"B200",                       "B200"),
-    (r"B100",                       "B100"),
-    (r"H200",                       "H200"),
-    (r"H100",                       "H100"),
-    (r"H800",                       "H800"),
-    (r"A100",                       "A100"),
-    (r"A800",                       "A800"),
-    (r"V100",                       "V100"),
+    (r"(?<![A-Za-z])B300",                       "B300"),
+    (r"(?<![A-Za-z])B200",                       "B200"),
+    (r"(?<![A-Za-z])B100",                       "B100"),
+    (r"(?<![A-Za-z])H200",                       "H200"),
+    (r"(?<![A-Za-z])H100",                       "H100"),
+    (r"(?<![A-Za-z])H800",                       "H800"),
+    (r"(?<![A-Za-z])A100",                       "A100"),
+    (r"(?<![A-Za-z])A800",                       "A800"),
+    (r"(?<![A-Za-z])V100",                       "V100"),
     (r"L40S",                       "L40S"),
     (r"L40(?![0-9S])",              "L40"),
     (r"(?<![A-Za-z0-9])L4(?![0-9])", "L4"),
@@ -479,7 +480,10 @@ STRONG = re.compile(
     r"GPU|고성능\s*컴퓨팅|AI\s*컴퓨팅|컴퓨팅\s*(자원|인프라)|연산\s*자원|그래픽\s*처리\s*장치"
     r"|AI\s*데이터\s*센터|H100|H200|A100|B200|GB200|L40S|슈퍼컴퓨|NPU\s*(자원|지원|인프라)", re.I)
 NEGATIVE = re.compile(r"입찰|용역|채용|낙찰|계약\s*체결|결과\s*(공고|발표)|선정\s*결과"
-                      r"|성과\s*공유|공유회|보고회|설명회|간담회|세미나|워크숍|웨비나|강연")
+                      r"|성과\s*공유|공유회|보고회|설명회|간담회|세미나|워크[숍샵]|웨비나|강연"
+                      # 지원사업이 아니라 서비스 운영 공지인 것들
+                      r"|점검|정비|장애|중단|재개|이전\s*안내|개최|컨퍼런스|참가\s*신청"
+                      r"|자료\s*공유|등록\s*안내|교육\s*(안내|신청)|서비스\s*기간|작업\s*안내")
 SUPPLIER = re.compile(r"공급사|공급\s*기업|운영기관|수행기관|위탁기관|구축\s*·?\s*운용|확보\s*·?\s*구축")
 
 
@@ -502,7 +506,12 @@ def audience(*fields: str) -> str:
     return "user"
 
 
-_APPLY_KEYS = re.compile(r"(모집\s*기간|신청\s*기간|접수\s*기간|신청\s*·?\s*접수|공모\s*기간|접수\s*일정)")
+_APPLY_KEYS = re.compile(r"(모집\s*기간|신청\s*기간|접수\s*기간|신청\s*·?\s*접수|공모\s*기간"
+                         r"|접수\s*일정|제출\s*기간|공고\s*·?\s*제출)")
+# '(접수마감) ’26.10.16.' 처럼 마감만 적는 표기. 기간 문장이 없을 때의 2순위.
+_DEADLINE = re.compile(
+    r"(?:접수\s*마감|마감\s*일시|제출\s*마감|마감\s*기한)\s*[)\]:：]?\s*"
+    r"((?:\d{4}|[’\'‘]?\d{2})\s*[.\-/년]\s*\d{1,2}\s*[.\-/월]\s*\d{1,2})")
 
 
 def find_apply_period(text: str, fallback_year: str | None = None) -> tuple[str | None, str | None]:
@@ -511,8 +520,15 @@ def find_apply_period(text: str, fallback_year: str | None = None) -> tuple[str 
         start, end = parse_range(line)
         if start or end:
             return start, end
-    if fallback_year:
-        m = re.search(r"[~∼]\s*(\d{1,2})\s*[./월]\s*(\d{1,2})", text or "")
+    m = _DEADLINE.search(text or "")
+    if m:
+        end = parse_dt(m.group(1))
+        if end:
+            return None, end
+    # '(~9/16)' 류는 제목에만 쓰는 표기다. 긴 문서에 적용하면 '~11월 3주'(셋째 주) 같은
+    # 일정표 문구를 11월 3일로 읽는다 — 실제로 그랬다. 그래서 짧은 텍스트에만 쓴다.
+    if fallback_year and len(text or "") <= 200:
+        m = re.search(r"[~∼]\s*(\d{1,2})\s*[./월]\s*(\d{1,2})(?!\s*(?:주|분기|개월))", text or "")
         if m:
             return None, parse_dt(f"{fallback_year}.{m.group(1)}.{m.group(2)}")
     return None, None

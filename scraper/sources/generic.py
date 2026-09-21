@@ -14,7 +14,7 @@ from .. import extract as E
 from bs4 import BeautifulSoup
 
 from ..common import download, doc_text, get_text, html_to_text, out_of_time
-from ..probe import probe
+from ..probe import clean_url, probe
 
 # 목록에서 실제로 몇 줄을 읽었는지. 0건이 '못 읽음'인지 '해당 공고 없음'인지 가른다.
 LAST_SCAN: dict[str, int] = {}
@@ -53,7 +53,7 @@ def fetch_config(cfg: dict, deep: bool = True) -> list[dict]:
         for row in found["rows"]:
             if out_of_time():
                 break
-            url = row["url"] or _detail_url(cfg, row["js_id"])
+            url = clean_url(row["url"] or _detail_url(cfg, row["js_id"]))
             ident = row["js_id"] or url
             if not url or ident in seen:
                 continue
@@ -89,7 +89,7 @@ def _detail_url(cfg: dict, ident: str) -> str:
 def _build(cfg: dict, label: str, ident: str, row: dict, url: str, deep: bool) -> dict:
     body, attachments, doc = ("", [], "")
     if deep:
-        body, attachments, doc = _detail(url)
+        body, attachments, doc = _detail(url, cfg.get("file_url", ""))
     blob = "\n".join(x for x in (row["title"], body, doc) if x)
     start, end = E.find_apply_period(blob, fallback_year=(row.get("posted") or "")[:4] or None)
 
@@ -117,7 +117,7 @@ def _build(cfg: dict, label: str, ident: str, row: dict, url: str, deep: bool) -
     }
 
 
-def _detail(url: str) -> tuple[str, list[dict], str]:
+def _detail(url: str, file_tmpl: str = "") -> tuple[str, list[dict], str]:
     try:
         page = get_text(url)
     except Exception:                                    # noqa: BLE001
@@ -129,15 +129,21 @@ def _detail(url: str) -> tuple[str, list[dict], str]:
         soup = BeautifulSoup(page, "lxml")
     except Exception:                                    # noqa: BLE001
         soup = None
-    for a in (soup.select("a[href]") if soup else []):
+    for a in (soup.select("a[href], a[onclick]") if soup else []):
         text = a.get_text(" ", strip=True)
-        href = a["href"]
-        if href.lower().startswith(("javascript:", "mailto:", "#")):
-            continue
-        if not (_DOC_EXT.search(text) or _DOC_EXT.search(href)):
-            continue
-        full = urllib.parse.urljoin(url, _html.unescape(href))
-        if full in {x["url"] for x in found}:
+        href = a.get("href") or ""
+        onclick = a.get("onclick") or ""
+        full = ""
+        if href and not href.lower().startswith(("javascript:", "mailto:", "#")):
+            if _DOC_EXT.search(text) or _DOC_EXT.search(href):
+                full = urllib.parse.urljoin(url, _html.unescape(href))
+        # href="#" 이고 onclick 안에 저장 파일명만 있는 게시판(KISTI downLocation 류).
+        # 실제 주소를 만들 수 없으므로 설정의 file_url 템플릿을 받아 쓴다.
+        if not full and file_tmpl and onclick:
+            m = re.search(r"""['"]([^'"]+\.(?:hwpx|hwp|pdf))['"]""", onclick, re.I)
+            if m:
+                full = file_tmpl.replace("{name}", urllib.parse.quote(m.group(1)))
+        if not full or full in {x["url"] for x in found}:
             continue
         found.append({"name": (text or full.rsplit("/", 1)[-1])[:160], "url": full})
 
