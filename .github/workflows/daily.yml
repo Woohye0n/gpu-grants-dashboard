@@ -54,7 +54,9 @@ jobs:
         run: |
           git config user.name  "gpu-grants-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/data.js docs/data.json data/history data/last_good
+          # index.html 은 수집 때마다 ?v= 해시가 다시 찍히므로 같이 커밋한다
+          # (안 하면 저장소와 배포본의 자산 버전이 어긋난다)
+          git add docs/data.js docs/data.json docs/index.html data/history data/last_good
           git diff --staged --quiet || git commit -m "chore: $(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M KST') 공고 수집"
           git push
 
