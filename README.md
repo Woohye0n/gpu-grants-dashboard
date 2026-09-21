@@ -151,6 +151,32 @@ python -m scraper.probe "https://example.kr/board/list"
 
 ---
 
+## 다른 서버에 올리기
+
+저장소만 클론하면 됩니다(작업트리 1.7MB). 설치 스크립트가 가상환경·의존성·첫 수집·
+cron·웹서버까지 한 번에 잡아 줍니다.
+
+```bash
+git clone <저장소> gpu-grants-dashboard
+cd gpu-grants-dashboard
+./deploy/setup_on_server.sh          # PORT=8080 RUN_AT=09:10 으로 조정 가능
+./deploy/serve.sh 8080               # 띄우기
+```
+
+nginx 를 쓴다면 `root <경로>/docs;` 만 잡으면 됩니다. 별도 빌드는 없습니다.
+
+### 국내 서버에 올리면 막혔던 곳이 풀립니다
+
+GitHub 러너(해외 IP)에서는 두 곳이 차단됩니다. 국내 서버에서 수집하면 둘 다 정상입니다.
+
+| 사이트 | GitHub 러너 | 국내 서버 |
+|---|---|---|
+| KISTI (`kisti.re.kr`) | 연결 차단 | 정상 |
+| AICA (`aica-gj.kr`) | 자동등록방지 페이지 | 정상 |
+
+국내 서버로 옮긴 뒤에는 `sources.json` 의 두 항목에서 `"ci_blocked": true` 를 지우세요.
+그래야 화면에 "사이트가 자동수집 차단" 대신 정상으로 표시됩니다.
+
 ## AI 사용량 화면 (`/ai/`)
 
 연구실의 Claude Code·Codex 토큰 사용량 대시보드입니다. 원래
