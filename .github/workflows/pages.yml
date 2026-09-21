@@ -6,9 +6,17 @@
 # 1분이면 끝난다.
 name: pages
 
+# 배포는 **main 에서만** 돌 수 있다. github-pages 환경의 배포 브랜치 정책이
+# main 하나만 허용하기 때문이다(ai-data 에서 돌린 런은 스텝 시작 전에 막혔다).
+# 그래서 스냅샷 발행은 트리거로 쓰지 않고, main 에서 주기적으로 ai-data 를
+# 들여다본다. 저장소 Settings → Environments → github-pages 의 배포 브랜치에
+# ai-data 를 추가하면 `push: branches: [ai-data]` 를 켜서 즉시 반영으로
+# 바꿀 수 있다(반영이 10분 → 1분).
 on:
   push:
-    branches: [main, ai-data]   # 코드 변경 · 스냅샷 발행 둘 다
+    branches: [main]
+  schedule:
+    - cron: "*/10 * * * *"     # 새 스냅샷을 10분마다 확인
   workflow_dispatch:
 
 permissions:
@@ -54,11 +62,30 @@ jobs:
             echo '::notice::ai-data 브랜치가 아직 없습니다 — /ai/ 는 데이터 없음으로 표시됩니다'
           fi
 
+      # 예약 실행은 대부분 "바뀐 게 없음" 이다. 그때까지 배포를 돌리면 하루
+      # 144번을 헛돈다. 지금 떠 있는 사이트의 스냅샷과 같은지 먼저 본다.
+      - id: check
+        if: github.event_name == 'schedule'
+        env:
+          SITE: https://woohye0n.github.io/gpu-grants-dashboard
+        run: |
+          gen() { python3 -c "import json,sys;print(json.load(sys.stdin).get('generated_at',0))" 2>/dev/null || echo 0; }
+          live=$(curl -sf --max-time 30 "$SITE/ai/data/dashboard.json" | gen)
+          new=$(gen < docs/ai/data/dashboard.json)
+          echo "live=$live new=$new"
+          if [ -n "$live" ] && [ "$live" = "$new" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::스냅샷이 그대로라 배포를 건너뜁니다"
+          fi
+
       - uses: actions/configure-pages@v5
+        if: steps.check.outputs.skip != 'true'
         with:
           enablement: true
       - uses: actions/upload-pages-artifact@v3
+        if: steps.check.outputs.skip != 'true'
         with:
           path: docs
       - id: deployment
+        if: steps.check.outputs.skip != 'true'
         uses: actions/deploy-pages@v4

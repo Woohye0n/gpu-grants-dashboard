@@ -68,14 +68,9 @@ export GIT_INDEX_FILE="$TMPD/index"
 trap 'rm -rf "$TMPD"' EXIT
 BLOB="$(git hash-object -w "$SNAPSHOT")" || { say "blob 생성 실패"; exit 1; }
 git update-index --add --cacheinfo "100644,$BLOB,dashboard.json" || exit 1
-# push 트리거는 **그 브랜치에 있는** 워크플로를 씁니다. 스냅샷만 올리면 ai-data 에는
-# 워크플로가 없어 배포가 아예 돌지 않습니다. 그래서 배포 워크플로를 같이 싣습니다.
-# 매번 작업트리에서 다시 읽으므로 main 쪽과 어긋날 일은 없습니다.
-WORKFLOW=".github/workflows/pages.yml"
-if [ -f "$WORKFLOW" ]; then
-  WF_BLOB="$(git hash-object -w "$WORKFLOW")" || exit 1
-  git update-index --add --cacheinfo "100644,$WF_BLOB,$WORKFLOW" || exit 1
-fi
+# 이 브랜치는 데이터만 담는다. 배포는 main 에서만 돌 수 있어서(환경의 배포 브랜치
+# 정책) 여기에 워크플로를 실어도 트리거가 되지 않는다 — main 의 pages.yml 이
+# 10분마다 이 브랜치를 들여다본다.
 TREE="$(git write-tree)" || exit 1
 COMMIT="$(printf 'chore: AI 사용량 스냅샷 %s\n' "$(TZ=Asia/Seoul date '+%F %H:%M KST')" \
           | git commit-tree "$TREE")" || exit 1
