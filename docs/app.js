@@ -435,7 +435,12 @@
       }
       if (s.error) {
         kv.appendChild(el('div', 'k', '사유'));
-        kv.appendChild(el('div', 'v', s.error));
+        const v = el('div', 'v reason', s.error);
+        if (s.error_detail && s.error_detail !== s.error) {
+          v.appendChild(el('span', 'more-detail', ' 자세히'));
+          bindTip(v, s.error_detail);       // 원문 예외는 도구설명으로
+        }
+        kv.appendChild(v);
       }
       n.appendChild(kv);
       box.appendChild(n);

@@ -295,11 +295,14 @@ def collect(deep: bool = True) -> tuple[list[dict], list[dict]]:
             else:
                 reason = "공고를 한 건도 읽지 못했습니다 (게시판 구조가 바뀌었을 수 있습니다)"
             rows = [{**r, "stale": True, "stale_since": cached_at} for r in cached]
-            entry.update(ok=False, stale=True, count=len(rows), error=reason, collected_at=cached_at)
+            entry.update(ok=False, stale=True, count=len(rows),
+                         error=humanize_error(reason), error_detail=reason,
+                         collected_at=cached_at)
             print(f"[warn] {key}: {cached_at} 수집분을 그대로 사용합니다", file=sys.stderr)
         else:
-            entry.update(ok=False, stale=False, count=0,
-                         error=error or "수집 결과 없음", collected_at="")
+            entry.update(ok=False, stale=False, count=0, collected_at="",
+                         error=humanize_error(error) or "수집 결과가 없습니다.",
+                         error_detail=error)
         programs.extend(rows)
         report.append(entry)
     return programs, report
@@ -373,6 +376,41 @@ def build(deep: bool = True) -> dict:
         },
         "programs": programs,
     }
+
+
+# 화면에 파이썬 예외를 그대로 쏟으면 읽을 수가 없다. 사람이 읽을 한 문장으로 바꾸고
+# 원문은 error_detail 로 따로 남겨 도구설명에서 볼 수 있게 한다.
+_ERROR_RULES = [
+    (re.compile(r"자동등록방지|보안절차|prove that you are human|captcha", re.I),
+     "사이트가 자동 수집을 막고 있습니다 (사람 확인 페이지가 대신 내려옵니다)."),
+    (re.compile(r"ConnectTimeout|Read timed out|timed out|시간\s*초과", re.I),
+     "사이트가 응답하지 않습니다 (연결 시간 초과). 해외 IP 를 막는 곳일 수 있습니다."),
+    (re.compile(r"NameResolution|Failed to resolve|Name or service not known", re.I),
+     "주소를 찾을 수 없습니다 (DNS 조회 실패). 주소가 바뀌었는지 확인하세요."),
+    (re.compile(r"SSLError|certificate", re.I),
+     "보안 연결(SSL)에 실패했습니다."),
+    (re.compile(r"ConnectionRefused|Connection refused", re.I),
+     "서버가 연결을 거부했습니다."),
+    (re.compile(r"행\s*없음"),
+     "목록 페이지는 열렸지만 게시글 줄을 찾지 못했습니다 (게시판 구조가 바뀌었을 수 있습니다)."),
+    (re.compile(r"게시글 줄을 찾지 못"),
+     "목록 페이지는 열렸지만 게시글 줄을 찾지 못했습니다 (게시판 구조가 바뀌었을 수 있습니다)."),
+]
+_HTTP_CODE = re.compile(r"\b([45]\d{2})\s+(?:Client|Server)\s+Error")
+
+
+def humanize_error(text: str) -> str:
+    """기술적인 예외 문자열을 한 문장으로 줄인다. 못 알아보면 앞부분만 자른다."""
+    if not text:
+        return ""
+    for pattern, message in _ERROR_RULES:
+        if pattern.search(text):
+            return message
+    m = _HTTP_CODE.search(text)
+    if m:
+        return f"서버가 HTTP {m.group(1)} 를 돌려줬습니다."
+    one = re.sub(r"\s+", " ", text).strip()
+    return one if len(one) <= 120 else one[:117] + "…"
 
 
 def _unknown_digest(programs: list[dict]) -> list[dict]:
