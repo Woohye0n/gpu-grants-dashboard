@@ -3,8 +3,9 @@
 #
 #   curl -fsSL https://woohye0n.github.io/gpu-grants-dashboard/install-sender.sh | sudo bash
 #
-# 이 파일에는 NAS 주소도 비밀번호도 없다. 이미 이 서버에 설치돼 있던 송신기의
-# config.json 에서 배워 오고, 그것도 없을 때만 터미널에서 물어본다.
+# 이 파일에는 NAS 주소도, 계정도, 비밀번호도 없다 — 공개 주소에 두기 때문이다.
+# 이미 이 서버에 설치돼 있던 송신기의 config.json 에서 배워 오고, 그것도 없을
+# 때만 터미널에서 물어본다.
 #
 # 왜 이렇게: 예전 안내는 dist 를 scp 로 받고, 비번을 파일로 쓰고, 설치하고, 파일을
 # 지우는 네 단계였다. 서버가 여러 대면 매번 정확히 반복해야 하고 한 번만 틀려도
@@ -66,10 +67,10 @@ MOUNT_DIST=""
 if [ -n "$MOUNT_DIST" ] && timeout 5 ls -d "$MOUNT_DIST" >/dev/null 2>&1; then
   cp -r "$MOUNT_DIST" "$WORK/dist" && say "     NAS 마운트에서 복사 (비밀번호 불필요)"
 else
-  [ -n "$SSH_HOST" ] || ask "     NAS 주소 (예: aidaslab.synology.me): " SSH_HOST
+  [ -n "$SSH_HOST" ] || ask "     NAS 주소: " SSH_HOST
   [ -n "$SSH_PORT" ] || SSH_PORT=2244
-  [ -n "$SSH_USER" ] || ask "     NAS 사용자 (예: synologynas): " SSH_USER
-  [ -n "$REMOTE_ROOT" ] || REMOTE_ROOT="/volume1/nas-nfs/yunseok/ai-monitoring"
+  [ -n "$SSH_USER" ] || ask "     NAS 사용자: " SSH_USER
+  [ -n "$REMOTE_ROOT" ] || ask "     NAS 상의 수집 경로 (예: /volume1/.../ai-monitoring): " REMOTE_ROOT
   if [ -z "$SSH_KEY" ] && [ -z "$SSH_PW" ]; then
     ask "     NAS 비밀번호: " SSH_PW silent
     [ -n "$SSH_PW" ] || { echo "     비밀번호가 필요합니다." >&2; exit 1; }
