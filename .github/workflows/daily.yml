@@ -4,9 +4,11 @@
 # Pages 가 꺼져 있으면 pages.yml 의 configure-pages 가 켭니다.
 name: daily-collect
 
+# **평소에는 돌지 않습니다.** 수집은 국내 서버(cron, deploy/collect_and_publish.sh)가
+# 합니다 — 러너는 해외 IP 라 AICA 가 자동등록방지 페이지를, KISTI 가 연결 차단을
+# 내줘서 두 곳이 늘 '직전 데이터' 였습니다. 국내에서는 7곳 전부 정상입니다.
+# 이 워크플로는 그 서버가 죽었을 때를 위한 비상용입니다(그때는 위 두 곳이 빠집니다).
 on:
-  schedule:
-    - cron: "10 0 * * *"      # 00:10 UTC = 09:10 KST
   workflow_dispatch:           # 수동 실행 버튼
 
 permissions:

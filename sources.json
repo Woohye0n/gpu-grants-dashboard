@@ -6,8 +6,8 @@
     "page_param : 2페이지 이후를 부르는 쿼리 이름 (없으면 1페이지만)",
     "detail_url : 목록이 링크 대신 JS 로 글을 열 때, {id} 를 글 번호로 바꿔 쓸 상세 주소",
     "repo : '사이트 추가' 폼이 이슈를 열 GitHub 저장소",
-    "ci_blocked : GitHub 러너에서 막히는 것이 알려진 사이트 (실패가 아니라 예상된 제약으로 표시)",
-    "file_url : href='#' 이고 onclick 에만 저장 파일명이 있는 게시판의 다운로드 주소. {name} 자리에 파일명이 들어간다"
+    "file_url : href='#' 이고 onclick 에만 저장 파일명이 있는 게시판의 다운로드 주소. {name} 자리에 파일명이 들어간다",
+    "수집은 국내 서버(cron)가 돌립니다 — 러너에서 막히던 AICA·KISTI 도 여기서는 정상입니다."
   ],
   "repo": "Woohye0n/gpu-grants-dashboard",
   "sources": [
@@ -43,8 +43,7 @@
       "org": "광주광역시 · AICA",
       "page_param": "page",
       "pages": 3,
-      "ci_blocked": true,
-      "note": "GitHub 러너에는 자동등록방지 페이지가 내려옵니다. 국내 망에서 수집한 직전 데이터를 씁니다."
+      "note": "GitHub 러너에는 자동등록방지 페이지가 내려옵니다. 국내 서버에서 수집하므로 정상입니다."
     },
     {
       "key": "kisti",
@@ -54,8 +53,7 @@
       "list_url": "https://www.kisti.re.kr/notifications/post/notice",
       "file_url": "https://www.kisti.re.kr/fatt/{name}",
       "pages": 3,
-      "ci_blocked": true,
-      "note": "GitHub 러너에서는 연결이 차단됩니다(해외 IP). 국내 망에서 수집한 직전 데이터를 씁니다. 한강 공고는 KSC 에도 올라와 그쪽에서 갱신됩니다."
+      "note": "GitHub 러너에서는 해외 IP 라 연결이 차단됩니다. 국내 서버에서 수집하므로 정상입니다."
     },
     {
       "key": "ksc",
