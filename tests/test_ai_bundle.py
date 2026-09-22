@@ -93,6 +93,17 @@ check("billable = io + 캐시생성", m["billable"], 17)
 check("total = 전부", m["total"], 20)
 
 print()
+
+
+# ---- 구버전 송신기가 보낸 표면 이름 보정 ----------------------------------
+from scraper.ai_store import _surface
+
+check("구버전 codex-tui 를 터미널로", _surface("other:codex-tui"), "terminal")
+check("모르는 표면은 그대로 둔다",
+      _surface("other:codex_chatgpt_android_remote"), "other:codex_chatgpt_android_remote")
+check("이미 정상인 값은 건드리지 않는다", _surface("vscode"), "vscode")
+check("값이 없으면 그대로", _surface(None), None)
+
 if fails:
     print(f"실패 {len(fails)}건: {', '.join(fails)}")
     sys.exit(1)

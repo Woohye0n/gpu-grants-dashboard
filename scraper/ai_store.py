@@ -17,6 +17,7 @@ inbox 는 멀쩡했는데 중간 한 칸이 빠져서 화면 전체가 과거에
 from __future__ import annotations
 
 import glob
+import re
 import gzip
 import json
 import os
@@ -91,6 +92,28 @@ def connect(path=DB_PATH):
 
 def _num(v):
     return int(v) if isinstance(v, (int, float)) else 0
+
+
+# 표면 이름이 도구마다 다르게 오고, 노드는 저마다의 일정으로 올라간다.
+# 구버전 송신기가 못 알아본 값은 other:<원문> 으로 실려 오므로, 원문을 구분자로
+# 쪼갠 토큰이 아는 표면이면 중앙에서 되돌린다. 전부 올릴 때까지 대시보드에
+# 같은 표면이 두 개로 갈리는 것을 막는다.
+_SURFACE_WORDS = {
+    "cli": "terminal", "terminal": "terminal", "tui": "terminal", "shell": "terminal",
+    "vscode": "vscode", "code": "vscode",
+    "desktop": "desktop", "app": "desktop",
+}
+
+
+def _surface(value):
+    if not isinstance(value, str) or not value.startswith("other:"):
+        return value
+    parts = re.split(r"[_\-\s]", value[len("other:"):].strip().lower())
+    for part in parts:
+        fixed = _SURFACE_WORDS.get(part)
+        if fixed:
+            return fixed
+    return value
 
 
 def _merge_list(raw, values):
@@ -187,7 +210,7 @@ def ingest_batch(db, payload, host_hint=None):
                         reported_at=excluded.reported_at""",
                    (s.get("provider") or "claude", sid, host, s.get("account_email"),
                     s.get("cwd"), s.get("project"), s.get("version"), s.get("kind"),
-                    s.get("entrypoint"), s.get("surface"), s.get("status"),
+                    s.get("entrypoint"), _surface(s.get("surface")), s.get("status"),
                     s.get("pid"), s.get("pid_alive"), s.get("started_at"),
                     s.get("updated_at"), payload.get("generated_at") or now))
 
@@ -205,7 +228,7 @@ def ingest_batch(db, payload, host_hint=None):
                  session_id, model, surface, input, output, cache_creation, cache_read)
                VALUES(?,?,?,?,?,?,?,?,?,?,?,?)""",
             (uid, u.get("ts"), u.get("provider") or "claude", host, u["account_email"],
-             u.get("session_id"), u.get("model"), u.get("surface"),
+             u.get("session_id"), u.get("model"), _surface(u.get("surface")),
              _num(u.get("input_tokens")), _num(u.get("output_tokens")),
              _num(u.get("cache_creation_tokens")), _num(u.get("cache_read_tokens"))))
         if not cur.rowcount:
@@ -215,7 +238,7 @@ def ingest_batch(db, payload, host_hint=None):
         row = db.execute("SELECT models, surfaces FROM session_totals WHERE provider=? AND session_id=?",
                          (u.get("provider") or "claude", sid)).fetchone()
         models = _merge_list(row["models"] if row else "[]", [u.get("model")])
-        surfaces = _merge_list(row["surfaces"] if row else "[]", [u.get("surface")])
+        surfaces = _merge_list(row["surfaces"] if row else "[]", [_surface(u.get("surface"))])
         db.execute("""INSERT INTO session_totals(provider, session_id, account_email, host,
                         cwd, project, first_ts, last_ts, messages, input, output,
                         cache_creation, cache_read, models, surfaces)
