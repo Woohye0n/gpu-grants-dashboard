@@ -70,7 +70,9 @@
     <!-- LIVE -->
     <section id="tab-live" class="panel hidden">
       <h2>지금 떠 있는 세션</h2>
-      <p class="hint">프로세스(pid) 생존으로 판정합니다. heartbeat 시간은 활동 표시용입니다.</p>
+      <p class="hint">프로세스(pid)가 살아 있고, 그 서버가 최근 보고했고, 1시간 안에
+        활동이 있은 세션입니다. 셋 중 하나만 보면 틀립니다 — 활동만 보면 잠깐 쉬는
+        세션이 꺼진 것으로, pid 만 보면 며칠째 떠 있기만 한 세션이 켜진 것으로 나옵니다.</p>
       <div id="liveSessions" class="tablewrap"></div>
     </section>
 

@@ -137,6 +137,12 @@ def build(db, cfg, now=None):
     allowed = set(tracking.get("allowed_accounts") or [])
     count_from = int(tracking.get("count_from_ms") or 0)
     live_seconds = int((cfg.get("collect") or {}).get("session_live_seconds") or 360)
+    # 노드가 '살아 있다' 고 볼 시간. 송신기는 5분마다 보고하므로 6분(=기존
+    # session_live_seconds)으로 재면 한 번만 늦어도 그 노드 세션이 통째로 죽는다.
+    # 실제로 6.4분 전에 보고한 노드의 세션이 전부 꺼져 보였다.
+    node_seconds = int((cfg.get("collect") or {}).get("node_stale_seconds") or 900)
+    # 프로세스가 살아 있어도 이만큼 쉬었으면 '지금 떠 있는' 축에 넣지 않는다.
+    idle_seconds = int((cfg.get("collect") or {}).get("session_idle_seconds") or 3600)
     rules = (cfg.get("people") or {}).get("rules") or []
 
     nodes, node_last = [], {}
@@ -225,13 +231,19 @@ def build(db, cfg, now=None):
         if allowed and email not in allowed:
             continue
         updated = max(r["last_ts"] or 0, (m["updated_at"] if m else 0) or 0)
-        # 라이브는 **최근 활동**이 기준이다. pid 만 보면 19일 전 세션이 계속 살아
-        # 있는 것으로 남는다(실제로 그랬다) — 프로세스가 떠 있는 것과 지금 쓰고
-        # 있는 것은 다르다. 송신기가 죽은 노드의 세션도 영원히 라이브로 두지 않는다.
-        node_fresh = (now - node_last.get(host, 0)) <= live_seconds * 1000
+        # 라이브 판정에는 세 가지가 다 필요하다. 하나만 쓰면 어느 쪽으로든 틀린다.
+        #   최근 활동만  → 10분 쉬고 있던 살아 있는 세션이 꺼진 것으로 나온다
+        #   pid 생존만   → 19일째 떠 있기만 한 세션이 계속 '지금 떠 있는' 것으로 남는다
+        #   노드 보고    → 없으면 송신기가 죽은 노드의 세션이 영원히 살아 있다
+        # 그래서 "프로세스가 살아 있고, 그 노드가 최근 보고했고, 너무 오래 쉬지
+        # 않았다" 로 본다. pid 를 안 주는 쪽(codex)은 최근 활동만으로 판정한다.
+        node_fresh = (now - node_last.get(host, 0)) <= node_seconds * 1000
         pid_alive = m["pid_alive"] if m else None
-        recent = (now - updated) <= live_seconds * 1000
-        live = bool(node_fresh and recent and pid_alive != 0)
+        idle = now - updated
+        if pid_alive == 1:
+            live = bool(node_fresh and idle <= idle_seconds * 1000)
+        else:
+            live = bool(node_fresh and pid_alive is None and idle <= live_seconds * 1000)
         live_count += 1 if live else 0
         row = {
             "session_id": r["session_id"], "provider": r["provider"],

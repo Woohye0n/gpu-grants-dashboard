@@ -189,7 +189,9 @@
     "codex_dirs": [
       "~/.codex-lab1",
       "~/.codex-lab2"
-    ]
+    ],
+    "node_stale_seconds": 900,
+    "session_idle_seconds": 3600
   },
   "nas": {
     "enabled": true,
