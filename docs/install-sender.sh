@@ -3,6 +3,10 @@
 #
 #   curl -fsSL https://woohye0n.github.io/gpu-grants-dashboard/install-sender.sh | sudo bash
 #
+# 노드 이름은 넣지 않아도 된다. config.json → NAS 기록 → hostname 순으로 스스로
+# 정한다. 새 장비에 원하는 이름을 붙일 때만:
+#   curl -fsSL <위 주소> | sudo bash -s -- --host <이름>
+#
 # 접속 정보는 이미 이 서버에 설치돼 있던 송신기의 config.json 에서 배워 온다.
 # 없으면 아래 기본값을 쓰고, **비밀번호만** 그때 터미널에서 물어본다.
 # (비밀번호는 이 파일에 담지 않는다. 환경변수로 덮어쓸 수 있다:
