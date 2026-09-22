@@ -129,7 +129,9 @@ function setupTooltip() {
 
 // ---- state ----------------------------------------------------------------
 const state = {
-  tab: "overview",
+  // 이 화면을 여는 이유는 대개 "누가 얼마나 썼나" 다. 계정·한도는 그 다음이라
+  // 개인별 사용량을 첫 화면으로 둔다(index.html 의 active 탭과 맞춰야 한다).
+  tab: "charts",
   metric: "total",
   summary: null,
   sessions: [],

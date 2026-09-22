@@ -4,9 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AIDAS AI 모니터링</title>
-  <link rel="stylesheet" href="./style.css?v=032ff40831" />
+  <link rel="stylesheet" href="./style.css?v=15e578e85b" />
   <script src="./vendor/chart.umd.min.js" defer></script>
-  <script src="./app.js?v=032ff40831" defer></script>
+  <script src="./app.js?v=15e578e85b" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -46,17 +46,17 @@
   <div id="staleBanner" class="banner stale hidden"></div>
 
   <nav class="tabs">
-    <button class="tab active" data-tab="overview">개요</button>
+    <button class="tab active" data-tab="charts">개인별 사용량</button>
+    <button class="tab" data-tab="overview">개요</button>
     <button class="tab" data-tab="live">라이브 세션 <span id="liveBadge" class="badge">0</span></button>
     <button class="tab" data-tab="sessions">세션 기록</button>
-    <button class="tab" data-tab="charts">차트</button>
     <button class="tab" data-tab="alerts">알림</button>
     <button class="tab" data-tab="settings">설정</button>
   </nav>
 
   <main>
     <!-- OVERVIEW -->
-    <section id="tab-overview" class="panel">
+    <section id="tab-overview" class="panel hidden">
       <div class="totalsrow" id="totalsRow"></div>
       <h2>계정별 사용량</h2>
       <div id="accounts" class="cards"></div>
@@ -84,8 +84,8 @@
     </section>
 
     <!-- CHARTS -->
-    <section id="tab-charts" class="panel hidden">
-      <h2>사람별 사용량</h2>
+    <section id="tab-charts" class="panel">
+      <h2>개인별 사용량</h2>
       <p class="hint">각 사람이 어느 계정·도구를 얼마나 썼는지 보여줍니다.
         도넛 조각은 계정 x 도구(claude/codex) 구성비이고, 가운데 숫자는 선택한 지표의 합계입니다. 각 창은 그 계정의 실제 한도 리셋 시점부터 셉니다.
         한도 소진율은 계정 속성이라 개요 탭의 계정 카드에서 확인하세요.</p>
