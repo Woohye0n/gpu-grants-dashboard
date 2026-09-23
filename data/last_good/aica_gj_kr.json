@@ -1,5 +1,5 @@
 {
- "saved_at": "2026-09-22 14:45",
+ "saved_at": "2026-09-23 09:11",
  "rows": [
   {
    "source": "aica_gj_kr",
@@ -158,10 +158,10 @@
    "source": "aica_gj_kr",
    "source_label": "인공지능산업융합사업단(AICA)",
    "org": "광주광역시 · AICA",
-   "uid": "aica_gj_kr-httpswwwaica-gjkrsubphpPID0201pagecatego",
+   "uid": "aica_gj_kr-httpswwwaica-gjkrsubphpPID0201page2categ",
    "title": "2026년 국가 AI데이터센터 고도화 사업 이용자 추가모집(상시) 공고",
    "program": "인공지능산업융합사업단(AICA)",
-   "url": "https://www.aica-gj.kr/sub.php?PID=0201&page=&category=&searchText=&searchType=&action=Read&idx=2859",
+   "url": "https://www.aica-gj.kr/sub.php?PID=0201&page=2&category=&searchText=&searchType=&action=Read&idx=2859",
    "posted": "2026-06-09",
    "apply_start": "2026-06-09",
    "apply_end": null,
@@ -390,10 +390,10 @@
    "source": "aica_gj_kr",
    "source_label": "인공지능산업융합사업단(AICA)",
    "org": "광주광역시 · AICA",
-   "uid": "aica_gj_kr-httpswwwaica-gjkrsubphpPID0201page2categ",
+   "uid": "aica_gj_kr-httpswwwaica-gjkrsubphpPID0201page3categ",
    "title": "2026년 국가 AI데이터센터 고도화 사업 공급사 모집 공고",
    "program": "인공지능산업융합사업단(AICA)",
-   "url": "https://www.aica-gj.kr/sub.php?PID=0201&page=2&category=&searchText=&searchType=&action=Read&idx=2795",
+   "url": "https://www.aica-gj.kr/sub.php?PID=0201&page=3&category=&searchText=&searchType=&action=Read&idx=2795",
    "posted": "2026-03-09",
    "apply_start": "2026-03-06",
    "apply_end": "2026-03-26T14:00",
