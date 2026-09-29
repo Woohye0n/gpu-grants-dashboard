@@ -68,9 +68,21 @@ export GIT_INDEX_FILE="$TMPD/index"
 trap 'rm -rf "$TMPD"' EXIT
 BLOB="$(git hash-object -w "$SNAPSHOT")" || { say "blob 생성 실패"; exit 1; }
 git update-index --add --cacheinfo "100644,$BLOB,dashboard.json" || exit 1
-# 이 브랜치는 데이터만 담는다. 배포는 main 에서만 돌 수 있어서(환경의 배포 브랜치
-# 정책) 여기에 워크플로를 실어도 트리거가 되지 않는다 — main 의 pages.yml 이
-# 10분마다 이 브랜치를 들여다본다.
+
+# 워크플로 파일을 이 브랜치에도 싣는다.
+#
+# push 이벤트에서 GitHub 은 **푸시된 브랜치에 있는** 워크플로를 읽는다. 고아
+# 브랜치에 .github/workflows 가 없으면 아무리 푸시해도 아무 일도 일어나지
+# 않는다 — 실제로 main 에 `branches: [main, ai-data]` 를 켰는데도 5분마다
+# 올라간 발행이 한 번도 배포를 부르지 못했다.
+#
+# main 의 파일을 그대로 복사하므로 따로 관리할 것이 없다. 이 워크플로는
+# 사이트 본체를 main 에서 체크아웃하니, 여기 실린 사본이 도는 것도 안전하다.
+WF=".github/workflows/pages.yml"
+if [ -f "$ROOT/$WF" ]; then
+  WFBLOB="$(git hash-object -w "$ROOT/$WF")" || { say "워크플로 blob 실패"; exit 1; }
+  git update-index --add --cacheinfo "100644,$WFBLOB,$WF" || exit 1
+fi
 TREE="$(git write-tree)" || exit 1
 COMMIT="$(printf 'chore: AI 사용량 스냅샷 %s\n' "$(TZ=Asia/Seoul date '+%F %H:%M KST')" \
           | git commit-tree "$TREE")" || exit 1
