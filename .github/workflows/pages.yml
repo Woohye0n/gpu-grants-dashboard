@@ -1,0 +1,98 @@
+# docs/ 를 GitHub Pages 로 배포한다. 수집은 하지 않는다.
+#
+# 왜 daily.yml 과 나누나: AI 사용량 스냅샷은 사내 서버가 5분마다 새로 만들어
+# 발행한다. 그때마다 daily.yml(공고 수집, 최대 15분)이 통째로 도는 것은 낭비고,
+# 배포가 수집 뒤에 줄을 서느라 화면 반영도 늦어진다. 배포만 하는 이 워크플로는
+# 1분이면 끝난다.
+name: pages
+
+# 스냅샷이 올라오면 그 자리에서 배포한다. 예약 실행은 믿을 수 없다 — */10 으로
+# 걸어 뒀지만 GitHub 이 실제로 돌린 간격은 중앙값 203분, 최대 7.9시간이었다.
+# 서버는 5분마다 집계하는데 화면은 반나절 묵는 일이 생겼다.
+#
+# ai-data 로 배포하려면 두 가지가 모두 필요하다:
+#  1) github-pages 환경의 배포 브랜치에 ai-data — 없으면 런이 스텝 시작 전에 막힌다
+#  2) ai-data 브랜치 안에 이 파일 — push 이벤트에서 GitHub 은 **푸시된 브랜치의**
+#     워크플로를 읽는다. 고아 브랜치에 .github/workflows 가 없어서, 1)만 해 두고
+#     5분마다 발행했는데 한 번도 배포가 불리지 않았다.
+#     publish_pages.sh 가 main 의 이 파일을 스냅샷과 함께 실어 보낸다.
+#
+# 발행 자체가 드물지 않냐면 그렇지 않다: publish_pages.sh 는 사람이 보는 숫자가
+# 바뀐 경우에만 푸시해서 하루 200~280회다. 겹치는 배포는 concurrency 가 정리한다.
+on:
+  push:
+    branches: [main, ai-data]
+  schedule:
+    - cron: "*/30 * * * *"     # 푸시 트리거가 실패했을 때를 위한 그물
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 배포는 한 번에 하나만. 새 스냅샷이 오면 진행 중인 옛 배포는 취소한다.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main            # ai-data 가 트리거여도 사이트 본체는 main 이다
+
+      # AI 사용량 스냅샷은 main 에 두지 않는다. 5분마다 바뀌는 160KB JSON 을
+      # 코드 이력에 쌓으면 저장소가 금방 수 GB 가 되기 때문에, 커밋 하나짜리
+      # 고아 브랜치(ai-data)에 force-push 하고 배포할 때만 꺼내 온다.
+      # 아직 한 번도 발행되지 않았으면 조용히 건너뛴다 — 그 경우 /ai/ 는
+      # "데이터가 없습니다" 라고 스스로 말한다.
+      - name: AI 사용량 스냅샷 주입
+        run: |
+          if git fetch --depth 1 origin ai-data 2>/dev/null; then
+            mkdir -p docs/ai/data
+            git show FETCH_HEAD:dashboard.json > docs/ai/data/dashboard.json
+            echo "스냅샷 $(wc -c < docs/ai/data/dashboard.json) bytes"
+            python3 - <<'EOF'
+          import datetime, json
+          d = json.load(open("docs/ai/data/dashboard.json"))
+          t = datetime.datetime.fromtimestamp(d["generated_at"] / 1000, datetime.timezone.utc)
+          print("스냅샷 기준", t.strftime("%F %H:%M"), "UTC")
+          EOF
+          else
+            echo '::notice::ai-data 브랜치가 아직 없습니다 — /ai/ 는 데이터 없음으로 표시됩니다'
+          fi
+
+      # 예약 실행은 대부분 "바뀐 게 없음" 이다. 그때까지 배포를 돌리면 하루
+      # 144번을 헛돈다. 지금 떠 있는 사이트의 스냅샷과 같은지 먼저 본다.
+      - id: check
+        if: github.event_name == 'schedule'
+        env:
+          SITE: https://woohye0n.github.io/gpu-grants-dashboard
+        run: |
+          gen() { python3 -c "import json,sys;print(json.load(sys.stdin).get('generated_at',0))" 2>/dev/null || echo 0; }
+          live=$(curl -sf --max-time 30 "$SITE/ai/data/dashboard.json" | gen)
+          new=$(gen < docs/ai/data/dashboard.json)
+          echo "live=$live new=$new"
+          if [ -n "$live" ] && [ "$live" = "$new" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::스냅샷이 그대로라 배포를 건너뜁니다"
+          fi
+
+      - uses: actions/configure-pages@v5
+        if: steps.check.outputs.skip != 'true'
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.check.outputs.skip != 'true'
+        with:
+          path: docs
+      - id: deployment
+        if: steps.check.outputs.skip != 'true'
+        uses: actions/deploy-pages@v4
