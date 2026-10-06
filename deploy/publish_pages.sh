@@ -89,6 +89,20 @@ COMMIT="$(printf 'chore: AI 사용량 스냅샷 %s\n' "$(TZ=Asia/Seoul date '+%F
 if git push -q -f "$REMOTE" "$COMMIT:refs/heads/$BRANCH" 2>&1; then
   echo "$FP" > "$STAMP"
   say "발행 완료 → $BRANCH ($(du -h "$SNAPSHOT" | cut -f1))"
+
+  # 방금 만든 커밋을 로컬 브랜치로 붙잡아 둔다. 안 그러면 commit-tree 로 만든
+  # 커밋이 로컬에서 아무 ref 에도 안 걸려, 쓰는 즉시 미참조 객체가 된다.
+  git update-ref "refs/heads/$BRANCH" "$COMMIT" 2>/dev/null || true
+
+  # 5분마다 350KB 블롭을 새로 쓰고 직전 것은 바로 미참조가 된다. 그대로 두면
+  # 하루 100MB 가 .git 에 쌓인다 — 실제로 271MB 까지 불어 디스크 경고가 났다.
+  # git gc 의 기본 유예는 2주라 그때까지 손대지 않으므로, 여기서 직접 턴다.
+  # 1시간 유예: 동시에 도는 다른 git 작업이 방금 쓴 객체는 건드리지 않는다.
+  LOOSE="$(git count-objects | awk '{print $1}')"
+  if [ "${LOOSE:-0}" -gt 2000 ]; then
+    git prune --expire=1.hour.ago 2>/dev/null || true
+    say "느슨한 객체 정리 ($LOOSE개 → $(git count-objects | awk '{print $1}')개)"
+  fi
 else
   say "push 실패 — 배포 키가 등록/쓰기허용 돼 있는지 확인하세요"
   exit 3
