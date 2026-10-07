@@ -255,3 +255,48 @@ tfoot .totalrow .hint { color: var(--muted); }
   color: var(--text); background: var(--panel2); border-color: var(--border);
 }
 @media (max-width: 560px) { .sitenav { order: 3; width: 100%; } }
+
+/* ---- 개인별 사용량: 크레딧 + 상세 ---------------------------------------- */
+#chartArea .card.person { cursor: pointer; transition: border-color .15s, transform .15s; }
+#chartArea .card.person:hover,
+#chartArea .card.person:focus-visible { border-color: var(--accent); outline: none; }
+#chartArea .pa-warn { margin-top: 8px; color: var(--yellow); }
+#chartArea .pa-more { margin-top: 10px; font-size: 11px; color: var(--accent); text-align: right; }
+
+.modal {
+  position: fixed; inset: 0; z-index: 50; background: rgba(1, 4, 9, .72);
+  display: flex; align-items: flex-start; justify-content: center;
+  overflow-y: auto; padding: 40px 16px;
+}
+.modal.hidden { display: none; }
+.modal-box {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+  width: min(1100px, 100%); padding: 18px 20px 22px;
+}
+.modal-box h2 { margin: 0; }
+.modal-box h3 { font-size: 13px; color: var(--muted); margin: 20px 0 8px; font-weight: 600; }
+.modal-head { display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 12px; flex-wrap: wrap; }
+.modal-ctl { display: flex; gap: 8px; align-items: center; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.seg button { background: var(--panel2); color: var(--muted); border: 0; padding: 6px 12px;
+  font-size: 12px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--border); }
+.seg button.on { background: var(--accent); color: #fff; }
+.cr-total { margin-top: 14px; font-size: 13px; color: var(--muted); }
+.cr-big { font-size: 26px; font-weight: 700; color: var(--text); margin-right: 4px;
+  font-variant-numeric: tabular-nums; }
+.cr-formula { margin: 10px 0 4px; padding: 8px 12px; border-radius: 8px; background: var(--panel2);
+  font-size: 12px; color: var(--muted); line-height: 1.6; }
+table.cr tr.cr-group td { background: var(--panel2); white-space: normal; }
+table.cr tr.cr-sub td:first-child { padding-left: 28px; color: var(--muted); }
+table.cr td.cr-calc { color: var(--muted); font-size: 12px; }
+.chip.fast { color: var(--yellow); background: rgba(210,153,34,.14); }
+.pctbar { display: inline-block; width: 56px; height: 6px; margin-left: 6px; vertical-align: middle;
+  background: var(--chip); border-radius: 3px; overflow: hidden; }
+.pctbar > i { display: block; height: 100%; background: var(--accent); }
+@media (max-width: 720px) {
+  .modal { padding: 12px 8px; }
+  .modal-box { padding: 14px 12px; }
+  .pctbar { display: none; }
+}

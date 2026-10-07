@@ -34,10 +34,17 @@ CREATE TABLE IF NOT EXISTS batches (
 
 -- 턴 단위. uuid 가 턴의 정체성이라, 송신기가 재시작해 같은 배치를 다시 보내도
 -- 두 번 세지 않는다.
+--
+-- speed / cache_creation_1h 는 토큰당 단가를 가르는 값이다(ai_pricing 참고).
+--   speed             : standard | fast | flex | ... (Codex 는 처리 티어를 옮긴 값)
+--   cache_creation_1h : 캐시 쓰기 중 1시간 TTL 몫. NULL 이면 TTL 을 모른다
+--                       (구버전 송신기) — 0 과는 뜻이 다르다.
+--   effort            : 단가는 바꾸지 않고 생성량만 바꾼다. 분류 용도.
 CREATE TABLE IF NOT EXISTS usage (
     uuid TEXT PRIMARY KEY, ts INTEGER, provider TEXT, host TEXT,
     account_email TEXT, session_id TEXT, model TEXT, surface TEXT,
-    input INTEGER, output INTEGER, cache_creation INTEGER, cache_read INTEGER);
+    input INTEGER, output INTEGER, cache_creation INTEGER, cache_read INTEGER,
+    speed TEXT, effort TEXT, cache_creation_1h INTEGER);
 CREATE INDEX IF NOT EXISTS usage_ts ON usage(ts);
 CREATE INDEX IF NOT EXISTS usage_session ON usage(session_id);
 
@@ -87,7 +94,77 @@ def connect(path=DB_PATH):
     db.execute("PRAGMA journal_mode=WAL")
     db.execute("PRAGMA synchronous=NORMAL")
     db.executescript(SCHEMA)
+    migrate(db)
     return db
+
+
+# 이미 돌고 있는 DB 에 나중에 생긴 컬럼. CREATE TABLE IF NOT EXISTS 는 있는 표를
+# 건드리지 않으므로 따로 붙인다.
+_ADDED_COLUMNS = {"usage": (("speed", "TEXT"), ("effort", "TEXT"),
+                            ("cache_creation_1h", "INTEGER"))}
+
+
+def migrate(db):
+    """옛 DB 를 지금 모양으로 맞춘다. 몇 번을 불러도 결과가 같다."""
+    for table, cols in _ADDED_COLUMNS.items():
+        have = {r[1] for r in db.execute(f"PRAGMA table_info({table})")}
+        for name, kind in cols:
+            if name not in have:
+                db.execute(f"ALTER TABLE {table} ADD COLUMN {name} {kind}")
+    if meta_get(db, "codex_uuid_v2") != "done":
+        n = rekey_codex_usage(db)
+        meta_set(db, "codex_uuid_v2", "done")
+        if n:
+            meta_set(db, "codex_uuid_v2_removed", n)
+    db.commit()
+
+
+def codex_usage_uuid(session_id, model, input_tokens, output_tokens, cache_read_tokens):
+    """Codex 턴의 정체성 — 송신기 ``sender/codex_collector.py:usage_uuid`` 와 같은 식.
+
+    송신기가 예전에 쓰던 키(``codex:{sid}:{ts}:{seq}``)는 파일을 어디서부터 읽었는지에
+    딸려 움직였다. 세션을 resume 하면 Codex 가 이전 턴들을 재개 시각으로 다시 적으므로
+    같은 턴이 다른 키로 거듭 들어왔다. 같은 inbox 를 읽는 다른 집계에서 측정하니 세션
+    하나가 20배(실제 69,275 턴 → 1,396,827 행), 커서가 생긴 9/23 이후에도 노드 하나가
+    1.95배였다.
+
+    송신기는 서버마다 손으로 올리므로 버전이 섞인다. 그래서 여기서 **다시 계산**한다 —
+    어느 버전의 송신기가 보냈든 같은 턴은 같은 키가 된다. 식을 바꾸면 송신기 쪽도
+    같이 바꿔야 한다.
+    """
+    import hashlib
+    key = "|".join(str(x) for x in (
+        session_id, model, input_tokens, output_tokens, cache_read_tokens))
+    return "codex:" + hashlib.sha1(key.encode("utf-8")).hexdigest()
+
+
+def rekey_codex_usage(db):
+    """이미 쌓인 codex 행을 새 키로 접는다. 같은 턴이면 **가장 이른 시각** 하나만 남긴다.
+
+    재개분은 재개 시각을 달고 오므로, 남겨야 할 것은 원래 턴이 실제로 돈 시각이다.
+    세션 누적(session_totals)은 이미 부풀어 있던 만큼 되돌리지 못한다 — 턴 기록이
+    retain_days 만큼만 남아 있어서 다시 셀 근거가 없다. 창(5시간/주간)은 턴 기록으로
+    세므로 이 정리로 바로 맞아진다.
+    """
+    before = db.execute("SELECT COUNT(*) FROM usage WHERE provider='codex'").fetchone()[0]
+    if not before:
+        return 0
+    # SQLite 는 MIN() 과 함께 고른 맨 컬럼(rowid)을 그 최솟값을 가진 행에서 가져온다.
+    db.execute("""DELETE FROM usage WHERE provider='codex' AND rowid NOT IN (
+                    SELECT rid FROM (SELECT rowid AS rid, MIN(ts) FROM usage
+                                     WHERE provider='codex'
+                                     GROUP BY session_id, model, input, output, cache_read))""")
+    rows = db.execute("""SELECT uuid, session_id, model, input, output, cache_read
+                         FROM usage WHERE provider='codex'""").fetchall()
+    changes = []
+    for r in rows:
+        new = codex_usage_uuid(r["session_id"], r["model"], r["input"],
+                               r["output"], r["cache_read"])
+        if new != r["uuid"]:
+            changes.append((new, r["uuid"]))
+    db.executemany("UPDATE usage SET uuid=? WHERE uuid=?", changes)
+    after = db.execute("SELECT COUNT(*) FROM usage WHERE provider='codex'").fetchone()[0]
+    return before - after
 
 
 def _num(v):
@@ -114,6 +191,18 @@ def _surface(value):
         if fixed:
             return fixed
     return value
+
+
+def _ttl_1h(u):
+    """캐시 쓰기 중 1시간 TTL 몫. 송신기가 TTL 을 안 보냈으면 None(=모름)."""
+    h1, m5 = u.get("cache_creation_1h_tokens"), u.get("cache_creation_5m_tokens")
+    if isinstance(h1, (int, float)):
+        return int(h1)
+    if isinstance(m5, (int, float)):
+        return max(0, _num(u.get("cache_creation_tokens")) - int(m5))
+    if (u.get("provider") or "claude") == "codex":
+        return 0          # OpenAI 캐시 쓰기에는 TTL 구분이 없다 — 모르는 게 아니다
+    return None
 
 
 def _merge_list(raw, values):
@@ -218,6 +307,10 @@ def ingest_batch(db, payload, host_hint=None):
     seed_until = int(meta_get(db, "seed_until_ms", 0) or 0)
     for u in payload.get("usage") or []:
         uid = u.get("uuid")
+        if uid and (u.get("provider") or "claude") == "codex":
+            uid = codex_usage_uuid(u.get("session_id"), u.get("model"),
+                                   _num(u.get("input_tokens")), _num(u.get("output_tokens")),
+                                   _num(u.get("cache_read_tokens")))
         if seed_until and (u.get("ts") or 0) <= seed_until:
             continue                      # 시드 스냅샷이 이미 세어 둔 구간
         # 계정을 증명하지 못한 기록은 집계하지 않는다(송신기가 그렇게 표시해 보낸다).
@@ -225,12 +318,14 @@ def ingest_batch(db, payload, host_hint=None):
             continue
         cur = db.execute(
             """INSERT OR IGNORE INTO usage(uuid, ts, provider, host, account_email,
-                 session_id, model, surface, input, output, cache_creation, cache_read)
-               VALUES(?,?,?,?,?,?,?,?,?,?,?,?)""",
+                 session_id, model, surface, input, output, cache_creation, cache_read,
+                 speed, effort, cache_creation_1h)
+               VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (uid, u.get("ts"), u.get("provider") or "claude", host, u["account_email"],
              u.get("session_id"), u.get("model"), _surface(u.get("surface")),
              _num(u.get("input_tokens")), _num(u.get("output_tokens")),
-             _num(u.get("cache_creation_tokens")), _num(u.get("cache_read_tokens"))))
+             _num(u.get("cache_creation_tokens")), _num(u.get("cache_read_tokens")),
+             u.get("speed"), u.get("effort"), _ttl_1h(u)))
         if not cur.rowcount:
             continue                      # 이미 센 턴
         added += 1

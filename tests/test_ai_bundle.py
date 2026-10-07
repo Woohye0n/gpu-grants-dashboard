@@ -104,6 +104,187 @@ check("모르는 표면은 그대로 둔다",
 check("이미 정상인 값은 건드리지 않는다", _surface("vscode"), "vscode")
 check("값이 없으면 그대로", _surface(None), None)
 
+
+
+# ---- 크레딧: 토큰 종류·모델·속도별 공식 단가 --------------------------------
+# 1 크레딧 = $10. 기대값은 전부 공식 단가표에서 손으로 계산한 값이다.
+from scraper import ai_pricing                    # noqa: E402
+
+
+def credit_bundle(rows):
+    """턴 행(rows)만으로 사람 한 명의 스냅샷을 만든다."""
+    db = sqlite3.connect(":memory:")
+    db.row_factory = sqlite3.Row
+    db.executescript(ai_store.SCHEMA)
+    db.execute("INSERT INTO nodes(host, last_report) VALUES('n1', ?)", (NOW,))
+    sids = set()
+    for i, r in enumerate(rows):
+        r = dict({"provider": "claude", "session_id": "s1", "speed": None, "effort": None,
+                  "input": 0, "output": 0, "cache_creation": 0, "cache_read": 0,
+                  "cache_creation_1h": None}, **r)
+        sids.add((r["provider"], r["session_id"]))
+        db.execute("""INSERT INTO usage(uuid, ts, provider, host, account_email, session_id,
+                        model, input, output, cache_creation, cache_read,
+                        speed, effort, cache_creation_1h)
+                      VALUES(?,?,?,'n1','lab@x',?,?,?,?,?,?,?,?,?)""",
+                   (f"u{i}", NOW - MIN, r["provider"], r["session_id"], r["model"],
+                    r["input"], r["output"], r["cache_creation"], r["cache_read"],
+                    r["speed"], r["effort"], r["cache_creation_1h"]))
+    for prov, sid in sids:
+        db.execute("""INSERT INTO session_totals(provider, session_id, account_email, host,
+                        cwd, first_ts, last_ts, messages, models, surfaces)
+                      VALUES(?,?,'lab@x','n1','/w/woohyeon/p',?,?,1,'[]','[]')""",
+                   (prov, sid, NOW - MIN, NOW - MIN))
+    cfg = {"tracking": {"allowed_accounts": ["lab@x"]},
+           "people": {"rules": [{"owner": "woohyeon", "cwd_glob": "*/woohyeon*"}]}}
+    p = ai_bundle.build(db, cfg, now=NOW)["summary"]["people"][0]
+    return p["credits"]["5h"], p["credit_detail"]["5h"]
+
+
+def near(a, b):
+    return abs(a - b) < 1e-9
+
+
+M = 1_000_000
+print("\n[5] 크레딧 — 공식 단가대로 매기는가")
+c, _ = credit_bundle([{"model": "claude-opus-5-5", "input": M}])
+check("Opus 5.5 입력 1M = $4 = 0.4 크레딧", near(c, 0.4), True)
+c, _ = credit_bundle([{"model": "claude-opus-5-5", "output": M}])
+check("Opus 5.5 출력 1M = $20 = 2 크레딧", near(c, 2.0), True)
+c, _ = credit_bundle([{"model": "claude-opus-5-5", "cache_read": M}])
+check("Opus 5.5 캐시 읽기 1M = $0.20 (입력가 x0.05)", near(c, 0.02), True)
+c, _ = credit_bundle([{"model": "claude-opus-5-5", "cache_creation": M, "cache_creation_1h": 0}])
+check("5분 캐시 쓰기 1M = $5 (입력가 x1.25)", near(c, 0.5), True)
+c, _ = credit_bundle([{"model": "claude-opus-5-5", "cache_creation": M, "cache_creation_1h": M}])
+check("1시간 캐시 쓰기 1M = $8 (입력가 x2) — 5분과 다르다", near(c, 0.8), True)
+c, d = credit_bundle([{"model": "claude-opus-5-5", "cache_creation": M}])
+check("TTL 을 모르는 쓰기는 1시간 단가로, 따로 표시", (near(c, 0.8),
+      [x["component"] for x in d["components"]]), (True, ["cache_write_ttl_unknown"]))
+c, _ = credit_bundle([{"model": "claude-opus-5-5", "output": M, "speed": "fast"}])
+check("fast mode 는 2배 ($40)", near(c, 4.0), True)
+c, _ = credit_bundle([{"model": "claude-opus-4-6", "output": M, "speed": "fast"}])
+check("Opus 4.6 은 fast 를 받아도 표준가", near(c, 2.5), True)
+c, _ = credit_bundle([{"model": "claude-fable-5", "cache_read": M}])
+check("모델이 다르면 캐시 읽기 배수도 다르다 (Fable 5 $1)", near(c, 0.1), True)
+c, _ = credit_bundle([{"model": "claude-opus-5-5-20260401", "input": M}])
+check("날짜가 붙은 모델 ID 도 찾는다", near(c, 0.4), True)
+
+# 한 턴에 1M 을 넣으면 그 자체로 장문맥(>272K)이라 표준가 확인은 272K 아래로 한다.
+c, _ = credit_bundle([{"provider": "codex", "model": "gpt-5.6-sol", "input": 200_000}])
+check("gpt-5.6-sol 입력 200K = $0.80 (표준가 $4/1M)", near(c, 0.08), True)
+c, _ = credit_bundle([{"provider": "codex", "model": "gpt-5.6-sol", "input": M}])
+check("같은 1M 이라도 한 요청이면 장문맥 ($8/1M)", near(c, 0.8), True)
+c, _ = credit_bundle([{"provider": "codex", "model": "gpt-5.6-sol", "output": M,
+                       "speed": "fast"}])
+check("Codex Fast(=priority) 는 2배 ($40)", near(c, 4.0), True)
+c, _ = credit_bundle([{"provider": "codex", "model": "gpt-5.6-sol", "output": M,
+                       "speed": "flex"}])
+check("Codex Flex 는 절반 ($10)", near(c, 1.0), True)
+c, _ = credit_bundle([{"provider": "codex", "model": "gpt-6-astra",
+                       "input": 100_000, "cache_read": 200_000, "output": 1000}])
+# 요청 하나의 입력 300K > 272K → 입력·캐시 x2, 출력 x1.5
+want = (100_000 * 20 + 200_000 * 2 + 1000 * 75) / M / 10
+check("OpenAI 장문맥(>272K) 할증은 요청 단위로", near(c, want), True)
+c, _ = credit_bundle([{"provider": "codex", "model": "gpt-6-astra",
+                       "input": 100_000, "cache_read": 100_000, "output": 1000}])
+want = (100_000 * 10 + 100_000 * 1 + 1000 * 50) / M / 10
+check("272K 이하는 표준가", near(c, want), True)
+
+c, d = credit_bundle([{"model": "claude-opus-5-5", "input": M},
+                      {"provider": "codex", "model": "gpt-reserve", "input": 5000,
+                       "session_id": "s2"}])
+check("모르는 모델은 0 으로 숨기지 않고 따로 드러낸다",
+      (near(c, 0.4), [(u["model"], u["tokens"]) for u in d["unpriced"]]),
+      (True, [("gpt-reserve", 5000)]))
+c, d = credit_bundle([{"provider": "codex", "model": "gpt-6-astra", "input": M,
+                       "speed": "ultrafast"}])
+check("모르는 처리 티어도 마찬가지", (c, d["unpriced"][0]["speed"]), (0.0, "ultrafast"))
+c, d = credit_bundle([{"provider": "codex", "model": "gpt-5.5", "input": 1000,
+                       "cache_creation": 500}])
+check("단가가 없는 토큰 종류만 따로 빼고 나머지는 계산한다",
+      (near(c, 1000 * 5 / M / 10), d["unpriced"][0]["tokens"]), (True, 500))
+c, d = credit_bundle([{"provider": "codex", "model": "gpt-6-sol", "input": 300_000}])
+check("장문맥 단가를 모르는 모델은 표준가로 짐작하지 않는다",
+      (c, d["unpriced"][0]["reason"]), (0.0, "장문맥(>272K) 단가 미확인"))
+c, d = credit_bundle([{"model": "claude-opus-5-5", "input": 300_000},
+                      {"model": "claude-opus-5-5", "input": 1000}])
+check("Claude 는 272K 를 넘어도 표준가 (장문맥 할증 없음)",
+      near(c, 301_000 * 4 / M / 10), True)
+check("Claude 는 장문맥으로 묶음을 쪼개지 않는다",
+      [(g["model"], g["long_context"]) for g in d["groups"]], [("claude-opus-5-5", False)])
+c, _ = credit_bundle([{"provider": "codex", "model": "gpt-6.1-sol", "cache_read": 200_000}])
+check("gpt-6.1-sol 캐시 읽기 $0.10/1M (모델마다 다르다)", near(c, 200_000 * 0.10 / M / 10), True)
+
+c, d = credit_bundle([
+    {"model": "claude-opus-5-5", "input": 1000, "output": 2000, "cache_read": M,
+     "cache_creation": 50_000, "cache_creation_1h": 50_000, "effort": "xhigh"},
+    {"model": "claude-opus-5-5", "output": 3000, "effort": "low", "session_id": "s2"},
+    {"provider": "codex", "model": "gpt-5.6-sol", "input": 4000, "output": 100,
+     "cache_read": 90_000, "speed": "fast", "session_id": "s3"}])
+check("묶음 비중의 합 = 100%", round(sum(g["pct"] for g in d["groups"]), 1), 100.0)
+check("토큰 종류 비중의 합 = 100%", round(sum(x["pct"] for x in d["components"]), 1), 100.0)
+check("effort 별로 따로 묶는다",
+      sorted(g["effort"] for g in d["groups"] if g["provider"] == "claude"), ["low", "xhigh"])
+check("묶음 크레딧의 합 = 그 사람의 창 크레딧",
+      near(round(sum(g["credits"] for g in d["groups"]), 4), round(c, 4)), True)
+
+
+# ---- 저장: 옛 DB 이어받기, codex 턴 정체성 ----------------------------------
+import tempfile                                    # noqa: E402
+
+print("\n[6] 저장 — 옛 DB 를 이어받고, 같은 턴을 두 번 세지 않는가")
+tmp = tempfile.mkdtemp()
+path = os.path.join(tmp, "old.db")
+old = sqlite3.connect(path)
+old.execute("""CREATE TABLE usage (uuid TEXT PRIMARY KEY, ts INTEGER, provider TEXT,
+                 host TEXT, account_email TEXT, session_id TEXT, model TEXT, surface TEXT,
+                 input INTEGER, output INTEGER, cache_creation INTEGER, cache_read INTEGER)""")
+# 같은 codex 턴이 resume 로 재개 시각을 달고 두 번 들어와 있던 상태
+for uid, ts in (("codex:S:100:1", 100), ("codex:S:900:7", 900)):
+    old.execute("INSERT INTO usage VALUES(?,?,'codex','n','lab@x','S','gpt-5.6-sol',"
+                "NULL,10,2,0,30)", (uid, ts))
+old.execute("INSERT INTO usage VALUES('c1',5,'claude','n','lab@x','C','claude-opus-5',"
+            "NULL,1,1,0,0)")
+old.commit()
+old.close()
+db = ai_store.connect(path)
+cols = {r[1] for r in db.execute("PRAGMA table_info(usage)")}
+check("옛 DB 에 새 컬럼이 붙는다",
+      {"speed", "effort", "cache_creation_1h"} <= cols, True)
+rows = db.execute("SELECT uuid, ts FROM usage WHERE provider='codex'").fetchall()
+check("재개로 겹친 codex 턴이 하나로 접힌다", len(rows), 1)
+check("남는 것은 원래 시각", rows[0]["ts"], 100)
+check("키가 내용 기반으로 바뀐다", rows[0]["uuid"],
+      ai_store.codex_usage_uuid("S", "gpt-5.6-sol", 10, 2, 30))
+check("claude 행은 건드리지 않는다",
+      db.execute("SELECT uuid FROM usage WHERE provider='claude'").fetchone()[0], "c1")
+ai_store.connect(path).close()
+check("다시 열어도 그대로 (멱등)",
+      db.execute("SELECT COUNT(*) FROM usage").fetchone()[0], 2)
+
+base = {"provider": "codex", "account_email": "lab@x", "session_id": "S2",
+        "model": "gpt-5.6-sol", "input_tokens": 7, "output_tokens": 3,
+        "cache_read_tokens": 40, "cache_creation_tokens": 0}
+ai_store.ingest_batch(db, {"host": "n", "usage": [dict(base, uuid="codex:S2:111:1", ts=111)]})
+ai_store.ingest_batch(db, {"host": "n", "usage": [dict(base, uuid="codex:S2:999:4", ts=999)]})
+check("구버전 송신기가 다른 키로 다시 보내도 한 번만 센다",
+      db.execute("SELECT COUNT(*) FROM usage WHERE session_id='S2'").fetchone()[0], 1)
+
+ai_store.ingest_batch(db, {"host": "n", "usage": [{
+    "uuid": "t1", "ts": 5, "provider": "claude", "account_email": "lab@x",
+    "session_id": "T", "model": "claude-opus-5-5", "input_tokens": 1, "output_tokens": 1,
+    "cache_creation_tokens": 900, "cache_creation_5m_tokens": 100,
+    "cache_creation_1h_tokens": 800, "speed": "fast", "effort": "xhigh"},
+    {"uuid": "t2", "ts": 5, "provider": "claude", "account_email": "lab@x",
+     "session_id": "T", "model": "claude-opus-5-5", "input_tokens": 1, "output_tokens": 2,
+     "cache_creation_tokens": 50}]})
+r1 = db.execute("SELECT speed, effort, cache_creation_1h FROM usage WHERE uuid='t1'").fetchone()
+r2 = db.execute("SELECT cache_creation_1h FROM usage WHERE uuid='t2'").fetchone()
+check("송신기가 보낸 단가 값이 저장된다", tuple(r1), ("fast", "xhigh", 800))
+check("TTL 을 안 보낸 쓰기는 NULL(=모름)", r2[0], None)
+db.close()
+
+print()
 if fails:
     print(f"실패 {len(fails)}건: {', '.join(fails)}")
     sys.exit(1)
