@@ -137,6 +137,8 @@ const state = {
   sessions: [],
   timer: null,
   chart: null,
+  // 열려 있는 개인 상세 창 { owner, w }. 30초 자동 새로고침 뒤에도 같은 창을 다시 그린다.
+  detail: null,
 };
 
 // ---- tabs -----------------------------------------------------------------
@@ -363,8 +365,34 @@ let donutCharts = [];
 // 도구(claude/codex)로 나눕니다. 사람에게는 한도가 없으므로 %는 그 사람 사용량의
 // 구성비이며, 한도 소진율은 계정 속성이라 개요 탭의 계정 카드에 있습니다.
 //
-// 각 창의 합계는 그 계정의 실제 한도 리셋 시점부터 셉니다(rolling clock 아님).
-// 그래서 제공자 쪽 창이 리셋되면 여기 숫자도 같이 0부터 다시 시작합니다.
+// 값은 토큰 합계가 아니라 **크레딧**입니다(scraper/ai_pricing.py). 토큰 1개의 값은
+// 종류에 따라 수백 배 차이가 나서 — Opus 5.5 캐시 읽기 $0.20, 출력 $20 /1M — 토큰을
+// 1:1 로 더한 합계는 대개 '캐시를 얼마나 다시 읽었나' 만 보여 줍니다. 크레딧은 각
+// 토큰을 그 종류·모델·속도의 공식 API 단가로 환산해 더한 값이고 1 크레딧 = $10 입니다.
+// 창은 지금부터 거꾸로 센 롤링 창입니다(scraper/ai_bundle.py window_start).
+
+function fmtCredit(c) {
+  c = c || 0;
+  if (c >= 100) return c.toFixed(0);
+  if (c >= 10) return c.toFixed(1);
+  if (c >= 0.01) return c.toFixed(2);
+  return c > 0 ? "<0.01" : "0";
+}
+const fmtPct = (p) => (p > 0 && p < 0.1 ? "<0.1" : (p || 0).toFixed(1)) + "%";
+// 토큰 종류 — 단가가 서로 다른 칸. 같은 '캐시 쓰기' 도 TTL 에 따라 단가가 다르다.
+const COMPONENT_LABEL = {
+  input: "입력",
+  output: "출력",
+  cache_read: "캐시 읽기",
+  cache_write: "캐시 쓰기",
+  cache_write_5m: "캐시 쓰기 (5분)",
+  cache_write_1h: "캐시 쓰기 (1시간)",
+  cache_write_ttl_unknown: "캐시 쓰기 (TTL 미상)",
+};
+const SPEED_LABEL = { standard: "표준", fast: "fast ×2", flex: "flex ×0.5" };
+// 단가 표기: $0.20 · $0.025 처럼 의미 있는 자리까지만.
+const fmtRate = (r) => "$" + (Math.round((r || 0) * 100) === (r || 0) * 100
+  ? (r || 0).toFixed(2) : String(+(r || 0).toFixed(4)));
 const PA_COLORS = ["#3fb950", "#58a6ff", "#d29922", "#bc8cff", "#f85149",
                    "#39c5cf", "#db6d28", "#8b949e"];
 const CHART_WINDOWS = [
@@ -400,7 +428,7 @@ function renderCharts() {
     return;
   }
   buildPaColors(people);
-  const m = state.metric;
+  const m = "credits";
   const pending = [];
 
   const cards = people.map((p, pi) => {
@@ -408,7 +436,7 @@ function renderCharts() {
     const seen = new Map();
     CHART_WINDOWS.forEach((w) => ((p.breakdown || {})[w.key] || []).forEach((b) => {
       const e = seen.get(paKey(b)) || { ...b, vals: {} };
-      e.vals[w.key] = b[m] || 0;
+      e.vals[w.key] = (e.vals[w.key] || 0) + (b[m] || 0);
       seen.set(paKey(b), e);
     }));
     const legendRows = [...seen.values()]
@@ -429,20 +457,29 @@ function renderCharts() {
     const legend = legendRows.map((e) => `<div class="pa-row">
         <span class="pa-dot" style="background:${paColor(e)}"></span>
         <span class="pa-name">${esc(paLabel(e))}</span>
-        <span class="pa-tok">${fmt(e.vals["5h"] || 0)}</span>
-        <span class="pa-tok">${fmt(e.vals["7d"] || 0)}</span>
+        <span class="pa-tok">${fmtCredit(e.vals["5h"] || 0)}</span>
+        <span class="pa-tok">${fmtCredit(e.vals["7d"] || 0)}</span>
       </div>`).join("");
     const live = p.live_sessions
       ? `<span class="chip live">라이브 ${p.live_sessions}</span>` : "";
-    return `<div class="card">
+    // 단가를 몰라 크레딧에서 빠진 토큰이 있으면 카드에서부터 알린다 — 0 으로 숨기면
+    // 비싼 신모델을 쓴 사람이 오히려 적게 쓴 것처럼 보인다.
+    const unpriced = (((p.credit_detail || {})["7d"] || {}).unpriced || [])
+      .reduce((a, u) => a + (u.tokens || 0), 0);
+    const warn = unpriced
+      ? `<div class="hint pa-warn">단가 미등록 ${fmt(unpriced)} 토큰은 크레딧에서 제외</div>` : "";
+    return `<div class="card person" data-owner="${esc(p.owner)}" role="button" tabindex="0"
+        title="눌러서 모델·fast·effort·토큰 종류별 계산 보기">
       <div class="acct-head"><span class="email">${esc(p.owner)}</span>${live}</div>
       <div class="dnut-row">${cells}</div>
       ${legendRows.length ? `<div class="pa-legend">
         <div class="pa-row pa-head"><span class="pa-dot"></span>
-          <span class="pa-name"></span>
+          <span class="pa-name">크레딧</span>
           <span class="pa-tok">5시간</span><span class="pa-tok">주간</span></div>
         ${legend}</div>`
         : `<div class="pa-legend"><div class="hint">이 기간에는 사용이 없습니다.</div></div>`}
+      ${warn}
+      <div class="pa-more">상세 보기 ›</div>
     </div>`;
   }).join("");
   box.innerHTML = `<div class="cards">${cards}</div>`;
@@ -466,7 +503,7 @@ function renderCharts() {
           legend: { display: false },
           tooltip: {
             callbacks: {
-              label: (c) => `${c.label}: ${fmtFull(c.parsed)}` +
+              label: (c) => `${c.label}: ${fmtCredit(c.parsed)} 크레딧` +
                 ` (${((c.parsed / d.total) * 100).toFixed(1)}%)`,
             },
           },
@@ -482,14 +519,123 @@ function renderCharts() {
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
           ctx.font = "700 13px -apple-system, sans-serif";
-          ctx.fillText(fmt(d.total),
-            (chartArea.left + chartArea.right) / 2,
-            (chartArea.top + chartArea.bottom) / 2);
+          const cx = (chartArea.left + chartArea.right) / 2;
+          const cy = (chartArea.top + chartArea.bottom) / 2;
+          ctx.fillText(fmtCredit(d.total), cx, cy - 6);
+          ctx.fillStyle = "#8b949e";
+          // canvas 는 CSS 폰트를 따르지 않으므로 본문과 같은 목록을 직접 준다(한글 포함).
+          ctx.font = '500 10px -apple-system, "Segoe UI", "Noto Sans KR", sans-serif';
+          ctx.fillText("크레딧", cx, cy + 9);
           ctx.restore();
         },
       }],
     }));
   });
+  if (state.detail) renderPersonDetail();
+}
+
+// ---- 개인 상세: 크레딧이 어떻게 계산됐는가 ---------------------------------
+// 카드의 숫자 하나를 '어디서 얼마가 나왔는지' 로 풀어 보여 준다.
+//   1) 토큰 종류별 합계 — 입력·출력·캐시 읽기·캐시 쓰기(TTL별) 각각의 크레딧과 비중
+//   2) 모델 · 속도(fast) · effort 별 묶음 — 묶음마다 종류별 계산식
+//        크레딧 = 토큰 수 × 단가($/1M) ÷ 1,000,000 ÷ $10
+//   3) 단가 미등록 — 크레딧에 넣지 못한 토큰
+// 비중은 전부 '그 사람의 그 창 크레딧 합계' 대비다.
+function openPersonDetail(owner) {
+  state.detail = { owner, w: (state.detail && state.detail.w) || "7d" };
+  renderPersonDetail();
+}
+
+function closePersonDetail() {
+  state.detail = null;
+  $("#personDetail").classList.add("hidden");
+}
+
+function pctBar(p) {
+  return `<span class="pctbar"><i style="width:${Math.min(100, Math.max(0, p || 0))}%"></i></span>`;
+}
+
+function renderPersonDetail() {
+  const box = $("#personDetail");
+  const d = state.detail;
+  const s = state.summary || {};
+  const p = (s.people || []).find((x) => x.owner === d.owner);
+  if (!p) { closePersonDetail(); return; }
+  const det = (p.credit_detail || {})[d.w] || { total: 0, groups: [], components: [], unpriced: [] };
+  const cr = s.credit || { usd_per_credit: 10 };
+  const usd = (det.total || 0) * (cr.usd_per_credit || 10);
+  const wl = (CHART_WINDOWS.find((x) => x.key === d.w) || {}).label || d.w;
+
+  const seg = CHART_WINDOWS.map((w) =>
+    `<button class="${w.key === d.w ? "on" : ""}" data-w="${w.key}">${w.label}</button>`).join("");
+
+  const compRows = (det.components || []).map((c) => `<tr>
+      <td>${esc(COMPONENT_LABEL[c.component] || c.component)}</td>
+      <td class="num">${fmtFull(c.tokens)}</td>
+      <td class="num">${fmtCredit(c.credits)}</td>
+      <td class="num">${fmtPct(c.pct)} ${pctBar(c.pct)}</td></tr>`).join("");
+
+  const groupRows = (det.groups || []).map((g) => {
+    const speed = SPEED_LABEL[g.speed] || g.speed;
+    const tags = [
+      `<span class="chip prov ${esc(g.provider)}">${esc(g.provider)}</span>`,
+      `<span class="chip">${esc((g.account_email || "").split("@")[0] || "계정 없음")}</span>`,
+      `<b>${esc(g.model || "(모델 미상)")}</b>`,
+      `<span class="chip ${g.speed === "fast" ? "fast" : ""}">${esc(speed)}</span>`,
+      `<span class="chip">effort ${esc(g.effort || "미상")}</span>`,
+      g.long_context ? `<span class="chip fast" data-tip="한 요청의 입력이 272K 를 넘어 OpenAI 장문맥 단가(입력·캐시 ×2, 출력 ×1.5)">장문맥</span>` : "",
+    ].join(" ");
+    const head = `<tr class="cr-group"><td colspan="3">${tags}
+        <span class="hint">· ${fmtFull(g.messages)}턴</span></td>
+      <td class="num">${fmtCredit(g.credits)}</td>
+      <td class="num">${fmtPct(g.pct)} ${pctBar(g.pct)}</td></tr>`;
+    const subs = (g.components || []).map((c) => {
+      const note = c.component === "cache_write_ttl_unknown"
+        ? ` <span class="hint" data-tip="송신기 업데이트 전 기록이라 5분/1시간 구분이 없습니다. Claude Code 의 캐시 쓰기는 실측 97~100%가 1시간짜리라 1시간 단가로 계산했습니다.">ⓘ</span>` : "";
+      return `<tr class="cr-sub">
+        <td>${esc(COMPONENT_LABEL[c.component] || c.component)}${note}</td>
+        <td class="num">${fmtFull(c.tokens)}</td>
+        <td class="num cr-calc">× ${fmtRate(c.usd_per_mtok)}/1M ÷ $10</td>
+        <td class="num">${fmtCredit(c.credits || (c.tokens ? 1e-9 : 0))}</td>
+        <td class="num">${fmtPct(c.pct)}</td></tr>`;
+    }).join("");
+    return head + subs;
+  }).join("");
+
+  const unp = det.unpriced || [];
+  const unpBlock = unp.length ? `<h3>단가 미등록 — 크레딧에서 제외</h3>
+    <p class="hint">공식 단가를 확인하지 못한 모델·처리 티어입니다. 0 으로 처리하면 그만큼 적게 쓴 것처럼
+      보이므로 따로 둡니다. 단가가 확인되면 <code>scraper/ai_pricing.py</code> 에 추가하세요.</p>
+    <div class="tablewrap"><table><thead><tr><th>도구</th><th>모델</th><th>처리</th>
+      <th class="num">토큰</th><th>사유</th></tr></thead><tbody>
+    ${unp.map((u) => `<tr><td>${esc(u.provider)}</td><td>${esc(u.model)}</td>
+      <td>${esc(SPEED_LABEL[u.speed] || u.speed)}</td><td class="num">${fmtFull(u.tokens)}</td>
+      <td>${esc(u.reason)}</td></tr>`).join("")}</tbody></table></div>` : "";
+
+  const empty = !(det.groups || []).length;
+  box.querySelector(".modal-box").innerHTML = `
+    <div class="modal-head">
+      <div><h2 id="pdTitle">${esc(p.owner)} · 크레딧 상세</h2>
+        <div class="hint">${wl} 창 · 단가 기준 ${esc(cr.pricing_as_of || "")}</div></div>
+      <div class="modal-ctl"><div class="seg">${seg}</div>
+        <button class="btn" data-close>닫기</button></div>
+    </div>
+    <div class="cr-total"><span class="cr-big">${fmtCredit(det.total)}</span> 크레딧
+      <span class="hint">≈ $${usd.toFixed(2)} (API 단가 환산 — 구독제라 실제 청구액은 아님)</span></div>
+    <div class="cr-formula">크레딧 = 토큰 수 × 공식 API 단가($/1M 토큰) ÷ 1,000,000 ÷ $10
+      &nbsp;·&nbsp; 1 크레딧 = $10. 단가는 모델·토큰 종류·처리 속도(fast)·장문맥에 따라 다르고,
+      effort 는 단가가 아니라 생성량을 바꿉니다.</div>
+    ${empty ? `<div class="empty">이 창에는 크레딧으로 환산할 사용이 없습니다.</div>` : `
+    <h3>토큰 종류별</h3>
+    <div class="tablewrap"><table class="cr"><thead><tr><th>종류</th><th class="num">토큰</th>
+      <th class="num">크레딧</th><th class="num">전체 대비</th></tr></thead>
+      <tbody>${compRows}</tbody></table></div>
+    <h3>모델 · 속도 · effort 별 계산</h3>
+    <div class="tablewrap"><table class="cr"><thead><tr><th>종류</th><th class="num">토큰</th>
+      <th class="num">단가</th><th class="num">크레딧</th><th class="num">전체 대비</th></tr></thead>
+      <tbody>${groupRows}</tbody></table></div>`}
+    ${unpBlock}`;
+  box.classList.remove("hidden");
 }
 
 // ---- alerts ---------------------------------------------------------------
@@ -602,6 +748,23 @@ window.addEventListener("DOMContentLoaded", () => {
   $("#metricSelect").onchange = () => { state.metric = $("#metricSelect").value; render(); };
   $("#autoRefresh").onchange = setupAutoRefresh;
   $("#sessionFilter").oninput = renderSessions;
+  // 개인 카드 → 상세. 카드는 30초마다 다시 그려지므로 영역에 한 번만 건다.
+  const openFrom = (e) => {
+    const card = e.target.closest(".card.person");
+    if (card) openPersonDetail(card.dataset.owner);
+  };
+  $("#chartArea").addEventListener("click", openFrom);
+  $("#chartArea").addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openFrom(e); }
+  });
+  $("#personDetail").addEventListener("click", (e) => {
+    if (e.target.id === "personDetail" || e.target.closest("[data-close]")) closePersonDetail();
+    const seg = e.target.closest(".seg button");
+    if (seg && state.detail) { state.detail.w = seg.dataset.w; renderPersonDetail(); }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && state.detail) closePersonDetail();
+  });
   setupTooltip();
   setupAutoRefresh();
   refresh();

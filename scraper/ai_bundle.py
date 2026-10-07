@@ -16,6 +16,8 @@ import socket
 import time
 from datetime import datetime, timezone
 
+from . import ai_pricing
+
 WINDOWS = {"5h": 5 * 3600 * 1000, "7d": 7 * 86400 * 1000}
 METRIC_KEYS = ("input", "output", "cache_creation", "cache_read",
                "io", "billable", "total", "messages")
@@ -294,19 +296,16 @@ def build(db, cfg, now=None):
             p["hosts"].add(s["host"])
         if s["account_email"]:
             p["accounts"].add(s["account_email"])
+    # 세션 → 사람. 창마다 세션 수만큼 목록을 다시 훑던 것을 사전 한 번으로 바꾼다
+    # (모델·속도로 더 잘게 묶으면서 행이 늘었다).
+    owner_by = {(s["provider"], s["session_id"]): s["owner"] for s in sessions}
+    models = ai_pricing.load_models(cfg)
     for w in WINDOWS:
         start = now - WINDOWS[w]
-        for r in db.execute(
-                """SELECT u.provider, u.account_email, u.session_id,
-                          COUNT(*) n, SUM(u.input) i, SUM(u.output) o,
-                          SUM(u.cache_creation) cw, SUM(u.cache_read) cr
-                   FROM usage u WHERE u.ts>=? GROUP BY u.provider, u.account_email, u.session_id""",
-                (start,)):
+        for r in db.execute(_CREDIT_SQL, (ai_pricing.OPENAI_LONG_CONTEXT_OVER, start)):
             if allowed and r["account_email"] not in allowed:
                 continue
-            sess = next((s for s in sessions if s["session_id"] == r["session_id"]
-                         and s["provider"] == r["provider"]), None)
-            owner = (sess or {}).get("owner") or "미분류"
+            owner = owner_by.get((r["provider"], r["session_id"])) or "미분류"
             p = people.setdefault(owner, {
                 "owner": owner, "lifetime": EMPTY, "live_sessions": 0,
                 "windows": {x: EMPTY for x in WINDOWS},
@@ -316,19 +315,27 @@ def build(db, cfg, now=None):
             p["windows"][w] = _add(p["windows"][w], m)
             bkey = (r["provider"], r["account_email"])
             p["breakdown"][w][bkey] = _add(p["breakdown"][w].get(bkey, EMPTY), m)
+            _add_credits(p, w, bkey, r, models)
 
     people_out = []
     for p in people.values():
+        cr = p.get("_credits") or {}
         people_out.append({
             "owner": p["owner"], "lifetime": p["lifetime"], "windows": p["windows"],
             "live_sessions": p["live_sessions"],
             "providers": sorted(p["providers"]), "hosts": sorted(p["hosts"]),
             "accounts": sorted(p["accounts"]),
-            "breakdown": {w: [dict(provider=k[0], account_email=k[1], **v)
+            "breakdown": {w: [dict(provider=k[0], account_email=k[1], **v,
+                                   credits=round(((cr.get(w) or {}).get("by_pa") or {})
+                                                 .get(k, 0.0), 4))
                               for k, v in sorted(p["breakdown"][w].items())]
                           for w in WINDOWS},
+            "credits": {w: round((cr.get(w) or {}).get("total", 0.0), 4) for w in WINDOWS},
+            "credit_detail": {w: _credit_detail(cr.get(w)) for w in WINDOWS},
         })
-    people_out.sort(key=lambda x: -x["windows"]["7d"]["total"])
+    # 많이 쓴 사람이 위로 — 토큰 합계가 아니라 크레딧으로 줄 세운다. 토큰 합계로는
+    # 캐시를 많이 다시 읽은 사람이 비싸게 쓴 사람보다 위에 온다.
+    people_out.sort(key=lambda x: -x["credits"]["7d"])
 
     totals = {w: EMPTY for w in WINDOWS}
     for a in accounts:
@@ -351,11 +358,121 @@ def build(db, cfg, now=None):
             "collect": cfg.get("collect") or {}, "nas": cfg.get("nas") or {},
             # 창이 아직 덜 찼는지 화면/사람이 알 수 있도록.
             "data_since": since, "pricing_models": [],
+            # 화면이 '크레딧이 무엇인지' 를 같은 근거로 설명할 수 있게.
+            "credit": {"usd_per_credit": ai_pricing.USD_PER_CREDIT,
+                       "pricing_as_of": ai_pricing.PRICING_AS_OF,
+                       "sources": ai_pricing.PRICING_SOURCES},
         },
         "sessions": sessions, "alerts": alerts, "timeseries": {},
         "config": {k: cfg.get(k) for k in ("tracking", "alerts", "email", "collect", "nas")
                    if cfg.get(k) is not None},
     }
+
+
+# 사람 x 창 집계의 입력. 단가가 갈리는 값(모델·속도·장문맥)과 분류용 값(effort)으로
+# 묶고, 캐시 쓰기는 TTL 별로 나눠 더한다.
+#   cw1h : TTL 을 아는 행에서 1시간 쓰기로 확인된 몫
+#   cwu  : TTL 을 모르는 행(구버전 송신기)의 캐시 쓰기 전부
+# 장문맥은 요청 하나의 입력(새 입력 + 캐시 읽기 + 캐시 쓰기)이 기준을 넘었는지로 가른다
+# — OpenAI 의 할증은 요청 단위다. Claude 는 1M 까지 할증이 없으므로 가르지 않는다
+# (가르면 같은 모델이 아무 의미 없이 두 묶음으로 쪼개지고 '장문맥' 표시가 붙는다).
+_CREDIT_SQL = """
+    SELECT provider, account_email, session_id, model,
+           COALESCE(NULLIF(speed, ''), 'standard') AS speed, effort,
+           CASE WHEN provider = 'codex' AND
+                     COALESCE(input,0) + COALESCE(cache_read,0) + COALESCE(cache_creation,0) > ?
+                THEN 1 ELSE 0 END AS lc,
+           COUNT(*) n, SUM(input) i, SUM(output) o,
+           SUM(cache_creation) cw, SUM(cache_read) cr,
+           SUM(COALESCE(cache_creation_1h, 0)) cw1h,
+           SUM(CASE WHEN cache_creation_1h IS NULL THEN cache_creation ELSE 0 END) cwu
+    FROM usage WHERE ts >= ?
+    GROUP BY provider, account_email, session_id, model, speed, effort, lc"""
+
+
+def _add_credits(p, w, bkey, r, models):
+    """한 묶음의 토큰을 종류별 단가로 크레딧으로 바꿔 그 사람의 창에 더한다."""
+    acc = p.setdefault("_credits", {}).setdefault(w, {
+        "total": 0.0, "by_pa": {}, "groups": {}, "unpriced": {}})
+    comps = ai_pricing.split_components(
+        r["provider"], r["i"] or 0, r["o"] or 0, r["cr"] or 0,
+        r["cw"] or 0, r["cw1h"] or 0, r["cwu"] or 0)
+    tokens = sum(comps.values())
+    if not tokens:
+        return
+    speed, lc = r["speed"], bool(r["lc"])
+    rate, why = ai_pricing.rates(models, r["model"], speed, lc)
+    if rate is None:
+        key = (r["provider"], r["model"] or "(모델 미상)", speed)
+        u = acc["unpriced"].setdefault(key, {"tokens": 0, "reason": why})
+        u["tokens"] += tokens
+        return
+    gkey = (r["provider"], r["account_email"], r["model"], speed, r["effort"] or "", lc)
+    g = acc["groups"].setdefault(gkey, {"credits": 0.0, "messages": 0, "components": {}})
+    g["messages"] += r["n"] or 0
+    for comp, tok in comps.items():
+        if not tok:
+            continue
+        if comp not in rate:
+            # 모델은 아는데 이 종류의 단가가 표에 없다(예: gpt-5.5 캐시 쓰기).
+            # 0 크레딧으로 넘기지 않고 미등록으로 드러낸다.
+            key = (r["provider"], r["model"] or "(모델 미상)", speed)
+            u = acc["unpriced"].setdefault(key, {"tokens": 0, "reason": f"{comp} 단가 미등록"})
+            u["tokens"] += tok
+            continue
+        cost = ai_pricing.credits(tok, rate[comp])
+        c = g["components"].setdefault(comp, {"tokens": 0, "usd_per_mtok": rate[comp],
+                                              "credits": 0.0})
+        c["tokens"] += tok
+        c["credits"] += cost
+        g["credits"] += cost
+        acc["total"] += cost
+        acc["by_pa"][bkey] = acc["by_pa"].get(bkey, 0.0) + cost
+
+
+def _pct(part, whole):
+    return round(part / whole * 100, 2) if whole else 0.0
+
+
+def _credit_detail(acc):
+    """화면의 상세 창이 그대로 그릴 수 있는 모양으로 편다.
+
+    groups     : 모델 · 속도 · effort · 장문맥 별 묶음. 안에 토큰 종류별 계산
+                 (토큰 수 × $/1M ÷ 10^6 ÷ $10) 과 전체 대비 비중.
+    components : 토큰 종류별 합계 (모든 묶음을 가로질러).
+    unpriced   : 단가를 몰라 크레딧에서 뺀 토큰. 0 으로 숨기지 않는다.
+    """
+    if not acc:
+        return {"total": 0.0, "groups": [], "components": [], "unpriced": []}
+    total = acc["total"]
+    groups, by_comp = [], {}
+    for (prov, acct, model, speed, effort, lc), g in acc["groups"].items():
+        comps = []
+        for comp in ai_pricing.COMPONENTS:
+            c = g["components"].get(comp)
+            if not c:
+                continue
+            comps.append({"component": comp, "tokens": c["tokens"],
+                          "usd_per_mtok": round(c["usd_per_mtok"], 4),
+                          "credits": round(c["credits"], 4),
+                          "pct": _pct(c["credits"], total)})
+            t = by_comp.setdefault(comp, {"tokens": 0, "credits": 0.0})
+            t["tokens"] += c["tokens"]
+            t["credits"] += c["credits"]
+        groups.append({"provider": prov, "account_email": acct, "model": model,
+                       "speed": speed, "effort": effort or None, "long_context": lc,
+                       "messages": g["messages"], "credits": round(g["credits"], 4),
+                       "pct": _pct(g["credits"], total), "components": comps})
+    groups.sort(key=lambda x: -x["credits"])
+    components = [{"component": k, "tokens": by_comp[k]["tokens"],
+                   "credits": round(by_comp[k]["credits"], 4),
+                   "pct": _pct(by_comp[k]["credits"], total)}
+                  for k in ai_pricing.COMPONENTS if k in by_comp]
+    unpriced = [{"provider": k[0], "model": k[1], "speed": k[2],
+                 "tokens": v["tokens"], "reason": v["reason"]}
+                for k, v in sorted(acc["unpriced"].items(), key=lambda x: -x[1]["tokens"])]
+    return {"total": round(total, 4), "groups": groups,
+            "components": components, "unpriced": unpriced}
 
 
 def rl_of(accounts, provider, email):

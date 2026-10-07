@@ -4,9 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AIDAS AI 모니터링</title>
-  <link rel="stylesheet" href="./style.css?v=15e578e85b" />
+  <link rel="stylesheet" href="./style.css?v=c998875058" />
   <script src="./vendor/chart.umd.min.js" defer></script>
-  <script src="./app.js?v=15e578e85b" defer></script>
+  <script src="./app.js?v=c998875058" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -88,9 +88,13 @@
     <!-- CHARTS -->
     <section id="tab-charts" class="panel">
       <h2>개인별 사용량</h2>
-      <p class="hint">각 사람이 어느 계정·도구를 얼마나 썼는지 보여줍니다.
-        도넛 조각은 계정 x 도구(claude/codex) 구성비이고, 가운데 숫자는 선택한 지표의 합계입니다. 각 창은 그 계정의 실제 한도 리셋 시점부터 셉니다.
-        한도 소진율은 계정 속성이라 개요 탭의 계정 카드에서 확인하세요.</p>
+      <p class="hint">각 사람이 어느 계정·도구를 얼마나 썼는지 <b>크레딧</b>으로 보여줍니다.
+        크레딧은 토큰을 종류·모델·속도별 <b>공식 API 단가</b>로 환산한 값이며
+        <b>1 크레딧 = $10</b>(단가 $10/1M 토큰 1M 개)입니다 — 토큰 1개의 값은 종류에 따라 수백 배까지 차이가
+        나서 토큰 합계로는 누가 비싸게 썼는지 알 수 없습니다. 상단 '지표' 선택과는 무관합니다.
+        도넛 조각은 계정 x 도구(claude/codex) 구성비, 가운데 숫자는 그 창의 크레딧 합계입니다.
+        창은 지금부터 거꾸로 센 5시간·7일입니다. <b>카드를 누르면</b> 모델·fast·effort·토큰 종류별
+        계산 내역과 비중이 열립니다. 한도 소진율은 계정 속성이라 개요 탭의 계정 카드에서 확인하세요.</p>
       <div id="chartArea"></div>
     </section>
 
@@ -117,6 +121,10 @@
       <div id="collectInfo" class="emailbox"></div>
     </section>
   </main>
+
+  <!-- 개인별 크레딧 상세 (개인별 사용량 카드를 누르면 열린다) -->
+  <div id="personDetail" class="modal hidden" role="dialog" aria-modal="true"
+       aria-labelledby="pdTitle"><div class="modal-box"></div></div>
 
   <footer class="foot">AIDAS AI Monitoring · 정적 스냅샷 (읽기 전용) · 중앙 서버가 발행한 스냅샷을 이 사이트가 주기적으로 받아 둡니다</footer>
 </body>
