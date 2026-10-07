@@ -124,7 +124,15 @@ DEFAULT_MODELS = {
     # 단기 문맥 전용(<272K). 캐시 쓰기 단가는 표에 없다.
     "gpt-5.5":       {"family": "openai", "in": 5,   "out": 30,  "cr": 0.50,
                       "speed": {"standard": 1.0}},
-    # codex-auto-review · gpt-reserve 는 공식 단가표에 없다 — 일부러 넣지 않는다.
+    # Codex 가 사용자 작업과 별도 세션으로 돌리는 자동 리뷰. 공식 단가표에 없고,
+    # 사용량이 거의 과금되지 않는 것으로 알려져 있어 단가 ≈ 0 으로 둔다. 토큰은
+    # 많아 보이지만(주간 888M, 93.8% 가 캐시 읽기) 이것을 '단가 미등록' 경고로 띄우면
+    # 실제로는 없는 비용이 있는 것처럼 읽힌다. 화면에는 note 로 정체를 밝혀 둔다.
+    "codex-auto-review": {"family": "openai", "in": 0, "out": 0, "cr": 0, "cw": 0,
+                          "speed": {"standard": 1.0, "fast": 1.0, "flex": 1.0},
+                          "long_context": {"in": 1.0, "cr": 1.0, "cw": 1.0, "out": 1.0},
+                          "note": "자동 리뷰 — 단가 ≈ 0 (크레딧 제외)"},
+    # gpt-reserve 는 공식 단가표에 없다 — 일부러 넣지 않는다.
 }
 
 _DATE_SUFFIX = re.compile(r"-\d{8}$")

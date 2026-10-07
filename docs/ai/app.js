@@ -474,6 +474,14 @@ function renderCharts() {
       .reduce((a, u) => a + (u.tokens || 0), 0);
     const warn = unpriced
       ? `<div class="hint pa-warn">단가 미등록 ${fmt(unpriced)} 토큰은 크레딧에서 제외</div>` : "";
+    // 단가표가 '거의 0' 으로 둔 모델(예: codex-auto-review — 자동 리뷰)은 경고가 아니라
+    // 정체만 밝힌다. 토큰은 많아 보여도 비용으로 읽으면 안 되는 사용이다.
+    const noted = new Map();
+    ((((p.credit_detail || {})["7d"] || {}).groups) || []).filter((g) => g.note)
+      .forEach((g) => noted.set(g.model, (noted.get(g.model) || 0) + (g.tokens || 0)));
+    const notes = [...noted.entries()].filter(([, t]) => t > 0)
+      .map(([model, t]) => `<div class="hint pa-note">${esc(model)} ${fmt(t)} 토큰 — 단가 ≈ 0 (크레딧 제외)</div>`)
+      .join("");
     return `<div class="card person" data-owner="${esc(p.owner)}" role="button" tabindex="0"
         title="눌러서 모델·fast·effort·토큰 종류별 계산 보기">
       <div class="acct-head"><span class="email">${esc(p.owner)}</span>${live}</div>
@@ -484,7 +492,7 @@ function renderCharts() {
           <span class="pa-tok">5시간</span><span class="pa-tok">주간</span></div>
         ${legend}</div>`
         : `<div class="pa-legend"><div class="hint">이 기간에는 사용이 없습니다.</div></div>`}
-      ${warn}
+      ${warn}${notes}
       <div class="pa-more">상세 보기 ›</div>
     </div>`;
   }).join("");
@@ -604,6 +612,7 @@ function renderPersonDetail() {
       `<span class="chip ${g.speed === "fast" ? "fast" : ""}">${esc(speed)}</span>`,
       `<span class="chip">effort ${esc(g.effort || "미상")}</span>`,
       g.long_context ? `<span class="chip fast" data-tip="한 요청의 입력이 272K 를 넘어 OpenAI 장문맥 단가(입력·캐시 ×2, 출력 ×1.5)">장문맥</span>` : "",
+      g.note ? `<span class="chip">${esc(g.note)}</span>` : "",
     ].join(" ");
     const head = `<tr class="cr-group"><td colspan="3">${tags}
         <span class="hint">· ${fmtFull(g.messages)}턴</span></td>
@@ -616,7 +625,7 @@ function renderPersonDetail() {
         <td>${esc(COMPONENT_LABEL[c.component] || c.component)}${note}</td>
         <td class="num">${fmtFull(c.tokens)}</td>
         <td class="num cr-calc">× ${fmtRate(c.usd_per_mtok)}/1M ÷ $10</td>
-        <td class="num">${fmtCredit(c.credits || (c.tokens ? 1e-9 : 0))}</td>
+        <td class="num">${fmtCredit(c.credits || (c.tokens && c.usd_per_mtok ? 1e-9 : 0))}</td>
         <td class="num">${fmtPct(c.pct)}</td></tr>`;
     }).join("");
     return head + subs;

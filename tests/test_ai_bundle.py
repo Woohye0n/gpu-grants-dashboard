@@ -199,6 +199,15 @@ check("모르는 모델은 0 으로 숨기지 않고 따로 드러낸다",
 c, d = credit_bundle([{"provider": "codex", "model": "gpt-6-astra", "input": M,
                        "speed": "ultrafast"}])
 check("모르는 처리 티어도 마찬가지", (c, d["unpriced"][0]["speed"]), (0.0, "ultrafast"))
+c, d = credit_bundle([{"model": "claude-opus-5-5", "input": M},
+                      {"provider": "codex", "model": "codex-auto-review", "input": 5000,
+                       "cache_read": 90_000, "output": 85, "session_id": "s2"}])
+ar = [g for g in d["groups"] if g["model"] == "codex-auto-review"]
+check("codex-auto-review 는 단가 ≈ 0 — 크레딧에 안 들어가고 미등록도 아니다",
+      (near(c, 0.4), d["unpriced"], ar[0]["credits"], ar[0]["tokens"]), (True, [], 0.0, 95_085))
+check("그 묶음에 정체를 밝히는 note 가 붙는다", bool(ar[0]["note"]), True)
+check("토큰 종류별 합계에는 섞지 않는다 (입력 = Opus 의 1M 만)",
+      [x["tokens"] for x in d["components"] if x["component"] == "input"], [M])
 c, d = credit_bundle([{"provider": "codex", "model": "gpt-5.5", "input": 1000,
                        "cache_creation": 500}])
 check("단가가 없는 토큰 종류만 따로 빼고 나머지는 계산한다",

@@ -408,7 +408,10 @@ def _add_credits(p, w, bkey, r, models):
         u["tokens"] += tokens
         return
     gkey = (r["provider"], r["account_email"], r["model"], speed, r["effort"] or "", lc)
-    g = acc["groups"].setdefault(gkey, {"credits": 0.0, "messages": 0, "components": {}})
+    g = acc["groups"].setdefault(gkey, {
+        "credits": 0.0, "messages": 0, "components": {},
+        # 단가표가 그 모델에 붙여 둔 설명(예: 자동 리뷰 — 단가 ≈ 0). 화면이 그대로 보인다.
+        "note": (ai_pricing.lookup(models, r["model"]) or {}).get("note")})
     g["messages"] += r["n"] or 0
     for comp, tok in comps.items():
         if not tok:
@@ -456,13 +459,18 @@ def _credit_detail(acc):
                           "usd_per_mtok": round(c["usd_per_mtok"], 4),
                           "credits": round(c["credits"], 4),
                           "pct": _pct(c["credits"], total)})
+            if not c["usd_per_mtok"]:
+                continue        # 단가 ≈ 0 (자동 리뷰 등) — 종류별 합계에 섞으면 토큰과
+                                # 크레딧이 어긋나 보인다. 그 묶음 안에서만 보인다.
             t = by_comp.setdefault(comp, {"tokens": 0, "credits": 0.0})
             t["tokens"] += c["tokens"]
             t["credits"] += c["credits"]
         groups.append({"provider": prov, "account_email": acct, "model": model,
                        "speed": speed, "effort": effort or None, "long_context": lc,
                        "messages": g["messages"], "credits": round(g["credits"], 4),
-                       "pct": _pct(g["credits"], total), "components": comps})
+                       "pct": _pct(g["credits"], total), "components": comps,
+                       "tokens": sum(c["tokens"] for c in comps),
+                       "note": g.get("note")})
     groups.sort(key=lambda x: -x["credits"])
     components = [{"component": k, "tokens": by_comp[k]["tokens"],
                    "credits": round(by_comp[k]["credits"], 4),

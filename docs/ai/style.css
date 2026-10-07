@@ -261,6 +261,7 @@ tfoot .totalrow .hint { color: var(--muted); }
 #chartArea .card.person:hover,
 #chartArea .card.person:focus-visible { border-color: var(--accent); outline: none; }
 #chartArea .pa-warn { margin-top: 8px; color: var(--yellow); }
+#chartArea .pa-note { margin-top: 6px; }
 #chartArea .pa-more { margin-top: 10px; font-size: 11px; color: var(--accent); text-align: right; }
 
 .modal {
