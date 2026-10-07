@@ -428,7 +428,13 @@ function renderCharts() {
     return;
   }
   buildPaColors(people);
-  const m = "credits";
+  // 크레딧은 스냅샷을 만드는 집계(scraper/ai_bundle.py)가 계산해 싣는다. 화면은 main
+  // 푸시로 바로 배포되지만 스냅샷은 사내 서버가 새 코드를 받아야 바뀌므로, 그 사이에는
+  // 크레딧이 없는 옛 스냅샷이 온다. 그때 크레딧만 찾으면 전원이 '사용 없음' 으로 보인다
+  // (실제로 그 조합을 띄워 보니 도넛 32개가 전부 비었다). 없으면 예전처럼 토큰으로 보인다.
+  const hasCredits = !!(s && s.credit);
+  const m = hasCredits ? "credits" : state.metric;
+  const fmtV = hasCredits ? fmtCredit : fmt;
   const pending = [];
 
   const cards = people.map((p, pi) => {
@@ -447,7 +453,7 @@ function renderCharts() {
       const parts = ((p.breakdown || {})[w.key] || []).filter((b) => (b[m] || 0) > 0);
       const total = parts.reduce((a, b) => a + (b[m] || 0), 0);
       const id = `dn-${pi}-${w.key}`;
-      if (total > 0) pending.push({ id, parts, m, total });
+      if (total > 0) pending.push({ id, parts, m, total, hasCredits });
       const face = total > 0
         ? `<canvas id="${id}" width="104" height="104"></canvas>`
         : `<div class="dnut-none">사용 없음</div>`;
@@ -457,8 +463,8 @@ function renderCharts() {
     const legend = legendRows.map((e) => `<div class="pa-row">
         <span class="pa-dot" style="background:${paColor(e)}"></span>
         <span class="pa-name">${esc(paLabel(e))}</span>
-        <span class="pa-tok">${fmtCredit(e.vals["5h"] || 0)}</span>
-        <span class="pa-tok">${fmtCredit(e.vals["7d"] || 0)}</span>
+        <span class="pa-tok">${fmtV(e.vals["5h"] || 0)}</span>
+        <span class="pa-tok">${fmtV(e.vals["7d"] || 0)}</span>
       </div>`).join("");
     const live = p.live_sessions
       ? `<span class="chip live">라이브 ${p.live_sessions}</span>` : "";
@@ -474,7 +480,7 @@ function renderCharts() {
       <div class="dnut-row">${cells}</div>
       ${legendRows.length ? `<div class="pa-legend">
         <div class="pa-row pa-head"><span class="pa-dot"></span>
-          <span class="pa-name">크레딧</span>
+          <span class="pa-name">${hasCredits ? "크레딧" : "토큰 · " + esc(m)}</span>
           <span class="pa-tok">5시간</span><span class="pa-tok">주간</span></div>
         ${legend}</div>`
         : `<div class="pa-legend"><div class="hint">이 기간에는 사용이 없습니다.</div></div>`}
@@ -482,7 +488,10 @@ function renderCharts() {
       <div class="pa-more">상세 보기 ›</div>
     </div>`;
   }).join("");
-  box.innerHTML = `<div class="cards">${cards}</div>`;
+  const notice = hasCredits ? "" : `<div class="hint pa-warn" style="margin-bottom:10px">
+      이 스냅샷에는 아직 크레딧 정보가 없어 토큰(상단 '지표')으로 표시합니다 — 집계 서버가
+      새 코드를 받아 다음 스냅샷을 만들면 크레딧으로 바뀝니다.</div>`;
+  box.innerHTML = `${notice}<div class="cards">${cards}</div>`;
 
   pending.forEach((d) => {
     const el = document.getElementById(d.id);
@@ -503,7 +512,8 @@ function renderCharts() {
           legend: { display: false },
           tooltip: {
             callbacks: {
-              label: (c) => `${c.label}: ${fmtCredit(c.parsed)} 크레딧` +
+              label: (c) => (d.hasCredits ? `${c.label}: ${fmtCredit(c.parsed)} 크레딧`
+                                          : `${c.label}: ${fmtFull(c.parsed)}`) +
                 ` (${((c.parsed / d.total) * 100).toFixed(1)}%)`,
             },
           },
@@ -521,11 +531,11 @@ function renderCharts() {
           ctx.font = "700 13px -apple-system, sans-serif";
           const cx = (chartArea.left + chartArea.right) / 2;
           const cy = (chartArea.top + chartArea.bottom) / 2;
-          ctx.fillText(fmtCredit(d.total), cx, cy - 6);
+          ctx.fillText(d.hasCredits ? fmtCredit(d.total) : fmt(d.total), cx, cy - 6);
           ctx.fillStyle = "#8b949e";
           // canvas 는 CSS 폰트를 따르지 않으므로 본문과 같은 목록을 직접 준다(한글 포함).
           ctx.font = '500 10px -apple-system, "Segoe UI", "Noto Sans KR", sans-serif';
-          ctx.fillText("크레딧", cx, cy + 9);
+          ctx.fillText(d.hasCredits ? "크레딧" : "토큰", cx, cy + 9);
           ctx.restore();
         },
       }],
@@ -561,6 +571,16 @@ function renderPersonDetail() {
   const s = state.summary || {};
   const p = (s.people || []).find((x) => x.owner === d.owner);
   if (!p) { closePersonDetail(); return; }
+  if (!s.credit) {
+    // 옛 스냅샷 — 계산 근거가 실려 오지 않았다. 빈 표 대신 이유를 말한다.
+    box.querySelector(".modal-box").innerHTML = `
+      <div class="modal-head"><div><h2 id="pdTitle">${esc(p.owner)} · 크레딧 상세</h2></div>
+        <div class="modal-ctl"><button class="btn" data-close>닫기</button></div></div>
+      <div class="empty">이 스냅샷에는 아직 크레딧 계산 내역이 없습니다. 집계 서버가 새 코드를
+        받아 다음 스냅샷을 만들면 모델·fast·effort·토큰 종류별 내역이 표시됩니다.</div>`;
+    box.classList.remove("hidden");
+    return;
+  }
   const det = (p.credit_detail || {})[d.w] || { total: 0, groups: [], components: [], unpriced: [] };
   const cr = s.credit || { usd_per_credit: 10 };
   const usd = (det.total || 0) * (cr.usd_per_credit || 10);
