@@ -32,43 +32,43 @@
     "rules": [
       {
         "owner": "yunseok",
-        "cwd_glob": "*/yunseok*"
+        "cwd_glob": "*yunseok*"
       },
       {
         "owner": "sieun",
-        "cwd_glob": "*/sieun*"
+        "cwd_glob": "*sieun*"
       },
       {
         "owner": "woohyeon",
-        "cwd_glob": "*/woohyeon*"
+        "cwd_glob": "*woohyeon*"
       },
       {
         "owner": "jhkim",
-        "cwd_glob": "*/jhkim*"
+        "cwd_glob": "*jhkim*"
       },
       {
         "owner": "yongha",
-        "cwd_glob": "*/yongha*"
+        "cwd_glob": "*yongha*"
       },
       {
         "owner": "jusang",
-        "cwd_glob": "*/jusang*"
+        "cwd_glob": "*jusang*"
       },
       {
         "owner": "jaeik",
-        "cwd_glob": "*/jaeik*"
+        "cwd_glob": "*jaeik*"
       },
       {
         "owner": "yejoon",
-        "cwd_glob": "*/yejoon*"
+        "cwd_glob": "*yejoon*"
       },
       {
         "owner": "csjihwanh",
-        "cwd_glob": "*/csjihwanh*"
+        "cwd_glob": "*csjihwanh*"
       },
       {
         "owner": "woohyeon",
-        "cwd_glob": "*/ARPA*"
+        "cwd_glob": "*ARPA*"
       },
       {
         "owner": "sieun",
@@ -76,23 +76,23 @@
       },
       {
         "owner": "kdg6245",
-        "cwd_glob": "*/kdg6245*"
+        "cwd_glob": "*kdg6245*"
       },
       {
         "owner": "minu0426",
-        "cwd_glob": "*/minu0426*"
+        "cwd_glob": "*minu0426*"
       },
       {
         "owner": "jake",
-        "cwd_glob": "*/jake*"
+        "cwd_glob": "*jake*"
       },
       {
         "owner": "skjinlee",
-        "cwd_glob": "*/skjinlee*"
+        "cwd_glob": "*skjinlee*"
       },
       {
         "owner": "wjkim",
-        "cwd_glob": "*/wjkim*"
+        "cwd_glob": "*wjkim*"
       },
       {
         "owner": "hgkim",
@@ -122,27 +122,37 @@
       },
       {
         "owner": "mintaek",
-        "cwd_glob": "*/mintaek*"
+        "cwd_glob": "*mintaek*"
       },
       {
         "owner": "hj153lee",
-        "cwd_glob": "*/hj153lee*"
+        "cwd_glob": "*hj153lee*"
       },
       {
         "owner": "gunchoi",
-        "cwd_glob": "*/gunchoi*"
+        "cwd_glob": "*gunchoi*"
       },
       {
         "owner": "steve97",
-        "cwd_glob": "*/steve97*"
+        "cwd_glob": "*steve97*"
       },
       {
         "owner": "hgkim",
-        "cwd_glob": "*/hgkim*"
+        "cwd_glob": "*hgkim*"
       },
       {
         "owner": "hoeun",
-        "cwd_glob": "*/hoeun*"
+        "cwd_glob": "*hoeun*"
+      },
+      {
+        "owner": "woohyeon",
+        "host": "kakao-b200-2",
+        "note": "임시(2026-10-08): 이 서버는 지금 woohyeon 만 쓴다. 이름 규칙에 안 걸린 세션만 받도록 맨 뒤에 둔다. 다른 사람이 쓰기 시작하면 지울 것."
+      },
+      {
+        "owner": "woohyeon",
+        "host": "gpu-2-0",
+        "note": "임시(2026-10-08): 이 서버는 지금 woohyeon 만 쓴다. 이름 규칙에 안 걸린 세션만 받도록 맨 뒤에 둔다. 다른 사람이 쓰기 시작하면 지울 것."
       }
     ],
     "sessions": {}
