@@ -298,7 +298,8 @@
     const parts = [...g.detail.entries()].map(([k, v]) => {
       const [owner, prov, acct, model, speed, effort] = k.split("\u0001");
       return { owner, prov, acct, model, speed, effort, ...v };
-    }).sort((a, b) => b.credits - a.credits || b.tokens - a.tokens);
+    }).filter((p) => p.tokens || p.credits)   // 토큰 없는 턴(Claude 의 <synthetic> 등)은 내역에서 뺀다
+      .sort((a, b) => b.credits - a.credits || b.tokens - a.tokens);
     const showOwner = s.by !== "owner";
     const comp = g.comp;
     const ct = comp.input + comp.output + comp.cache_write + comp.cache_read || 1;
