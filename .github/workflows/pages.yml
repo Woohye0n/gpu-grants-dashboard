@@ -69,6 +69,11 @@ jobs:
             mkdir -p docs/ai/data
             git show FETCH_HEAD:dashboard.json > docs/ai/data/dashboard.json
             echo "스냅샷 $(wc -c < docs/ai/data/dashboard.json) bytes"
+            # 기록 탭 데이터. 아직 발행 전이면 없다 — 그때 기록 탭은 스스로 그렇다고 말한다.
+            if git cat-file -e FETCH_HEAD:history.json 2>/dev/null; then
+              git show FETCH_HEAD:history.json > docs/ai/data/history.json
+              echo "기록 $(wc -c < docs/ai/data/history.json) bytes"
+            fi
             python3 - <<'EOF'
           import datetime, json
           d = json.load(open("docs/ai/data/dashboard.json"))

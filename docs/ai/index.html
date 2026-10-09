@@ -4,9 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AIDAS AI 모니터링</title>
-  <link rel="stylesheet" href="./style.css?v=a277187127" />
+  <link rel="stylesheet" href="./style.css?v=h20261009" />
+  <link rel="stylesheet" href="./history.css?v=h20261009" />
   <script src="./vendor/chart.umd.min.js" defer></script>
-  <script src="./app.js?v=a277187127" defer></script>
+  <script src="./history.js?v=h20261009" defer></script>
+  <script src="./app.js?v=h20261009" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -47,6 +49,7 @@
 
   <nav class="tabs">
     <button class="tab active" data-tab="charts">개인별 사용량</button>
+    <button class="tab" data-tab="history">기록</button>
     <button class="tab" data-tab="overview">개요</button>
     <button class="tab" data-tab="live">라이브 세션 <span id="liveBadge" class="badge">0</span></button>
     <button class="tab" data-tab="sessions">세션 기록</button>
@@ -96,6 +99,14 @@
         창은 지금부터 거꾸로 센 5시간·7일입니다. <b>카드를 누르면</b> 모델·fast·effort·토큰 종류별
         계산 내역과 비중이 열립니다. 한도 소진율은 계정 속성이라 개요 탭의 계정 카드에서 확인하세요.</p>
       <div id="chartArea"></div>
+    </section>
+
+    <!-- HISTORY -->
+    <section id="tab-history" class="panel hidden">
+      <h2>기록</h2>
+      <p class="hint">지난 사용을 <b>원하는 기간</b>으로 골라 사람·계정·모델·도구별로 합산합니다.
+        시작·끝 날짜를 직접 고르거나 위의 빠른 선택을 쓰세요. 고른 기간은 주소에 남아 그대로 공유할 수 있습니다.</p>
+      <div id="historyArea"></div>
     </section>
 
     <!-- ALERTS -->

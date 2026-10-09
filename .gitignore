@@ -12,3 +12,4 @@ data/ai/
 # AI 사용량 스냅샷 — 서버가 직접 만드는 로컬 산출물입니다.
 # 공개 Pages 에 랩 구성원 이름·작업 경로가 올라가지 않도록 커밋하지 않습니다.
 docs/ai/data/dashboard.json
+docs/ai/data/history.json

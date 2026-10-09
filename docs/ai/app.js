@@ -83,6 +83,13 @@ async function loadBundle() {
   return BUNDLE;
 }
 
+// 기록 탭 데이터 — 스냅샷 옆의 history.json (scraper/ai_bundle.build_history).
+async function loadHistory() {
+  const res = await fetch("./data/history.json?t=" + Date.now(), { cache: "no-store" });
+  if (!res.ok) throw new Error(`history.json ${res.status} — 집계 서버가 아직 기록을 발행하지 않았습니다`);
+  return res.json();
+}
+
 async function api(path) {
   if (!BUNDLE) await loadBundle();
   if (path === "/api/summary") return BUNDLE.summary || {};
@@ -144,6 +151,10 @@ const state = {
 // ---- tabs -----------------------------------------------------------------
 function switchTab(name) {
   state.tab = name;
+  // 기록 탭은 고른 기간을 주소(#history?...)에 남긴다. 다른 탭으로 가면 지운다.
+  if (name !== "history" && /^#history/.test(location.hash)) {
+    history.replaceState(null, "", location.pathname + location.search);
+  }
   $$(".tab").forEach((t) => t.classList.toggle("active", t.dataset.tab === name));
   $$(".panel").forEach((p) => p.classList.toggle("hidden", p.id !== "tab-" + name));
   render();
@@ -735,6 +746,7 @@ async function render() {
     if (state.tab === "live") renderLive(); else renderSessions();
   }
   if (state.tab === "charts") await renderCharts();
+  if (state.tab === "history") await AIHistory.render($("#historyArea"), loadHistory);
   if (state.tab === "alerts") await renderAlerts();
   if (state.tab === "settings") await renderSettings();
 }
@@ -796,5 +808,12 @@ window.addEventListener("DOMContentLoaded", () => {
   });
   setupTooltip();
   setupAutoRefresh();
+  if (AIHistory.wantsTab()) {
+    // 공유된 기록 주소(#history?...)로 들어오면 그 탭부터 연다. 스냅샷을 읽기 전이라
+    // switchTab(=render) 은 부르지 않고 표시만 바꾼다 — 그리는 건 아래 refresh 가 한다.
+    state.tab = "history";
+    $$(".tab").forEach((t) => t.classList.toggle("active", t.dataset.tab === "history"));
+    $$(".panel").forEach((p) => p.classList.toggle("hidden", p.id !== "tab-history"));
+  }
   refresh();
 });

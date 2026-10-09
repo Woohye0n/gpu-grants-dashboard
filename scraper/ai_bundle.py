@@ -16,7 +16,7 @@ import socket
 import time
 from datetime import datetime, timezone
 
-from . import ai_pricing
+from . import ai_history, ai_pricing, ai_store
 
 WINDOWS = {"5h": 5 * 3600 * 1000, "7d": 7 * 86400 * 1000}
 METRIC_KEYS = ("input", "output", "cache_creation", "cache_read",
@@ -496,3 +496,25 @@ def rl_of(accounts, provider, email):
         if a["provider"] == provider and a["email"] == email:
             return a.get("rate_limits")
     return None
+
+
+def build_history(db, cfg, now=None):
+    """'기록' 탭 데이터 (docs/ai/data/history.json). 사람 판정은 build() 와 같은 규칙."""
+    now = now or int(time.time() * 1000)
+    people = cfg.get("people") or {}
+    rules = people.get("rules") or []
+    pinned = {k: v for k, v in (people.get("sessions") or {}).items() if v}
+    allowed = set((cfg.get("tracking") or {}).get("allowed_accounts") or [])
+    local_from = ai_store.meta_get(db, "history_local_from")
+    sources, notes = [], []
+    if local_from:
+        sources = [
+            {"to": local_from, "label": "중앙 서버 기록에서 옮겨 옴",
+             "detail": "중앙 서버는 fast·effort·캐시 TTL 을 보관하지 않아 이 구간은 표준 단가, "
+                       "캐시 쓰기는 1시간 단가로 계산했습니다."},
+            {"from": local_from, "label": "이 집계 서버"},
+        ]
+    return ai_history.assemble(
+        ai_store.daily_records(db), models=ai_pricing.load_models(cfg),
+        owner_of=lambda r: owner_of(rules, r, pinned), now_ms=now,
+        allowed=allowed, sources=sources, notes=notes)
