@@ -293,6 +293,19 @@ check("송신기가 보낸 단가 값이 저장된다", tuple(r1), ("fast", "xhi
 check("TTL 을 안 보낸 쓰기는 NULL(=모름)", r2[0], None)
 db.close()
 
+# ---- 사람 판정: 세션 고정이 경로 규칙보다 먼저 ------------------------------
+rules = [{"owner": "kdg", "cwd_glob": "*kdg*"}, {"owner": "woo", "host": "b2"}]
+pinned = {"S-tmp": "kdg"}
+check("경로가 /tmp 여도 고정된 세션은 그 사람",
+      ai_bundle.owner_of(rules, {"session_id": "S-tmp", "cwd": "/tmp", "host": "a"}, pinned), "kdg")
+check("고정이 서버 규칙보다 먼저",
+      ai_bundle.owner_of(rules, {"session_id": "S-tmp", "cwd": "/x", "host": "b2"}, pinned), "kdg")
+check("고정 안 된 세션은 경로 규칙대로 (Claude scratchpad 경로)",
+      ai_bundle.owner_of(rules, {"session_id": "S2", "cwd": "/tmp/claude-1006/-home-kdg-sglang/u/scratchpad",
+                                 "host": "a"}, pinned), "kdg")
+check("어디에도 안 걸리면 None(=미분류)",
+      ai_bundle.owner_of(rules, {"session_id": "S3", "cwd": "/tmp", "host": "a"}, pinned), None)
+
 print()
 if fails:
     print(f"실패 {len(fails)}건: {', '.join(fails)}")

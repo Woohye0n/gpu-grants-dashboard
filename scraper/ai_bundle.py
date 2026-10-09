@@ -60,8 +60,15 @@ def window_start(rate_limits, key, now):
     return now - WINDOWS[key]
 
 
-def owner_of(rules, session):
-    """사람을 가르는 유일한 근거는 작업 디렉토리다(필요하면 호스트·도구로 좁힌다)."""
+def owner_of(rules, session, pinned=None):
+    """사람을 가르는 근거는 작업 디렉토리다(필요하면 호스트·도구로 좁힌다).
+
+    ``pinned`` 는 ``people.sessions`` — 세션 ID 를 사람에게 직접 묶는다. 세션 도중
+    ``/tmp`` 처럼 이름 없는 곳으로 옮겨 경로로는 가릴 수 없는 세션에 쓴다. 규칙보다 먼저 본다.
+    """
+    owner = (pinned or {}).get(session.get("session_id"))
+    if owner:
+        return owner
     for r in rules or []:
         if r.get("host") and r["host"] != session.get("host"):
             continue
@@ -146,6 +153,7 @@ def build(db, cfg, now=None):
     # 프로세스가 살아 있어도 이만큼 쉬었으면 '지금 떠 있는' 축에 넣지 않는다.
     idle_seconds = int((cfg.get("collect") or {}).get("session_idle_seconds") or 3600)
     rules = (cfg.get("people") or {}).get("rules") or []
+    pinned = {k: v for k, v in ((cfg.get("people") or {}).get("sessions") or {}).items() if v}
 
     nodes, node_last = [], {}
     for r in db.execute("SELECT * FROM nodes ORDER BY host"):
@@ -263,7 +271,7 @@ def build(db, cfg, now=None):
             "updated_at": updated, "version": m["version"] if m else None,
             "owner": None,
         }
-        row["owner"] = owner_of(rules, row)
+        row["owner"] = owner_of(rules, row, pinned)
         for key_w in WINDOWS:
             start = now - WINDOWS[key_w]
             got = db.execute(

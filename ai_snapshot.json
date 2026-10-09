@@ -145,6 +145,10 @@
         "cwd_glob": "*hoeun*"
       },
       {
+        "owner": "geonchoi",
+        "cwd_glob": "*geonchoi*"
+      },
+      {
         "owner": "woohyeon",
         "host": "kakao-b200-2",
         "note": "임시(2026-10-08): 이 서버는 지금 woohyeon 만 쓴다. 이름 규칙에 안 걸린 세션만 받도록 맨 뒤에 둔다. 다른 사람이 쓰기 시작하면 지울 것."
@@ -155,7 +159,11 @@
         "note": "임시(2026-10-08): 이 서버는 지금 woohyeon 만 쓴다. 이름 규칙에 안 걸린 세션만 받도록 맨 뒤에 둔다. 다른 사람이 쓰기 시작하면 지울 것."
       }
     ],
-    "sessions": {}
+    "sessions": {
+      "533ca633-229d-4ae7-bd22-3995d4e7d4f5": "kdg6245",
+      "01a0f61f-1e6a-7753-9109-0dba1b346420": "csjihwanh",
+      "01a0f61d-46f4-7303-a336-d84538eccb09": "csjihwanh"
+    }
   },
   "alerts": {
     "default_cooldown_minutes": 30,
