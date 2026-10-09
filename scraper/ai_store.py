@@ -13,6 +13,9 @@ inbox 는 멀쩡했는데 중간 한 칸이 빠져서 화면 전체가 과거에
                    묶이므로 오래 돌려도 커지지 않습니다.
   usage          : 최근 구간의 턴 단위 기록. 5시간/주간 창을 세려면 시각이 필요한데,
                    그건 최근 것만 있으면 됩니다(retain_days 로 정리).
+  usage_daily    : 하루 × 세션 × 모델 × 속도 × effort 로 묶은 기록. '기록' 탭이 쓴다.
+                   usage 를 지우기 **전에** 묶어 두고 지우지 않으므로, 턴 기록이
+                   사라진 뒤에도 지난 기간을 볼 수 있습니다(refresh_daily).
 """
 from __future__ import annotations
 
@@ -83,6 +86,19 @@ CREATE TABLE IF NOT EXISTS alerts (
     account TEXT, provider TEXT, window TEXT, metric TEXT,
     value REAL, limit_value REAL, message TEXT);
 CREATE INDEX IF NOT EXISTS alerts_ts ON alerts(ts);
+
+-- 기록 탭용 하루 단위 묶음. src='local' 은 이 DB 의 usage 에서, 'central' 은 이 DB 가
+-- 생기기 전 기간을 중앙 서버에서 한 번 옮겨 온 것(import_daily). 세션·작업 경로를
+-- 남겨 두므로 사람 규칙을 고치면 과거도 다시 갈린다.
+CREATE TABLE IF NOT EXISTS usage_daily (
+    day TEXT NOT NULL, src TEXT NOT NULL, provider TEXT NOT NULL,
+    account_email TEXT NOT NULL DEFAULT '', host TEXT NOT NULL DEFAULT '',
+    session_id TEXT NOT NULL DEFAULT '', cwd TEXT NOT NULL DEFAULT '',
+    model TEXT NOT NULL DEFAULT '', speed TEXT NOT NULL DEFAULT 'standard',
+    effort TEXT NOT NULL DEFAULT '', lc INTEGER NOT NULL DEFAULT 0,
+    n INTEGER, i INTEGER, o INTEGER, cw INTEGER, cr INTEGER, cw1h INTEGER, cwu INTEGER,
+    PRIMARY KEY (day, src, provider, account_email, host, session_id, cwd,
+                 model, speed, effort, lc));
 """
 
 
@@ -474,3 +490,86 @@ def prune(db, retain_days=30):
     cur = db.execute("DELETE FROM usage WHERE ts IS NOT NULL AND ts < ?", (cutoff,))
     db.commit()
     return cur.rowcount
+
+
+# ---- 기록 탭: 하루 단위 묶음 ------------------------------------------------
+_DAY = "date(u.ts / 1000 + 32400, 'unixepoch')"     # 한국 시각 자정 기준
+
+
+def _kst_day(ms):
+    return time.strftime("%Y-%m-%d", time.gmtime(ms / 1000 + 9 * 3600))
+
+
+def _kst_midnight_ms(day):
+    import calendar
+    return (calendar.timegm(time.strptime(day, "%Y-%m-%d")) - 9 * 3600) * 1000
+
+
+def refresh_daily(db, retain_days=30, now_ms=None, long_context_over=272_000):
+    """usage 가 아직 다 갖고 있는 날들을 다시 묶는다. prune **전에** 불러야 한다.
+
+    prune 은 지금부터 retain_days 전보다 오래된 턴을 지운다. 그 경계가 걸린 날은
+    이미 앞부분이 지워졌을 수 있으므로 그 다음 날부터만 다시 묶는다. 그보다 앞선
+    날은 예전에 묶어 둔 값을 그대로 둔다 — 그게 턴이 지워진 뒤에도 남는 기록이다.
+    중앙에서 옮겨 온 구간(history_local_from 이전)은 건드리지 않는다.
+    """
+    now_ms = now_ms or int(time.time() * 1000)
+    start = _kst_day(now_ms - retain_days * 86400 * 1000 + 86400 * 1000) if retain_days else "0000-00-00"
+    local_from = meta_get(db, "history_local_from")
+    if local_from and local_from > start:
+        start = local_from
+    start_ms = _kst_midnight_ms(start) if start[0] != "0" else 0
+    db.execute("DELETE FROM usage_daily WHERE src = 'local' AND day >= ?", (start,))
+    db.execute(f"""
+        INSERT INTO usage_daily
+        SELECT {_DAY}, 'local', u.provider, COALESCE(u.account_email, ''),
+               COALESCE(u.host, ''), COALESCE(u.session_id, ''), COALESCE(st.cwd, ''),
+               COALESCE(u.model, ''), COALESCE(NULLIF(u.speed, ''), 'standard'),
+               COALESCE(u.effort, ''),
+               CASE WHEN u.provider = 'codex' AND COALESCE(u.input, 0) + COALESCE(u.cache_read, 0)
+                         + COALESCE(u.cache_creation, 0) > ? THEN 1 ELSE 0 END,
+               COUNT(*), SUM(COALESCE(u.input, 0)), SUM(COALESCE(u.output, 0)),
+               SUM(COALESCE(u.cache_creation, 0)), SUM(COALESCE(u.cache_read, 0)),
+               SUM(COALESCE(u.cache_creation_1h, 0)),
+               SUM(CASE WHEN u.cache_creation_1h IS NULL THEN COALESCE(u.cache_creation, 0) ELSE 0 END)
+        FROM usage u
+        LEFT JOIN session_totals st ON st.provider = u.provider AND st.session_id = u.session_id
+        WHERE u.ts >= ?
+        GROUP BY 1, 3, 4, 5, 6, 7, 8, 9, 10, 11""", (long_context_over, start_ms))
+    db.commit()
+    return start
+
+
+def import_daily(db, records, until_day):
+    """이 DB 가 생기기 전 기간을 다른 집계(중앙 서버)에서 한 번 옮겨 온다.
+
+    until_day 이전 날짜만 'central' 로 넣고, 그 날부터는 이 DB 의 것을 쓰도록
+    경계를 남긴다. 다시 부르면 'central' 몫을 통째로 갈아 끼운다.
+    """
+    db.execute("DELETE FROM usage_daily WHERE src = 'central'")
+    n = 0
+    for r in records:
+        if r["day"] >= until_day:
+            continue
+        db.execute("""INSERT OR REPLACE INTO usage_daily VALUES
+            (?, 'central', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", (
+            r["day"], r["provider"], r.get("account_email") or "", r.get("host") or "",
+            r.get("session_id") or "", r.get("cwd") or "", r.get("model") or "",
+            r.get("speed") or "standard", r.get("effort") or "", int(r.get("lc") or 0),
+            r.get("n") or 0, r.get("i") or 0, r.get("o") or 0, r.get("cw") or 0,
+            r.get("cr") or 0, r.get("cw1h") or 0, r.get("cwu") or 0))
+        n += 1
+    meta_set(db, "history_local_from", until_day)
+    db.commit()
+    return n
+
+
+def daily_records(db):
+    """기록 탭에 넘길 레코드. 날마다 출처는 하나 — 중앙 구간과 이 DB 구간이 겹치지 않는다."""
+    local_from = meta_get(db, "history_local_from")
+    if local_from:
+        where, args = "(src = 'central' AND day < ?) OR (src = 'local' AND day >= ?)", (local_from, local_from)
+    else:
+        where, args = "src = 'local'", ()
+    for r in db.execute(f"SELECT * FROM usage_daily WHERE {where}", args):
+        yield dict(r)

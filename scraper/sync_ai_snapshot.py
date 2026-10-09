@@ -22,12 +22,15 @@ NAS 에 떨군 배치를 읽어 집계합니다(scraper/ai_store.py + ai_bundle.
     python -m scraper.sync_ai_snapshot --rebuild  # DB 를 비우고 처음부터
     python -m scraper.sync_ai_snapshot --seed <dashboard.json>   # 누적을 이어받기
     python -m scraper.sync_ai_snapshot --source <경로|주소>      # 복사 모드 강제
+    python -m scraper.sync_ai_snapshot --import-history <파일.jsonl.gz> --history-from 2026-09-22
+        # 이 DB 가 생기기 전 기간의 '기록' 탭 데이터를 중앙 서버 내보내기에서 한 번 옮겨 온다
 
 종료 코드: 0 최신 / 1 못 만들었지만 사본은 있다(저하) / 2 사본도 없다(고장)
 """
 from __future__ import annotations
 
 import argparse
+import gzip
 import json
 import os
 import sys
@@ -65,10 +68,15 @@ def build_from_inbox(conf: dict, out: str, meta_path: str, quiet: bool = False) 
     db = ai_store.connect()
     stats = ai_store.ingest_inbox(
         db, inbox, ignore_hosts=(conf.get("nas") or {}).get("ignore_hosts") or ())
+    # 기록 탭: 턴 기록을 지우기 전에 하루 단위로 묶어 둔다(순서가 바뀌면 지운 날이 빈다).
+    ai_store.refresh_daily(db, conf.get("retain_days", 30), now_ms)
     ai_store.prune(db, conf.get("retain_days", 30))
     bundle = ai_bundle.build(db, conf, now=now_ms)
     payload = json.dumps(bundle, ensure_ascii=False).encode("utf-8")
     write_atomic(out, payload)
+    history = ai_bundle.build_history(db, conf, now=now_ms)
+    write_atomic(os.path.join(os.path.dirname(out), "history.json"),
+                 json.dumps(history, ensure_ascii=False, separators=(",", ":")).encode("utf-8"))
     update_meta(meta_path, checked_at=now_ms, synced_at=now_ms, ok=True,
                 source=inbox, error=None, mode="inbox", batches=stats["batches"])
     s = bundle["summary"]
@@ -179,9 +187,23 @@ def main() -> int:
     ap.add_argument("--rebuild", action="store_true", help="집계 DB 를 비우고 처음부터")
     ap.add_argument("--seed", metavar="스냅샷",
                     help="기존 dashboard.json 에서 세션 누적을 이어받습니다")
+    ap.add_argument("--import-history", metavar="파일",
+                    help="중앙 서버가 내보낸 하루 단위 기록(jsonl.gz)을 기록 탭에 옮겨 옵니다")
+    ap.add_argument("--history-from", metavar="YYYY-MM-DD",
+                    help="--import-history 와 함께: 이 날부터는 이 DB 의 기록을 씁니다")
     a = ap.parse_args()
 
     conf = load_config()
+    if a.import_history:
+        if not a.history_from:
+            ap.error("--import-history 에는 --history-from 이 필요합니다")
+        db = ai_store.connect()
+        with gzip.open(a.import_history, "rt", encoding="utf-8") as fh:
+            n = ai_store.import_daily(db, (json.loads(line) for line in fh if line.strip()),
+                                      a.history_from)
+        print(f"[info] 기록 {n}행을 옮겼습니다 — {a.history_from} 전은 중앙 기록, "
+              f"그 날부터는 이 DB", file=sys.stderr)
+        return 0
     if a.rebuild:
         try:
             os.remove(ai_store.DB_PATH)

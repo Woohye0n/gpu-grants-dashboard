@@ -19,6 +19,7 @@ command -v "$PY" >/dev/null 2>&1 || PY=python3
 KEY="${DEPLOY_KEY:-$HOME/.ssh/id_ed25519_gpugrants}"
 BRANCH="${DATA_BRANCH:-ai-data}"
 SNAPSHOT="docs/ai/data/dashboard.json"
+HISTORY="docs/ai/data/history.json"      # 기록 탭 (없으면 싣지 않는다)
 STAMP="$ROOT/logs/.last_published"
 mkdir -p "$ROOT/logs"
 
@@ -31,7 +32,7 @@ say() { echo "[$(TZ=Asia/Seoul date '+%F %H:%M KST')] $*"; }
 # 2) 사람이 보는 숫자가 실제로 바뀌었을 때만 발행한다.
 #    generated_at 은 매번 달라지므로 그것만으로 판단하면 밤새 아무도 안 썼는데도
 #    5분마다 배포가 돈다.
-FP="$("$PY" - "$SNAPSHOT" <<'PYEOF'
+FP="$("$PY" - "$SNAPSHOT" "$HISTORY" <<'PYEOF'
 import hashlib, json, sys
 d = json.load(open(sys.argv[1], encoding="utf-8"))
 s = d.get("summary") or {}
@@ -46,6 +47,12 @@ sig = {
                for p in s.get("people") or []],
     "alerts": len(d.get("alerts") or []),
 }
+# 기록 탭: 사람 규칙만 바뀌어도 과거 기록이 다시 갈리므로 그 내용도 본다.
+try:
+    h = json.load(open(sys.argv[2], encoding="utf-8"))
+    sig["history"] = [h.get("dims"), h.get("rows")]
+except (OSError, ValueError, IndexError):
+    pass
 print(hashlib.sha256(json.dumps(sig, sort_keys=True, default=str).encode()).hexdigest()[:16])
 PYEOF
 )"
@@ -68,6 +75,10 @@ export GIT_INDEX_FILE="$TMPD/index"
 trap 'rm -rf "$TMPD"' EXIT
 BLOB="$(git hash-object -w "$SNAPSHOT")" || { say "blob 생성 실패"; exit 1; }
 git update-index --add --cacheinfo "100644,$BLOB,dashboard.json" || exit 1
+if [ -f "$HISTORY" ]; then
+  HBLOB="$(git hash-object -w "$HISTORY")" || { say "기록 blob 생성 실패"; exit 1; }
+  git update-index --add --cacheinfo "100644,$HBLOB,history.json" || exit 1
+fi
 
 # 워크플로 파일을 이 브랜치에도 싣는다.
 #

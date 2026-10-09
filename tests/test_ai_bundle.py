@@ -18,7 +18,7 @@ import time
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
-from scraper import ai_bundle, ai_store          # noqa: E402
+from scraper import ai_bundle, ai_pricing, ai_store          # noqa: E402
 
 fails = []
 
@@ -305,6 +305,66 @@ check("고정 안 된 세션은 경로 규칙대로 (Claude scratchpad 경로)",
                                  "host": "a"}, pinned), "kdg")
 check("어디에도 안 걸리면 None(=미분류)",
       ai_bundle.owner_of(rules, {"session_id": "S3", "cwd": "/tmp", "host": "a"}, pinned), None)
+
+# ---- 기록 탭: 하루 단위 묶음은 턴 기록을 지운 뒤에도 남는다 --------------------
+from scraper import ai_history                                    # noqa: E402
+db = ai_store.connect(os.path.join(tmp, "history.db"))
+DAY_MS = 86400 * 1000
+now = ai_store._kst_midnight_ms("2026-10-20") + 12 * 3600 * 1000      # 10-20 정오(KST)
+def turn(uuid, day, sid="S1", **kw):
+    base = {"uuid": uuid, "ts": ai_store._kst_midnight_ms(day) + 3600 * 1000, "provider": "claude",
+            "account_email": "lab@x", "session_id": sid, "model": "claude-opus-5-5",
+            "input_tokens": 1_000_000, "output_tokens": 0, "cache_read_tokens": 0,
+            "cache_creation_tokens": 0}
+    base.update(kw)
+    return base
+ai_store.ingest_batch(db, {"host": "n", "usage": [turn("a", "2026-09-10"), turn("b", "2026-10-19"),
+                                                   turn("c", "2026-10-19", sid="S2")]})
+db.execute("INSERT OR REPLACE INTO session_totals (provider, session_id, cwd) VALUES ('claude','S1','/home/kim/x')")
+start = ai_store.refresh_daily(db, 30, now)
+check("경계에 걸린 날 다음부터 다시 묶는다", start, "2026-09-21")
+check("경계 앞의 날은 (아직 묶인 적 없으면) 비어 있다",
+      db.execute("SELECT COUNT(*) FROM usage_daily WHERE day='2026-09-10'").fetchone()[0], 0)
+ai_store.refresh_daily(db, 60, now)       # 보관을 길게 잡았던 때에 묶어 둔 것으로 친다
+db.execute("DELETE FROM usage WHERE ts < ?", (now - 30 * DAY_MS,))   # prune
+ai_store.refresh_daily(db, 30, now)
+check("턴 기록을 지운 뒤에도 그날 묶음은 남는다",
+      db.execute("SELECT SUM(i) FROM usage_daily WHERE day='2026-09-10'").fetchone()[0], 1_000_000)
+ai_store.refresh_daily(db, 30, now)
+check("다시 묶어도 두 번 세지 않는다",
+      db.execute("SELECT SUM(i) FROM usage_daily WHERE day='2026-10-19'").fetchone()[0], 2_000_000)
+
+n = ai_store.import_daily(db, [
+    {"day": "2026-09-10", "provider": "claude", "account_email": "lab@x", "session_id": "S0",
+     "cwd": "/home/lee/y", "model": "claude-opus-5-5", "n": 1, "i": 3_000_000},
+    {"day": "2026-10-19", "provider": "claude", "account_email": "lab@x", "session_id": "S9",
+     "model": "claude-opus-5-5", "n": 1, "i": 9_000_000}], "2026-09-22")
+check("경계 이후 날짜는 옮겨 오지 않는다", n, 1)
+recs = list(ai_store.daily_records(db))
+check("경계 전은 중앙 것만, 이후는 이 DB 것만 (겹쳐 세지 않음)",
+      sorted((r["day"], r["src"], r["i"]) for r in recs),
+      [("2026-09-10", "central", 3_000_000), ("2026-10-19", "local", 1_000_000),
+       ("2026-10-19", "local", 1_000_000)])
+
+h = ai_history.assemble(recs, models=ai_pricing.load_models(), now_ms=now, allowed={"lab@x"},
+                        owner_of=lambda r: ai_bundle.owner_of(
+                            [{"owner": "kim", "cwd_glob": "*kim*"}, {"owner": "lee", "cwd_glob": "*lee*"}],
+                            r, {"S2": "kim"}))
+ix = {c: i for i, c in enumerate(h["cols"])}
+by = {}
+for row in h["rows"]:
+    o = h["dims"]["owner"][row[ix["owner"]]]
+    by[o] = round(by.get(o, 0) + row[ix["credits"]], 4)
+check("사람별로 가르고 공식 단가로 환산 (Opus 5.5 입력 $4/1M → 1M 당 0.4 크레딧)",
+      by, {"kim": 0.8, "lee": 1.2})
+check("기간 범위", (h["first_day"], h["last_day"]), ("2026-09-10", "2026-10-19"))
+h2 = ai_history.assemble([{"day": "2026-08-01", "provider": "codex", "account_email": "lab@x",
+                           "model": "", "n": 1, "i": 500}],
+                         models=ai_pricing.load_models(), now_ms=now, owner_of=lambda r: None)
+check("모델 이름이 없으면 크레딧 0 + 미등록으로 남기고 이유를 적는다",
+      (h2["rows"][0][h2["cols"].index("credits")], h2["rows"][0][h2["cols"].index("unpriced")],
+       bool(h2["notes"])), (0.0, 500, True))
+db.close()
 
 print()
 if fails:
