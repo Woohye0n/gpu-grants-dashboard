@@ -229,6 +229,12 @@ function creditsHTML(a) {
   const when = c.observed_at ? ` <span class="hint">· ${ago(c.observed_at)} 관측</span>` : "";
   if (a.provider === "codex") {
     const bal = c.unlimited ? "무제한" : Math.round(c.balance || 0).toLocaleString();
+    // 지급 초깃값 기준 누적 사용
+    let total = "";
+    if (c.initial && c.total_spent != null) {
+      const p = Math.max(0, Math.min(100, c.total_spent / c.initial * 100));
+      total = ` / ${c.initial.toLocaleString()} <span class="hint">· 누적 사용 <b>${Math.round(c.total_spent).toLocaleString()}</b> (${p.toFixed(1)}%)</span>`;
+    }
     let month = "";
     if (c.month_spent != null) {
       const lim = c.monthly_limit;
@@ -242,7 +248,7 @@ function creditsHTML(a) {
     const tip = (c.limit_note ? c.limit_note + " · " : "")
       + "주간 한도를 다 쓰면 이 잔액에서 차감됩니다. Codex 를 쓸 때만 갱신됩니다.";
     return `<div class="credits" data-tip="${esc(tip)}"><span class="credit-lab">Codex 크레딧 잔액</span>
-      <b>${bal}</b>${c.has_credits || c.unlimited ? "" : " (없음)"}${when}${month}</div>`;
+      <b>${bal}</b>${total}${c.has_credits || c.unlimited ? "" : " (없음)"}${when}${month}</div>`;
   }
   const reason = CLAUDE_EXTRA_REASON[c.disabled_reason] || c.disabled_reason;
   const used = c.is_enabled && c.used_credits != null

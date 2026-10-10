@@ -108,10 +108,16 @@ def _credits_view(db, cfg, provider, email, raw, now):
     out = dict(c)
     if provider == "codex":
         month_start = ai_store._kst_midnight_ms(ai_store._kst_day(now)[:8] + "01")
-        spent, since = ai_store.credit_spent(db, provider, email, month_start)
+        conf = cfg.get("credits") or {}
+        initial = (conf.get("initial") or {}).get(provider)
+        # 지급 초깃값 기준 누적 사용 = 초깃값 - 지금 잔액
+        out["initial"] = initial
+        bal = c.get("balance")
+        out["total_spent"] = (round(initial - bal, 2)
+                              if initial is not None and isinstance(bal, (int, float)) else None)
+        spent, since = ai_store.credit_spent(db, provider, email, month_start, initial)
         out["month_spent"] = round(spent, 2) if spent is not None else None
         out["month_since"] = since
-        conf = cfg.get("credits") or {}
         until = conf.get("limit_until")
         live = not until or ai_store._kst_day(now) <= until
         out["monthly_limit"] = (conf.get("monthly_limit") or {}).get(provider) if live else None

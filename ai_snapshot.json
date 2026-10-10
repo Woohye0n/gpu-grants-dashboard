@@ -225,6 +225,9 @@
     ]
   },
   "credits": {
+    "initial": {
+      "codex": 62500
+    },
     "monthly_limit": {
       "codex": 15000
     },

@@ -416,6 +416,18 @@ check("성공한 적이 없으면 -> auth_error",
 check("설정으로 지정한 상태가 우선",
       ai_bundle._account_status("e", "claude", "ok", {"claude:e": "suspended"}, T, T), "suspended")
 
+# ---- 크레딧: 지급 초깃값 기준 -----------------------------------------------
+db = ai_store.connect(os.path.join(tmp, "credits2.db"))
+M = ai_store._kst_midnight_ms("2026-10-01")
+ai_store.ingest_batch(db, {"host": "n", "accounts": [{"provider": "codex", "email": "two@x", "credits": {
+    "balance": 49480.2, "has_credits": True, "unlimited": False, "observed_at": M + 9 * 86400_000}}]})
+raw = db.execute("SELECT credits FROM accounts WHERE email='two@x'").fetchone()[0]
+v = ai_bundle._credits_view(db, {"credits": {"initial": {"codex": 62500}}}, "codex", "two@x", raw,
+                            M + 10 * 86400_000)
+check("누적 사용 = 초깃값 - 잔액", v["total_spent"], 13019.8)
+check("처음 관측 전 사용도 이번 달에 (초깃값이 기준점)", round(v["month_spent"], 1), 13019.8)
+db.close()
+
 print()
 if fails:
     print(f"실패 {len(fails)}건: {', '.join(fails)}")
