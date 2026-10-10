@@ -606,16 +606,20 @@ def record_credits(db, provider, email, credits):
                        (provider, email, at, float(bal)))
 
 
-def credit_spent(db, provider, email, since_ms):
+def credit_spent(db, provider, email, since_ms, initial=None):
     """since_ms 이후 잔액이 줄어든 만큼의 합(충전으로 늘어난 것은 빼지 않는다).
 
-    since_ms 직전 관측을 기준점으로 삼는다. 그 전 관측이 없으면 첫 관측부터 센다.
+    since_ms 직전 관측을 기준점으로 삼는다. 그 전 관측이 하나도 없으면 지급 초깃값
+    (initial)이 기준점이다 — 처음 관측했을 때 이미 쓴 몫도 빠지지 않게. 초깃값도
+    모르면 첫 관측부터 센다.
     돌려주는 값: (사용량, 계산에 쓴 첫 관측 시각) — 관측이 없으면 (None, None).
     """
     base = db.execute("""SELECT ts, balance FROM credit_balance WHERE provider = ? AND email = ?
                          AND ts < ? ORDER BY ts DESC LIMIT 1""", (provider, email, since_ms)).fetchone()
     rows = db.execute("""SELECT ts, balance FROM credit_balance WHERE provider = ? AND email = ?
                          AND ts >= ? ORDER BY ts""", (provider, email, since_ms)).fetchall()
+    if base is None and initial is not None and rows:
+        base = (since_ms, float(initial))
     seq = ([tuple(base)] if base else []) + [tuple(r) for r in rows]
     if not seq:
         return None, None
