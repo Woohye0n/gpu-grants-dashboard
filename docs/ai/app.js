@@ -302,7 +302,7 @@ function renderStale() {
     ? `데이터가 ${ago(gen)} 기준입니다 — 자동 갱신이 멈춰 있습니다.`
     : "스냅샷에 생성 시각이 없습니다."];
   if (!SYNC)
-    lines.push("집계 기록이 없습니다 — 이 배포본은 사내 수집 서버가 아닙니다.");
+    lines.push("이 배포본에는 집계 상태 기록(sync.json)이 없어 어느 쪽이 멈췄는지 알 수 없습니다.");
   else if (!SYNC.ok)
     lines.push(`이 서버가 집계를 만들지 못하고 있습니다 — ${esc(SYNC.error || "원인 미상")}`);
   else if (SYNC.checked_at && Date.now() - SYNC.checked_at > STALE_AFTER_MS)
@@ -752,7 +752,9 @@ async function render() {
 }
 
 // ---- refresh: reload the snapshot, then render ----------------------------
+let lastRefreshAt = 0;
 async function refresh() {
+  lastRefreshAt = Date.now();
   try {
     await loadBundle();
     const gen = BUNDLE.generated_at;
@@ -775,6 +777,17 @@ async function refresh() {
     }
     b.classList.remove("hidden");
   }
+}
+
+// 오래 열어 둔 탭은 절전·백그라운드 동안 타이머가 멈춰 데이터가 묵는다. 돌아오는 즉시
+// 다시 받는다 — 안 그러면 묵은 사본으로 "자동 갱신이 멈춰 있습니다" 를 띄우게 된다.
+function setupResumeRefresh() {
+  const again = () => {
+    if ($("#autoRefresh").checked && Date.now() - lastRefreshAt > 60 * 1000) refresh();
+  };
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) again(); });
+  window.addEventListener("focus", again);
+  window.addEventListener("online", again);
 }
 
 function setupAutoRefresh() {
@@ -808,6 +821,7 @@ window.addEventListener("DOMContentLoaded", () => {
   });
   setupTooltip();
   setupAutoRefresh();
+  setupResumeRefresh();
   if (AIHistory.wantsTab()) {
     // 공유된 기록 주소(#history?...)로 들어오면 그 탭부터 연다. 스냅샷을 읽기 전이라
     // switchTab(=render) 은 부르지 않고 표시만 바꾼다 — 그리는 건 아래 refresh 가 한다.
