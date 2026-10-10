@@ -19,6 +19,7 @@ command -v "$PY" >/dev/null 2>&1 || PY=python3
 KEY="${DEPLOY_KEY:-$HOME/.ssh/id_ed25519_gpugrants}"
 BRANCH="${DATA_BRANCH:-ai-data}"
 SNAPSHOT="docs/ai/data/dashboard.json"
+SYNCMETA="docs/ai/data/sync.json"        # 집계 상태 — 화면이 "어느 쪽이 멈췄는지" 말할 근거
 HISTORY="docs/ai/data/history.json"      # 기록 탭 (없으면 싣지 않는다)
 STAMP="$ROOT/logs/.last_published"
 mkdir -p "$ROOT/logs"
@@ -56,8 +57,13 @@ except (OSError, ValueError, IndexError):
 print(hashlib.sha256(json.dumps(sig, sort_keys=True, default=str).encode()).hexdigest()[:16])
 PYEOF
 )"
-if [ -z "${FORCE:-}" ] && [ "$FP" = "$(cat "$STAMP" 2>/dev/null)" ]; then
-  exit 0                                   # 숫자가 그대로 — 배포할 이유가 없다
+# 숫자가 그대로여도 HEARTBEAT_MIN 마다 한 번은 발행한다. 화면은 스냅샷이 30분 넘게
+# 묵으면 "자동 갱신이 멈춰 있습니다" 를 띄우는데, 밤에 아무도 안 쓰면 숫자가 안 바뀌어
+# 발행도 멈추고, 멀쩡한데도 그 경고가 뜬다. 하트비트는 그 경고 기준(30분)보다 짧아야 한다.
+HEARTBEAT_MIN="${HEARTBEAT_MIN:-20}"
+if [ -z "${FORCE:-}" ] && [ "$FP" = "$(cat "$STAMP" 2>/dev/null)" ] \
+   && [ -n "$(find "$STAMP" -mmin -"$HEARTBEAT_MIN" 2>/dev/null)" ]; then
+  exit 0                                   # 숫자가 그대로이고 최근에 발행했다
 fi
 
 # 3) 커밋 1개짜리 고아 브랜치로 force-push
@@ -75,6 +81,10 @@ export GIT_INDEX_FILE="$TMPD/index"
 trap 'rm -rf "$TMPD"' EXIT
 BLOB="$(git hash-object -w "$SNAPSHOT")" || { say "blob 생성 실패"; exit 1; }
 git update-index --add --cacheinfo "100644,$BLOB,dashboard.json" || exit 1
+if [ -f "$SYNCMETA" ]; then
+  SBLOB="$(git hash-object -w "$SYNCMETA")" || { say "sync blob 생성 실패"; exit 1; }
+  git update-index --add --cacheinfo "100644,$SBLOB,sync.json" || exit 1
+fi
 if [ -f "$HISTORY" ]; then
   HBLOB="$(git hash-object -w "$HISTORY")" || { say "기록 blob 생성 실패"; exit 1; }
   git update-index --add --cacheinfo "100644,$HBLOB,history.json" || exit 1
