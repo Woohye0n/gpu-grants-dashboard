@@ -119,11 +119,21 @@ def _credits_view(db, cfg, provider, email, raw, now):
     return out
 
 
-def _account_status(email, provider, usage_status, overrides):
+def _account_status(email, provider, usage_status, overrides,
+                    usage_status_at=None, fetched_at=None):
+    """계정 상태. 인증 실패는 **다른 곳에서 그 뒤에 성공한 적이 없을 때만** 계정 문제다.
+
+    송신기는 디렉토리마다 따로 사용량 API 를 부른다. 안 쓰는 디렉토리의 토큰은 만료된
+    채 남는데(Claude Code 가 그 디렉토리에서 돌아야 갱신된다), 그 401 이 가장 최근
+    상태로 올라와 멀쩡한 계정 카드에 "인증 오류" 가 떴다 — 실제로 같은 시각 다른 7곳은
+    1분 전에 조회에 성공하고 있었다.
+    """
     forced = (overrides or {}).get(f"{provider}:{email}") or (overrides or {}).get(email)
     if forced:
         return forced
     if usage_status in ("unauthorized", "auth_error"):
+        if fetched_at and usage_status_at and fetched_at >= usage_status_at - 30 * 60 * 1000:
+            return "ok"
         return "auth_error"
     return "ok"
 
@@ -245,7 +255,8 @@ def build(db, cfg, now=None):
                AND host IS NOT NULL AND COALESCE(updated_at,0) >= ?""",
             (email, provider, now - live_seconds * 1000))]
         status = _account_status(email, provider, r["usage_status"],
-                                 tracking.get("account_status"))
+                                 tracking.get("account_status"),
+                                 r["usage_status_at"], r["rate_limits_updated_at"])
         updated = r["rate_limits_updated_at"] or 0
         account = {
             "email": email, "provider": provider, "account_id": r["account_id"],
