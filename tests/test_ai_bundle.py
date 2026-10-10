@@ -306,6 +306,15 @@ check("고정 안 된 세션은 경로 규칙대로 (Claude scratchpad 경로)",
 check("어디에도 안 걸리면 None(=미분류)",
       ai_bundle.owner_of(rules, {"session_id": "S3", "cwd": "/tmp", "host": "a"}, pinned), None)
 
+# ---- 사람 판정: 최근 경로로 안 갈리면 시작 경로로 -----------------------------
+rules = [{"owner": "kdg", "cwd_glob": "*kdg*"}, {"owner": "lee", "cwd_glob": "*lee*"}]
+check("마지막에 /tmp 로 옮긴 세션은 시작 경로로 판정",
+      ai_bundle.owner_of_session(rules, {"session_id": "A", "cwd": "/tmp/e2e2"}, {}, "/home/kdg/sglang"), "kdg")
+check("최근 경로로 갈리면 시작 경로는 보지 않는다",
+      ai_bundle.owner_of_session(rules, {"session_id": "A", "cwd": "/home/lee/x"}, {}, "/home/kdg/sglang"), "lee")
+check("둘 다 안 갈리면 미분류",
+      ai_bundle.owner_of_session(rules, {"session_id": "A", "cwd": "/tmp/x"}, {}, "/tmp"), None)
+
 # ---- 기록 탭: 하루 단위 묶음은 턴 기록을 지운 뒤에도 남는다 --------------------
 from scraper import ai_history                                    # noqa: E402
 db = ai_store.connect(os.path.join(tmp, "history.db"))

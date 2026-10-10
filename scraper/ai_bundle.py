@@ -83,6 +83,20 @@ def owner_of(rules, session, pinned=None):
     return None
 
 
+def owner_of_session(rules, session, pinned=None, launch_cwd=None):
+    """owner_of + 세션을 시작한 경로로 한 번 더.
+
+    세션 누적의 cwd 는 **가장 최근 턴**의 경로다. /home/kdg6245/sglang 에서 1,500턴을
+    쓰다가 마지막에 /tmp/e2e2 로 옮기자 세션 전체(888M 토큰, 주간 55 크레딧)가 미분류로
+    넘어갔다. 최근 경로로 갈리지 않을 때만 시작 경로(session_meta.cwd — 떠 있는 프로세스의
+    작업 경로)를 본다. 최근 경로로 이미 갈리는 세션은 그대로다.
+    """
+    owner = owner_of(rules, session, pinned)
+    if owner or not launch_cwd or launch_cwd == session.get("cwd"):
+        return owner
+    return owner_of(rules, dict(session, cwd=launch_cwd), pinned)
+
+
 def _account_status(email, provider, usage_status, overrides):
     forced = (overrides or {}).get(f"{provider}:{email}") or (overrides or {}).get(email)
     if forced:
@@ -271,7 +285,7 @@ def build(db, cfg, now=None):
             "updated_at": updated, "version": m["version"] if m else None,
             "owner": None,
         }
-        row["owner"] = owner_of(rules, row, pinned)
+        row["owner"] = owner_of_session(rules, row, pinned, m["cwd"] if m else None)
         for key_w in WINDOWS:
             start = now - WINDOWS[key_w]
             got = db.execute(
@@ -505,6 +519,8 @@ def build_history(db, cfg, now=None):
     rules = people.get("rules") or []
     pinned = {k: v for k, v in (people.get("sessions") or {}).items() if v}
     allowed = set((cfg.get("tracking") or {}).get("allowed_accounts") or [])
+    launch = {(r["provider"], r["session_id"]): r["cwd"]
+              for r in db.execute("SELECT provider, session_id, cwd FROM session_meta")}
     local_from = ai_store.meta_get(db, "history_local_from")
     sources, notes = [], []
     if local_from:
@@ -516,5 +532,7 @@ def build_history(db, cfg, now=None):
         ]
     return ai_history.assemble(
         ai_store.daily_records(db), models=ai_pricing.load_models(cfg),
-        owner_of=lambda r: owner_of(rules, r, pinned), now_ms=now,
+        owner_of=lambda r: owner_of_session(rules, r, pinned,
+                                            launch.get((r.get("provider"), r.get("session_id")))),
+        now_ms=now,
         allowed=allowed, sources=sources, notes=notes)
