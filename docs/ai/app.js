@@ -219,6 +219,39 @@ function gaugeHTML(th) {
   </div>`;
 }
 
+// 크레딧 잔량. Codex: 주간 한도를 다 쓰면 넘어가는 유료 크레딧의 잔액과 이번 달 사용량
+// (Codex 자체 단위 — 이 화면의 크레딧(=$10)과 다르다). Claude: 추가 사용(extra usage) 상태 —
+// 사용량 API 가 잔액 숫자는 주지 않는다.
+const CLAUDE_EXTRA_REASON = { out_of_credits: "크레딧 소진" };
+function creditsHTML(a) {
+  const c = a.credits;
+  if (!c) return "";
+  const when = c.observed_at ? ` <span class="hint">· ${ago(c.observed_at)} 관측</span>` : "";
+  if (a.provider === "codex") {
+    const bal = c.unlimited ? "무제한" : Math.round(c.balance || 0).toLocaleString();
+    let month = "";
+    if (c.month_spent != null) {
+      const lim = c.monthly_limit;
+      const pct = lim ? Math.min(100, c.month_spent / lim * 100) : 0;
+      const from = c.month_since && new Date(c.month_since + 9 * 3600e3).getUTCDate() !== 1
+        ? ` <span class="hint">(${new Date(c.month_since).toLocaleDateString("ko-KR")} 관측부터)</span>` : "";
+      month = `<div class="credit-month">이번 달 사용 <b>${Math.round(c.month_spent).toLocaleString()}</b>`
+        + (lim ? ` / ${lim.toLocaleString()} <span class="pctbar ${pct >= 90 ? "hot" : ""}"><i style="width:${pct}%"></i></span>` : "")
+        + from + "</div>";
+    }
+    const tip = (c.limit_note ? c.limit_note + " · " : "")
+      + "주간 한도를 다 쓰면 이 잔액에서 차감됩니다. Codex 를 쓸 때만 갱신됩니다.";
+    return `<div class="credits" data-tip="${esc(tip)}"><span class="credit-lab">Codex 크레딧 잔액</span>
+      <b>${bal}</b>${c.has_credits || c.unlimited ? "" : " (없음)"}${when}${month}</div>`;
+  }
+  const reason = CLAUDE_EXTRA_REASON[c.disabled_reason] || c.disabled_reason;
+  const used = c.is_enabled && c.used_credits != null
+    ? ` · 사용 ${c.used_credits}${c.monthly_limit != null ? " / " + c.monthly_limit : ""} ${esc(c.currency || "")}` : "";
+  return `<div class="credits" data-tip="한도를 다 쓴 뒤 유료 크레딧으로 계속 쓰는 기능(extra usage)의 상태입니다. 사용량 API 는 잔액 숫자를 주지 않습니다.">
+    <span class="credit-lab">추가 사용 크레딧</span> <b>${c.is_enabled ? "켜짐" : "꺼짐"}</b>${
+    !c.is_enabled && reason ? ` (${esc(reason)})` : ""}${used}${when}</div>`;
+}
+
 function renderAccounts(s) {
   const m = state.metric;
   const box = $("#accounts");
@@ -270,6 +303,7 @@ function renderAccounts(s) {
       <div class="usagehead">실제 사용 한도</div>
       <div class="${suspended || stale ? "gauges dim" : "gauges"}">${gauges}</div>
       <div class="src">${src}</div>
+      ${creditsHTML(a)}
       <div class="tokrow">참고 토큰량 (${m}): ${tok} · 누적 ${fmt(a.lifetime[m])}</div>
     </div>`;
   }).join("");

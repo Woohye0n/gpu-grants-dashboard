@@ -301,3 +301,11 @@ table.cr td.cr-calc { color: var(--muted); font-size: 12px; }
   .modal-box { padding: 14px 12px; }
   .pctbar { display: none; }
 }
+
+/* 개요 카드의 크레딧 잔량 줄 */
+.credits { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); font-size: 12px; }
+.credits .credit-lab { color: var(--muted); margin-right: 4px; }
+.credits b { font-variant-numeric: tabular-nums; }
+.credit-month { margin-top: 3px; color: var(--muted); }
+.credit-month b { color: var(--text); }
+.pctbar.hot > i { background: var(--red); }

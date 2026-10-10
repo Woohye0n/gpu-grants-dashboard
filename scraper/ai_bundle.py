@@ -97,6 +97,28 @@ def owner_of_session(rules, session, pinned=None, launch_cwd=None):
     return owner_of(rules, dict(session, cwd=launch_cwd), pinned)
 
 
+def _credits_view(db, cfg, provider, email, raw, now):
+    """개요 카드의 크레딧 줄. Codex 는 잔액 + 이번 달(KST) 사용량, Claude 는 extra usage 상태."""
+    try:
+        c = json.loads(raw) if raw else None
+    except ValueError:
+        c = None
+    if not c:
+        return None
+    out = dict(c)
+    if provider == "codex":
+        month_start = ai_store._kst_midnight_ms(ai_store._kst_day(now)[:8] + "01")
+        spent, since = ai_store.credit_spent(db, provider, email, month_start)
+        out["month_spent"] = round(spent, 2) if spent is not None else None
+        out["month_since"] = since
+        conf = cfg.get("credits") or {}
+        until = conf.get("limit_until")
+        live = not until or ai_store._kst_day(now) <= until
+        out["monthly_limit"] = (conf.get("monthly_limit") or {}).get(provider) if live else None
+        out["limit_note"] = conf.get("note") if live else None
+    return out
+
+
 def _account_status(email, provider, usage_status, overrides):
     forced = (overrides or {}).get(f"{provider}:{email}") or (overrides or {}).get(email)
     if forced:
@@ -240,6 +262,7 @@ def build(db, cfg, now=None):
             "hosts": sorted(hosts), "live_hosts": sorted(live_hosts),
         }
         account["thresholds"] = _thresholds(cfg.get("alerts"), account, rl)
+        account["credits"] = _credits_view(db, cfg, provider, email, r["credits"], now)
         accounts.append(account)
     _record_alerts(db, accounts, now)
 

@@ -10,6 +10,7 @@
 """
 from __future__ import annotations
 
+import json
 import os
 import sqlite3
 import sys
@@ -373,6 +374,35 @@ h2 = ai_history.assemble([{"day": "2026-08-01", "provider": "codex", "account_em
 check("모델 이름이 없으면 크레딧 0 + 미등록으로 남기고 이유를 적는다",
       (h2["rows"][0][h2["cols"].index("credits")], h2["rows"][0][h2["cols"].index("unpriced")],
        bool(h2["notes"])), (0.0, 500, True))
+db.close()
+
+# ---- 크레딧 잔량: 최근 관측이 이기고, 월 사용량은 줄어든 만큼의 합 -------------
+db = ai_store.connect(os.path.join(tmp, "credits.db"))
+def acct(bal, at, **kw):
+    a = {"provider": "codex", "email": "lab@x", "credits": dict(
+        {"balance": bal, "has_credits": True, "unlimited": False, "observed_at": at}, **kw)}
+    ai_store.ingest_batch(db, {"host": "n", "accounts": [a]})
+M = ai_store._kst_midnight_ms("2026-10-01")
+acct(62478.82, M - 3600_000)               # 9/30 밤 — 이번 달의 기준점
+acct(60118.69, M + 5 * 86400_000)
+acct(70118.69, M + 5 * 86400_000 + 1000)   # 충전 +10,000 — 사용으로 빼지 않는다
+acct(49431.65, M + 6 * 86400_000)
+acct(61000.0, M + 2 * 86400_000)           # 다른 노드가 늦게 보낸 그 시점의 잔액 — 순서대로 끼운다
+spent, since = ai_store.credit_spent(db, "codex", "lab@x", M)
+check("이번 달 사용 = 줄어든 만큼의 합 (충전은 빼지 않음)", round(spent, 2),
+      round((62478.82 - 61000.0) + (61000.0 - 60118.69) + (70118.69 - 49431.65), 2))
+check("늦게 온 옛 관측이 카드의 잔액을 덮지 않는다",
+      json.loads(db.execute("SELECT credits FROM accounts").fetchone()[0])["balance"], 49431.65)
+view = ai_bundle._credits_view(db, {"credits": {"monthly_limit": {"codex": 15000},
+                                                "limit_until": "2026-12-31"}},
+                               "codex", "lab@x", db.execute("SELECT credits FROM accounts").fetchone()[0],
+                               M + 7 * 86400_000)
+check("카드에 월 한도와 기준 시각", (view["monthly_limit"], view["month_since"]), (15000, M))
+view2 = ai_bundle._credits_view(db, {"credits": {"monthly_limit": {"codex": 15000},
+                                                 "limit_until": "2026-09-30"}},
+                                "codex", "lab@x", db.execute("SELECT credits FROM accounts").fetchone()[0],
+                                M + 7 * 86400_000)
+check("특별 룰 기한이 지나면 한도를 싣지 않는다", view2["monthly_limit"], None)
 db.close()
 
 print()

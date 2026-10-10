@@ -87,6 +87,12 @@ CREATE TABLE IF NOT EXISTS alerts (
     value REAL, limit_value REAL, message TEXT);
 CREATE INDEX IF NOT EXISTS alerts_ts ON alerts(ts);
 
+-- 크레딧 잔액 변화. Codex 는 주간 한도를 다 쓰면 유료 크레딧으로 넘어가 계속 돈다.
+-- 잔액이 바뀐 시점만 남겨 "이번 달 얼마 썼나" 를 센다(줄어든 만큼의 합).
+CREATE TABLE IF NOT EXISTS credit_balance (
+    provider TEXT NOT NULL, email TEXT NOT NULL, ts INTEGER NOT NULL, balance REAL NOT NULL,
+    PRIMARY KEY (provider, email, ts));
+
 -- 기록 탭용 하루 단위 묶음. src='local' 은 이 DB 의 usage 에서, 'central' 은 이 DB 가
 -- 생기기 전 기간을 중앙 서버에서 한 번 옮겨 온 것(import_daily). 세션·작업 경로를
 -- 남겨 두므로 사람 규칙을 고치면 과거도 다시 갈린다.
@@ -117,7 +123,9 @@ def connect(path=DB_PATH):
 # 이미 돌고 있는 DB 에 나중에 생긴 컬럼. CREATE TABLE IF NOT EXISTS 는 있는 표를
 # 건드리지 않으므로 따로 붙인다.
 _ADDED_COLUMNS = {"usage": (("speed", "TEXT"), ("effort", "TEXT"),
-                            ("cache_creation_1h", "INTEGER"))}
+                            ("cache_creation_1h", "INTEGER")),
+                  # 송신기가 보내는 크레딧 상태 (Codex 잔액 / Claude extra usage)
+                  "accounts": (("credits", "TEXT"), ("credits_at", "INTEGER"))}
 
 
 def migrate(db):
@@ -287,6 +295,8 @@ def ingest_batch(db, payload, host_hint=None):
                     json.dumps(a.get("rate_limits"), ensure_ascii=False) if a.get("rate_limits") else None,
                     a.get("rate_limits_updated_at"), a.get("usage_status"),
                     a.get("usage_status_at"), payload.get("generated_at") or now))
+
+        record_credits(db, a.get("provider") or "claude", email, a.get("credits"))
 
     for s in payload.get("sessions") or []:
         sid = s.get("session_id")
@@ -573,3 +583,41 @@ def daily_records(db):
         where, args = "src = 'local'", ()
     for r in db.execute(f"SELECT * FROM usage_daily WHERE {where}", args):
         yield dict(r)
+
+
+# ---- 크레딧 잔량 -------------------------------------------------------------
+def record_credits(db, provider, email, credits):
+    """송신기가 보낸 크레딧 상태를 저장한다. 더 최근에 관측한 쪽만 이긴다.
+
+    Codex 잔액은 바뀐 시점마다 credit_balance 에도 남긴다(월 사용량 계산용).
+    """
+    if not isinstance(credits, dict):
+        return
+    at = int(credits.get("observed_at") or 0)
+    db.execute("""UPDATE accounts SET credits = ?, credits_at = ?
+                  WHERE provider = ? AND email = ? AND COALESCE(credits_at, 0) <= ?""",
+               (json.dumps(credits, ensure_ascii=False), at, provider, email, at))
+    bal = credits.get("balance")
+    if provider == "codex" and isinstance(bal, (int, float)) and at:
+        prev = db.execute("""SELECT balance FROM credit_balance WHERE provider = ? AND email = ?
+                             AND ts <= ? ORDER BY ts DESC LIMIT 1""", (provider, email, at)).fetchone()
+        if prev is None or abs(prev[0] - bal) > 1e-6:
+            db.execute("INSERT OR IGNORE INTO credit_balance VALUES (?, ?, ?, ?)",
+                       (provider, email, at, float(bal)))
+
+
+def credit_spent(db, provider, email, since_ms):
+    """since_ms 이후 잔액이 줄어든 만큼의 합(충전으로 늘어난 것은 빼지 않는다).
+
+    since_ms 직전 관측을 기준점으로 삼는다. 그 전 관측이 없으면 첫 관측부터 센다.
+    돌려주는 값: (사용량, 계산에 쓴 첫 관측 시각) — 관측이 없으면 (None, None).
+    """
+    base = db.execute("""SELECT ts, balance FROM credit_balance WHERE provider = ? AND email = ?
+                         AND ts < ? ORDER BY ts DESC LIMIT 1""", (provider, email, since_ms)).fetchone()
+    rows = db.execute("""SELECT ts, balance FROM credit_balance WHERE provider = ? AND email = ?
+                         AND ts >= ? ORDER BY ts""", (provider, email, since_ms)).fetchall()
+    seq = ([tuple(base)] if base else []) + [tuple(r) for r in rows]
+    if not seq:
+        return None, None
+    spent = sum(max(0.0, a[1] - b[1]) for a, b in zip(seq, seq[1:]))
+    return spent, (since_ms if base else seq[0][0])

@@ -223,5 +223,12 @@
       "kakao-b200",
       "servername"
     ]
+  },
+  "credits": {
+    "monthly_limit": {
+      "codex": 15000
+    },
+    "limit_until": "2026-12-31",
+    "note": "특별 룰: 2026-12-31 까지 제공된 Codex 크레딧은 월 15,000 까지 사용 (Codex 자체 단위 — 대시보드 크레딧($10)과 다름)"
   }
 }
