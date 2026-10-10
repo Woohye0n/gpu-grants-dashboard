@@ -405,6 +405,17 @@ view2 = ai_bundle._credits_view(db, {"credits": {"monthly_limit": {"codex": 1500
 check("특별 룰 기한이 지나면 한도를 싣지 않는다", view2["monthly_limit"], None)
 db.close()
 
+# ---- 계정 상태: 안 쓰는 디렉토리의 만료 토큰이 계정을 "인증 오류" 로 만들지 않는다 ---
+T = 1_000_000_000
+check("다른 곳이 최근 성공 -> ok",
+      ai_bundle._account_status("e", "claude", "unauthorized", {}, T, T - 3 * 60_000), "ok")
+check("한참 동안 성공이 없으면 -> auth_error",
+      ai_bundle._account_status("e", "claude", "unauthorized", {}, T, T - 5 * 3600_000), "auth_error")
+check("성공한 적이 없으면 -> auth_error",
+      ai_bundle._account_status("e", "claude", "unauthorized", {}, T, None), "auth_error")
+check("설정으로 지정한 상태가 우선",
+      ai_bundle._account_status("e", "claude", "ok", {"claude:e": "suspended"}, T, T), "suspended")
+
 print()
 if fails:
     print(f"실패 {len(fails)}건: {', '.join(fails)}")
