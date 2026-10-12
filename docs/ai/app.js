@@ -65,6 +65,21 @@ const STALE_AFTER_MS = 30 * 60 * 1000;
 let BUNDLE = null;
 let SYNC = null;
 
+// GitHub Pages 의 CDN 은 주소의 ?t= 를 무시하고 엣지마다 따로 캐시한다(max-age=600, 실측:
+// 매번 다른 ?t= 인데 x-cache: HIT). 그래서 한 엣지가 묵은 dashboard.json 을 쥐고 있으면
+// 같은 순간 받은 sync.json 은 새것인데 스냅샷만 몇 시간 전 것이 된다 — 실제로 "데이터가
+// 7시간 전 / 집계는 2분 전에 정상" 이 함께 떴다. 스냅샷이 묵어 보이면 같은 파일을 발행
+// 원본(ai-data 브랜치의 raw, 최대 5분 캐시)에서 다시 받아 더 새것을 쓴다.
+const RAW_BASE = location.hostname.endsWith("github.io")
+  ? "https://raw.githubusercontent.com/Woohye0n/gpu-grants-dashboard/ai-data/" : null;
+const FALLBACK_AFTER_MS = 15 * 60 * 1000;
+
+async function fetchJSON(url) {
+  const r = await fetch(url + (url.includes("?") ? "&" : "?") + "t=" + Date.now(), { cache: "no-store" });
+  if (!r.ok) throw new Error(url + " -> " + r.status);
+  return r.json();
+}
+
 async function loadBundle() {
   const res = await fetch(DATA_URL + "?t=" + Date.now(), { cache: "no-store" });
   if (!res.ok) {
@@ -74,12 +89,27 @@ async function loadBundle() {
     err.absent = res.status === 404;
     throw err;
   }
-  BUNDLE = await res.json();
+  // 전역은 끝에서 한 번만 바꾼다 — 자동 새로고침과 탭 복귀 갱신이 겹쳐 돌아도
+  // 한쪽이 받은 묵은 사본이 다른 쪽의 새 사본을 덮지 않게.
+  let bundle = await res.json();
+  let sync = null;
   // 동기화 기록은 있으면 쓰고 없으면 만다 — 배포본에 따라 없을 수 있다.
   try {
     const r = await fetch(SYNC_URL + "?t=" + Date.now(), { cache: "no-store" });
-    SYNC = r.ok ? await r.json() : null;
-  } catch (e) { SYNC = null; }
+    sync = r.ok ? await r.json() : null;
+  } catch (e) { sync = null; }
+  if (RAW_BASE && Date.now() - (bundle.generated_at || 0) > FALLBACK_AFTER_MS) {
+    try {
+      const fresh = await fetchJSON(RAW_BASE + "dashboard.json");
+      if ((fresh.generated_at || 0) > (bundle.generated_at || 0)) bundle = fresh;
+      const s2 = await fetchJSON(RAW_BASE + "sync.json").catch(() => null);
+      if (s2 && (!sync || (s2.checked_at || 0) > (sync.checked_at || 0))) sync = s2;
+    } catch (e) { /* 원본도 못 읽으면 받은 사본으로 그린다 — 배너가 사실대로 말한다 */ }
+  }
+  if (!BUNDLE || (bundle.generated_at || 0) >= (BUNDLE.generated_at || 0)) {
+    BUNDLE = bundle;
+    SYNC = sync;
+  }
   return BUNDLE;
 }
 
@@ -87,7 +117,13 @@ async function loadBundle() {
 async function loadHistory() {
   const res = await fetch("./data/history.json?t=" + Date.now(), { cache: "no-store" });
   if (!res.ok) throw new Error(`history.json ${res.status} — 집계 서버가 아직 기록을 발행하지 않았습니다`);
-  return res.json();
+  const h = await res.json();
+  // 스냅샷과 같은 이유로 CDN 사본이 묵었으면 원본에서 다시 받는다.
+  if (RAW_BASE && Date.now() - (h.generated_at || 0) > FALLBACK_AFTER_MS) {
+    const fresh = await fetchJSON(RAW_BASE + "history.json").catch(() => null);
+    if (fresh && (fresh.generated_at || 0) > (h.generated_at || 0)) return fresh;
+  }
+  return h;
 }
 
 async function api(path) {
