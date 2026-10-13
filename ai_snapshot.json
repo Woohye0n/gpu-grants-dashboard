@@ -21,7 +21,8 @@
   "tracking": {
     "allowed_accounts": [
       "aidaslab.snu@gmail.com",
-      "aidaslab2.snu@gmail.com"
+      "aidaslab2.snu@gmail.com",
+      "aidaslab3.snu@gmail.com"
     ],
     "account_status": {
       "claude:aidaslab2.snu@gmail.com": "suspended"
