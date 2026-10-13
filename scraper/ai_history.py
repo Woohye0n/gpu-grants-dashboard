@@ -67,18 +67,21 @@ def record_credits(r, models):
     return credits, unpriced
 
 
-def assemble(records, *, models, owner_of, now_ms, allowed=None,
+def assemble(records, *, models, owner_of, now_ms, allowed=None, tracked=None,
              sources=None, notes=None):
     """레코드를 사람별로 갈라 하루 단위 표로 압축한다.
 
     owner_of(record) -> 사람 이름 또는 None(미분류).
     allowed 가 있으면 그 계정의 사용만 싣는다(대시보드의 다른 탭과 같은 기준).
+    tracked(provider, email) -> bool 을 주면 그것으로 가른다(도구별 제외까지 반영).
     """
     groups = {}
     no_model = {}                       # 모델 이름이 빠진 기록: day -> 토큰
     for r in records:
         acct = r.get("account_email") or ""
         if allowed and acct not in allowed:
+            continue
+        if tracked and not tracked(r.get("provider") or "", acct):
             continue
         credits, unpriced = record_credits(r, models)
         turns = r.get("n") or 0
