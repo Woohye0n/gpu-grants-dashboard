@@ -428,6 +428,21 @@ check("누적 사용 = 초깃값 - 잔액", v["total_spent"], 13019.8)
 check("처음 관측 전 사용도 이번 달에 (초깃값이 기준점)", round(v["month_spent"], 1), 13019.8)
 db.close()
 
+# ---- 도구별 제외: 같은 이메일의 한 도구만 뺀다 --------------------------------
+tr = ai_bundle.tracked_fn({"allowed_accounts": ["two@x"],
+                           "excluded_accounts": ["claude:two@x"]})
+check("제외한 도구는 집계 안 함", tr("claude", "two@x"), False)
+check("같은 이메일의 다른 도구는 그대로", tr("codex", "two@x"), True)
+check("허용 목록 밖은 여전히 제외", tr("codex", "other@x"), False)
+db = ai_store.connect(os.path.join(tmp, "excl.db"))
+ai_store.ingest_batch(db, {"host": "n", "accounts": [
+    {"provider": "claude", "email": "two@x"}, {"provider": "codex", "email": "two@x"}]})
+b = ai_bundle.build(db, {"tracking": {"allowed_accounts": ["two@x"],
+                                      "excluded_accounts": ["claude:two@x"]}})
+check("카드에서도 빠진다", [(a["provider"], a["email"]) for a in b["summary"]["accounts"]],
+      [("codex", "two@x")])
+db.close()
+
 print()
 if fails:
     print(f"실패 {len(fails)}건: {', '.join(fails)}")

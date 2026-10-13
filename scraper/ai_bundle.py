@@ -192,10 +192,24 @@ def _record_alerts(db, accounts, now):
     db.commit()
 
 
+def tracked_fn(tracking):
+    """(도구, 계정) 이 집계 대상인지. allowed_accounts 는 이메일 단위라, 같은 이메일을
+    두 도구가 쓸 때 한쪽만 빼려면 excluded_accounts 에 "도구:이메일" 로 적는다."""
+    allowed = set(tracking.get("allowed_accounts") or [])
+    excluded = set(tracking.get("excluded_accounts") or [])
+
+    def tracked(provider, email):
+        if allowed and email not in allowed:
+            return False
+        return f"{provider}:{email}" not in excluded
+    return tracked
+
+
 def build(db, cfg, now=None):
     now = int(now or time.time() * 1000)
     tracking = cfg.get("tracking") or {}
     allowed = set(tracking.get("allowed_accounts") or [])
+    tracked = tracked_fn(tracking)
     count_from = int(tracking.get("count_from_ms") or 0)
     live_seconds = int((cfg.get("collect") or {}).get("session_live_seconds") or 360)
     # 노드가 '살아 있다' 고 볼 시간. 송신기는 5분마다 보고하므로 6분(=기존
@@ -223,7 +237,7 @@ def build(db, cfg, now=None):
     known = {(r["provider"], r["email"]) for r in rows}
     for email in sorted(allowed):
         for provider in ("claude", "codex"):
-            if (provider, email) not in known and \
+            if (provider, email) not in known and tracked(provider, email) and \
                     (tracking.get("account_status") or {}).get(f"{provider}:{email}"):
                 rows.append({"provider": provider, "email": email, "account_id": None,
                              "org_type": None, "rate_limit_tier": None,
@@ -232,7 +246,7 @@ def build(db, cfg, now=None):
                              "usage_status_at": None, "last_seen": None})
     for r in rows:
         email, provider = r["email"], r["provider"]
-        if allowed and email not in allowed:
+        if not tracked(provider, email):
             continue
         try:
             rl = json.loads(r["rate_limits"]) if r["rate_limits"] else None
@@ -292,7 +306,7 @@ def build(db, cfg, now=None):
         m = meta.get(key)
         host = r["host"] or (m["host"] if m else None)
         email = r["account_email"] or (m["account_email"] if m else None)
-        if allowed and email not in allowed:
+        if not tracked(r["provider"], email):
             continue
         updated = max(r["last_ts"] or 0, (m["updated_at"] if m else 0) or 0)
         # 라이브 판정에는 세 가지가 다 필요하다. 하나만 쓰면 어느 쪽으로든 틀린다.
@@ -365,7 +379,7 @@ def build(db, cfg, now=None):
     for w in WINDOWS:
         start = now - WINDOWS[w]
         for r in db.execute(_CREDIT_SQL, (ai_pricing.OPENAI_LONG_CONTEXT_OVER, start)):
-            if allowed and r["account_email"] not in allowed:
+            if not tracked(r["provider"], r["account_email"]):
                 continue
             owner = owner_by.get((r["provider"], r["session_id"])) or "미분류"
             p = people.setdefault(owner, {
@@ -558,7 +572,7 @@ def build_history(db, cfg, now=None):
     people = cfg.get("people") or {}
     rules = people.get("rules") or []
     pinned = {k: v for k, v in (people.get("sessions") or {}).items() if v}
-    allowed = set((cfg.get("tracking") or {}).get("allowed_accounts") or [])
+    tracked = tracked_fn(cfg.get("tracking") or {})
     launch = {(r["provider"], r["session_id"]): r["cwd"]
               for r in db.execute("SELECT provider, session_id, cwd FROM session_meta")}
     local_from = ai_store.meta_get(db, "history_local_from")
@@ -575,4 +589,4 @@ def build_history(db, cfg, now=None):
         owner_of=lambda r: owner_of_session(rules, r, pinned,
                                             launch.get((r.get("provider"), r.get("session_id")))),
         now_ms=now,
-        allowed=allowed, sources=sources, notes=notes)
+        tracked=tracked, sources=sources, notes=notes)
