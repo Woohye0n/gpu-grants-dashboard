@@ -255,7 +255,7 @@ function gaugeHTML(th) {
   </div>`;
 }
 
-// 크레딧 잔량. Codex: 주간 한도를 다 쓰면 넘어가는 유료 크레딧의 잔액과 이번 달 사용량
+// 크레딧 잔량. Codex: 주간 한도를 다 쓰면 넘어가는 유료 크레딧의 잔액
 // (Codex 자체 단위 — 이 화면의 크레딧(=$10)과 다르다). Claude: 추가 사용(extra usage) 상태 —
 // 사용량 API 가 잔액 숫자는 주지 않는다.
 const CLAUDE_EXTRA_REASON = { out_of_credits: "크레딧 소진" };
