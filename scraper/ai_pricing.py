@@ -51,7 +51,7 @@ from __future__ import annotations
 import re
 
 USD_PER_CREDIT = 10.0
-PRICING_AS_OF = "2026-10-07"
+PRICING_AS_OF = "2026-10-16"
 PRICING_SOURCES = [
     "https://platform.claude.com/docs/en/about-claude/pricing",
     "https://developers.openai.com/api/docs/pricing",
@@ -103,14 +103,16 @@ DEFAULT_MODELS = {
     # Flex 는 gpt-5.6-sol 에만 있다($2/$0.2/$10). astra 의 Ultrafast 는 단가를
     # 확인하지 못해 넣지 않았다 — 쓰이면 '단가 미등록' 으로 드러난다.
     # long_context 가 없는 모델은 272K 초과 요청의 단가를 확인하지 못했다는 뜻이다.
-    # 그 경우 표준가로 짐작하지 않고 미등록으로 둔다(지금까지 실측 0건).
+    # 그 경우 표준가로 짐작하지 않고 미등록으로 둔다.
     "gpt-6-astra":   {"family": "openai", "in": 10,  "out": 50,  "cr": 1.00, "cw": 12.5,
                       "speed": {"standard": 1.0, "fast": 2.0},
                       "long_context": {"in": 2.0, "cr": 2.0, "cw": 2.0, "out": 1.5}},
     "gpt-6.1-sol":   {"family": "openai", "in": 2,   "out": 10,  "cr": 0.10, "cw": 2.5,
-                      "speed": {"standard": 1.0, "fast": 2.0}},
+                      "speed": {"standard": 1.0, "fast": 2.0},
+                      "long_context": {"in": 2.0, "cr": 2.0, "cw": 2.0, "out": 1.5}},
     "gpt-6-sol":     {"family": "openai", "in": 2,   "out": 10,  "cr": 0.20, "cw": 2.5,
-                      "speed": {"standard": 1.0, "fast": 2.0}},
+                      "speed": {"standard": 1.0, "fast": 2.0},
+                      "long_context": {"in": 2.0, "cr": 2.0, "cw": 2.0, "out": 1.5}},
     # 문서상 프로모션가이며 "at least through November 21, 2026" 유지된다.
     "gpt-5.6-sol":   {"family": "openai", "in": 4,   "out": 20,  "cr": 0.40, "cw": 5,
                       "speed": {"standard": 1.0, "fast": 2.0, "flex": 0.5},

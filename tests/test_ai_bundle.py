@@ -213,9 +213,12 @@ c, d = credit_bundle([{"provider": "codex", "model": "gpt-5.5", "input": 1000,
                        "cache_creation": 500}])
 check("단가가 없는 토큰 종류만 따로 빼고 나머지는 계산한다",
       (near(c, 1000 * 5 / M / 10), d["unpriced"][0]["tokens"]), (True, 500))
-c, d = credit_bundle([{"provider": "codex", "model": "gpt-6-sol", "input": 300_000}])
+c, d = credit_bundle([{"provider": "codex", "model": "gpt-5.5", "input": 300_000}])
 check("장문맥 단가를 모르는 모델은 표준가로 짐작하지 않는다",
       (c, d["unpriced"][0]["reason"]), (0.0, "장문맥(>272K) 단가 미확인"))
+c, d = credit_bundle([{"provider": "codex", "model": "gpt-6.1-sol", "input": 300_000}])
+check("gpt-6.1-sol 장문맥은 입력 $4 (공식 단가표)",
+      (near(c, 300_000 * 4 / M / 10), d["unpriced"]), (True, []))
 c, d = credit_bundle([{"model": "claude-opus-5-5", "input": 300_000},
                       {"model": "claude-opus-5-5", "input": 1000}])
 check("Claude 는 272K 를 넘어도 표준가 (장문맥 할증 없음)",
