@@ -446,6 +446,21 @@ check("카드에서도 빠진다", [(a["provider"], a["email"]) for a in b["summ
       [("codex", "two@x")])
 db.close()
 
+# ---- 세션을 개인 계정으로 이어 쓰면: 그 전의 연구실 턴은 여전히 그 사람 몫 ------------
+db = ai_store.connect(os.path.join(tmp, "switch.db"))
+u = {"provider": "codex", "session_id": "SW", "model": "gpt-6.1-sol",
+     "cwd": "/home/jovyan/data/wjkim/VFM", "input_tokens": 1000, "output_tokens": 10}
+ai_store.ingest_batch(db, {"host": "k3", "usage": [
+    dict(u, uuid="sw1", ts=NOW - 3 * 3600_000, account_email="lab2@x"),
+    dict(u, uuid="sw2", ts=NOW - 600_000, account_email="me@personal", input_tokens=2000)]})
+b = ai_bundle.build(db, {"tracking": {"allowed_accounts": ["lab2@x"]},
+                         "people": {"rules": [{"owner": "wjkim", "cwd_glob": "*wjkim*"}]}}, now=NOW)
+owners = {p["owner"]: p["windows"]["7d"]["messages"] for p in b["summary"]["people"]}
+check("세션 계정이 개인 계정으로 바뀌어도 연구실 턴은 wjkim", owners.get("wjkim"), 1)
+check("미분류로 새지 않는다", owners.get("미분류"), None)
+check("개인 계정 세션은 목록에는 안 나온다", [s["session_id"] for s in b["sessions"]], [])
+db.close()
+
 print()
 if fails:
     print(f"실패 {len(fails)}건: {', '.join(fails)}")
