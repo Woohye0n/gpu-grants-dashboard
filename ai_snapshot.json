@@ -152,6 +152,10 @@
         "cwd_glob": "*geonchoi*"
       },
       {
+        "owner": "jihoonkwon",
+        "cwd_glob": "*jihoonkwon*"
+      },
+      {
         "owner": "woohyeon",
         "host": "kakao-b200-2",
         "note": "임시(2026-10-08): 이 서버는 지금 woohyeon 만 쓴다. 이름 규칙에 안 걸린 세션만 받도록 맨 뒤에 둔다. 다른 사람이 쓰기 시작하면 지울 것."
