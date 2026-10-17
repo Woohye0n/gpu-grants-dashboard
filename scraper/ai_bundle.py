@@ -299,6 +299,11 @@ def build(db, cfg, now=None):
 
     # ---- 세션 --------------------------------------------------------------
     sessions, live_count = [], 0
+    # 목록에서 빠지는 세션도 사람은 정해 둔다. 세션의 계정은 **마지막** 계정이라,
+    # 연구실 계정으로 쓰던 세션을 개인 계정으로 이어 쓰면 세션은 목록에서 빠지지만
+    # 그 전의 연구실 턴은 그대로 집계된다. 사람을 모르면 그 턴이 전부 미분류로 간다
+    # (wjkim, kakao-b200-3: 세션 5개, 주간 2.3만 턴).
+    owner_hidden = {}
     meta = {(r["provider"], r["session_id"]): r
             for r in db.execute("SELECT * FROM session_meta")}
     for r in db.execute("SELECT * FROM session_totals ORDER BY last_ts DESC"):
@@ -307,6 +312,12 @@ def build(db, cfg, now=None):
         host = r["host"] or (m["host"] if m else None)
         email = r["account_email"] or (m["account_email"] if m else None)
         if not tracked(r["provider"], email):
+            owner_hidden[key] = owner_of_session(rules, {
+                "session_id": r["session_id"], "provider": r["provider"],
+                "account_email": email, "host": host,
+                "cwd": r["cwd"] or (m["cwd"] if m else None),
+                "project": r["project"] or (m["project"] if m else None),
+            }, pinned, m["cwd"] if m else None)
             continue
         updated = max(r["last_ts"] or 0, (m["updated_at"] if m else 0) or 0)
         # 라이브 판정에는 세 가지가 다 필요하다. 하나만 쓰면 어느 쪽으로든 틀린다.
@@ -374,7 +385,8 @@ def build(db, cfg, now=None):
             p["accounts"].add(s["account_email"])
     # 세션 → 사람. 창마다 세션 수만큼 목록을 다시 훑던 것을 사전 한 번으로 바꾼다
     # (모델·속도로 더 잘게 묶으면서 행이 늘었다).
-    owner_by = {(s["provider"], s["session_id"]): s["owner"] for s in sessions}
+    owner_by = dict(owner_hidden)
+    owner_by.update({(s["provider"], s["session_id"]): s["owner"] for s in sessions})
     models = ai_pricing.load_models(cfg)
     for w in WINDOWS:
         start = now - WINDOWS[w]
