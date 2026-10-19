@@ -176,29 +176,29 @@
     "default_cooldown_minutes": 30,
     "thresholds": [
       {
-        "name": "5h-80%",
+        "name": "5h-90%",
         "window": "five_hour",
         "provider": "claude",
         "account": "*",
         "metric": "utilization",
-        "limit": 80,
+        "limit": 90,
         "cooldown_minutes": 30
       },
       {
-        "name": "weekly-80%",
+        "name": "weekly-90%",
         "window": "seven_day",
         "account": "*",
         "metric": "utilization",
-        "limit": 80,
+        "limit": 90,
         "cooldown_minutes": 120
       },
       {
-        "name": "weekly-fable-80%",
+        "name": "weekly-fable-90%",
         "window": "seven_day_fable",
         "provider": "claude",
         "account": "*",
         "metric": "utilization",
-        "limit": 80,
+        "limit": 90,
         "cooldown_minutes": 120
       }
     ]
