@@ -461,6 +461,15 @@ check("미분류로 새지 않는다", owners.get("미분류"), None)
 check("개인 계정 세션은 목록에는 안 나온다", [s["session_id"] for s in b["sessions"]], [])
 db.close()
 
+# ---- 알림을 끈 기준: 게이지는 남고 한도 초과·알림은 없다 ------------------------
+ths = ai_bundle._thresholds(
+    {"thresholds": [{"name": "5h", "window": "five_hour", "limit": 90, "alert": False},
+                    {"name": "wk", "window": "seven_day", "limit": 90}]},
+    {"provider": "claude", "email": "a@x"},
+    {"five_hour": {"utilization": 97}, "seven_day": {"utilization": 95}})
+check("알림 끈 5시간은 넘어도 breached 아님", [(t["name"], t["breached"], t["alert"]) for t in ths],
+      [("5h", False, False), ("wk", True, True)])
+
 print()
 if fails:
     print(f"실패 {len(fails)}건: {', '.join(fails)}")
