@@ -177,6 +177,7 @@
     "thresholds": [
       {
         "name": "5h-90%",
+        "alert": false,
         "window": "five_hour",
         "provider": "claude",
         "account": "*",

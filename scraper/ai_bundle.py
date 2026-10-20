@@ -156,12 +156,14 @@ def _thresholds(cfg_alerts, account, rate_limits):
         data = (rate_limits or {}).get(win) or {}
         value = data.get("utilization")
         limit = t.get("limit")
+        alert = t.get("alert") is not False   # false: 게이지만 보이고 경고·알림은 없다
         out.append({
             "name": t.get("name") or win, "window": win,
             "metric": t.get("metric") or "utilization", "limit": limit,
             "value": value, "resets_at": data.get("resets_at"),
             "available": value is not None,
-            "breached": bool(value is not None and limit is not None and value >= limit),
+            "alert": alert,
+            "breached": bool(alert and value is not None and limit is not None and value >= limit),
             "cooldown_minutes": t.get("cooldown_minutes",
                                       (cfg_alerts or {}).get("default_cooldown_minutes", 30)),
         })
