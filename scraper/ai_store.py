@@ -140,6 +140,16 @@ def migrate(db):
         meta_set(db, "codex_uuid_v2", "done")
         if n:
             meta_set(db, "codex_uuid_v2_removed", n)
+    if meta_get(db, "claude_uuid_v1") != "done":
+        n = rekey_claude_usage(db)
+        meta_set(db, "claude_uuid_v1", "done")
+        if n:
+            meta_set(db, "claude_uuid_v1_removed", n)
+    if meta_get(db, "codex_replay_v1") != "done":
+        n = drop_codex_replays(db)
+        meta_set(db, "codex_replay_v1", "done")
+        if n:
+            meta_set(db, "codex_replay_v1_removed", n)
     db.commit()
 
 
@@ -189,6 +199,109 @@ def rekey_codex_usage(db):
     db.executemany("UPDATE usage SET uuid=? WHERE uuid=?", changes)
     after = db.execute("SELECT COUNT(*) FROM usage WHERE provider='codex'").fetchone()[0]
     return before - after
+
+
+def claude_usage_uuid(model, input_tokens, output_tokens, cache_creation_tokens,
+                      cache_read_tokens):
+    """Claude 턴의 정체성 — 응답 하나의 사용량.
+
+    Claude Code 는 응답 하나를 내용 블록(thinking·text·tool_use)마다 한 줄씩 적고,
+    줄마다 **같은 usage 를 통째로 복사**한다. 송신기는 줄의 uuid 를 키로 보내므로
+    같은 응답이 블록 수만큼(2~3배) 세졌다(실측: 이 DB 의 claude 행 46% 가 중복).
+    세션을 resume/fork 하면 이전 응답들이 새 세션 파일로 복사돼 세션을 넘어서도
+    겹쳤다. 그래서 세션을 빼고 모델과 토큰 네 칸으로 정체성을 삼는다 — 캐시 읽기·
+    쓰기 수까지 같은 서로 다른 응답은 사실상 없다. 같은 키면 먼저 들어온(=원래)
+    행이 남는다.
+
+    캐시를 전혀 안 쓴 응답은 토큰 수가 우연히 겹칠 수 있어 내용으로 가르지 않는다
+    (None → 송신기가 보낸 줄 uuid 를 그대로 쓴다). Claude Code 응답은 사실상 전부
+    캐시를 읽거나 쓴다.
+    """
+    if not (cache_creation_tokens or cache_read_tokens):
+        return None
+    import hashlib
+    key = "|".join(str(x) for x in (
+        model, input_tokens, output_tokens, cache_creation_tokens, cache_read_tokens))
+    return "claude:" + hashlib.sha1(key.encode("utf-8")).hexdigest()
+
+
+def _subtract_totals(db, where, params=()):
+    """지울 usage 행만큼 세션 누적에서 뺀다. 그 행들이 들어올 때 더해졌던 몫이다."""
+    for r in db.execute(f"""SELECT provider, session_id, COUNT(*) n, SUM(input) i,
+                              SUM(output) o, SUM(cache_creation) cw, SUM(cache_read) cr
+                            FROM usage WHERE {where} GROUP BY provider, session_id""",
+                        params).fetchall():
+        db.execute("""UPDATE session_totals SET
+                        messages=MAX(0, messages-?), input=MAX(0, input-?),
+                        output=MAX(0, output-?), cache_creation=MAX(0, cache_creation-?),
+                        cache_read=MAX(0, cache_read-?)
+                      WHERE provider=? AND session_id=?""",
+                   (r["n"], r["i"] or 0, r["o"] or 0, r["cw"] or 0, r["cr"] or 0,
+                    r["provider"], r["session_id"]))
+
+
+def rekey_claude_usage(db):
+    """이미 쌓인 claude 행을 내용 키로 접는다. 같은 응답이면 **가장 이른 시각** 하나만.
+
+    접힌 행만큼 세션 누적도 덜어 낸다. retain_days 전에 이미 지워진 턴의 몫은
+    되돌리지 못한다(codex 와 같은 한계).
+    """
+    db.execute("""CREATE TEMP TABLE _keep AS
+                    SELECT rid FROM (SELECT rowid AS rid, MIN(ts) FROM usage
+                                     WHERE provider='claude'
+                                       AND cache_creation + cache_read > 0
+                                     GROUP BY model, input, output, cache_creation, cache_read)""")
+    where = ("provider='claude' AND cache_creation + cache_read > 0 "
+             "AND rowid NOT IN (SELECT rid FROM _keep)")
+    n = db.execute(f"SELECT COUNT(*) FROM usage WHERE {where}").fetchone()[0]
+    if n:
+        _subtract_totals(db, where)
+        db.execute(f"DELETE FROM usage WHERE {where}")
+    db.execute("DROP TABLE _keep")
+    rows = db.execute("""SELECT uuid, model, input, output, cache_creation, cache_read
+                         FROM usage WHERE provider='claude'""").fetchall()
+    changes = []
+    for r in rows:
+        new = claude_usage_uuid(r["model"], r["input"], r["output"],
+                                r["cache_creation"], r["cache_read"])
+        if new and new != r["uuid"]:
+            changes.append((new, r["uuid"]))
+    db.executemany("UPDATE usage SET uuid=? WHERE uuid=?", changes)
+    return n
+
+
+# 세션 하나가 1초 안에 이만큼 턴을 냈다면 실제 사용이 아니라 이력 복사다.
+# Codex Desktop 에서 세션을 fork 하면 새 rollout 파일에 조상 세션들의 이력이 통째로
+# **복사 시각**을 달고 다시 적힌다(실측: 1.87GB, 조상 2개의 6.7만 턴이 5초 안에).
+# 송신기는 그걸 새 턴으로 보낸다. 원래 턴이 아직 usage 에 있으면 내용 키로 걸러지지만,
+# retain_days 가 지나 지워졌거나 이 DB 가 생기기 전의 턴이면 '지금 쓴 것' 으로 들어와
+# 한 사람의 5시간 창이 1,000 크레딧을 넘었다. 실제 사용은 같은 세션에서 1초에 많아야
+# 3턴이다(30일치 1.25만 초 중 3턴 4번, 2턴 68번).
+REPLAY_TURNS_PER_SECOND = 10
+
+
+def _replay_seconds(rows):
+    """codex 행들 중 (세션, 초) 당 REPLAY_TURNS_PER_SECOND 이상인 칸."""
+    from collections import Counter
+    count = Counter((r["session_id"], (r["ts"] or 0) // 1000) for r in rows)
+    return {k for k, n in count.items() if n >= REPLAY_TURNS_PER_SECOND}
+
+
+def drop_codex_replays(db):
+    """이미 들어온 fork 복사분을 지운다. 세션 누적에서도 덜어 낸다."""
+    rows = db.execute("SELECT session_id, ts FROM usage WHERE provider='codex'").fetchall()
+    bad = _replay_seconds(rows)
+    if not bad:
+        return 0
+    db.execute("CREATE TEMP TABLE _replay (session_id TEXT, sec INTEGER)")
+    db.executemany("INSERT INTO _replay VALUES(?,?)", list(bad))
+    where = ("provider='codex' AND EXISTS (SELECT 1 FROM _replay r WHERE "
+             "r.session_id=usage.session_id AND r.sec=usage.ts/1000)")
+    n = db.execute(f"SELECT COUNT(*) FROM usage WHERE {where}").fetchone()[0]
+    _subtract_totals(db, where)
+    db.execute(f"DELETE FROM usage WHERE {where}")
+    db.execute("DROP TABLE _replay")
+    return n
 
 
 def _num(v):
@@ -331,12 +444,22 @@ def ingest_batch(db, payload, host_hint=None):
 
     added = 0
     seed_until = int(meta_get(db, "seed_until_ms", 0) or 0)
-    for u in payload.get("usage") or []:
+    usage = payload.get("usage") or []
+    replay = _replay_seconds([u for u in usage if (u.get("provider") or "claude") == "codex"])
+    for u in usage:
         uid = u.get("uuid")
-        if uid and (u.get("provider") or "claude") == "codex":
+        provider = u.get("provider") or "claude"
+        if uid and provider == "codex":
+            if (u.get("session_id"), (u.get("ts") or 0) // 1000) in replay:
+                continue                  # fork 가 다시 적은 조상 이력 (drop_codex_replays)
             uid = codex_usage_uuid(u.get("session_id"), u.get("model"),
                                    _num(u.get("input_tokens")), _num(u.get("output_tokens")),
                                    _num(u.get("cache_read_tokens")))
+        elif uid:
+            uid = claude_usage_uuid(u.get("model"), _num(u.get("input_tokens")),
+                                    _num(u.get("output_tokens")),
+                                    _num(u.get("cache_creation_tokens")),
+                                    _num(u.get("cache_read_tokens"))) or uid
         if seed_until and (u.get("ts") or 0) <= seed_until:
             continue                      # 시드 스냅샷이 이미 세어 둔 구간
         # 계정을 증명하지 못한 기록은 집계하지 않는다(송신기가 그렇게 표시해 보낸다).
