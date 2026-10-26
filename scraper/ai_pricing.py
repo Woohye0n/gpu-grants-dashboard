@@ -51,7 +51,7 @@ from __future__ import annotations
 import re
 
 USD_PER_CREDIT = 10.0
-PRICING_AS_OF = "2026-10-16"
+PRICING_AS_OF = "2026-10-27"
 PRICING_SOURCES = [
     "https://platform.claude.com/docs/en/about-claude/pricing",
     "https://developers.openai.com/api/docs/pricing",
@@ -79,7 +79,7 @@ _CLAUDE_FAST = {"standard": 1.0, "fast": 2.0}
 _CLAUDE_STD = {"standard": 1.0}
 
 # $/1M 토큰. Anthropic 표는 5분/1시간 쓰기와 캐시 읽기를 모델별로 직접 적는다
-# (캐시 읽기 배수가 모델마다 다르다: 기본 ×0.1, Opus 5.5 ×0.05, Fable 5.1 ×0.025).
+# (캐시 읽기 배수가 모델마다 다르다: 기본 ×0.1, Opus 5.5·Sonnet 5.5 ×0.05, Fable 5.1 ×0.025).
 DEFAULT_MODELS = {
     # ---- Anthropic ------------------------------------------------------------
     "claude-fable-5-1":  {"family": "claude", "in": 10, "out": 50, "cr": 0.25, "cw5m": 12.5, "cw1h": 20, "speed": _CLAUDE_STD},
@@ -93,7 +93,7 @@ DEFAULT_MODELS = {
     # Opus 4.6 은 speed=fast 를 받아도 표준 속도·표준 단가로 처리된다.
     "claude-opus-4-6":   {"family": "claude", "in": 5,  "out": 25, "cr": 0.50, "cw5m": 6.25, "cw1h": 10, "speed": {"standard": 1.0, "fast": 1.0}},
     "claude-opus-4-5":   {"family": "claude", "in": 5,  "out": 25, "cr": 0.50, "cw5m": 6.25, "cw1h": 10, "speed": _CLAUDE_STD},
-    "claude-sonnet-5-5": {"family": "claude", "in": 2,  "out": 10, "cr": 0.20, "cw5m": 2.5,  "cw1h": 4,  "speed": _CLAUDE_STD},
+    "claude-sonnet-5-5": {"family": "claude", "in": 2,  "out": 10, "cr": 0.10, "cw5m": 2.5,  "cw1h": 4,  "speed": _CLAUDE_STD},
     "claude-sonnet-5":   {"family": "claude", "in": 2,  "out": 10, "cr": 0.20, "cw5m": 2.5,  "cw1h": 4,  "speed": _CLAUDE_STD},
     "claude-sonnet-4-6": {"family": "claude", "in": 3,  "out": 15, "cr": 0.30, "cw5m": 3.75, "cw1h": 6,  "speed": _CLAUDE_STD},
     "claude-sonnet-4-5": {"family": "claude", "in": 3,  "out": 15, "cr": 0.30, "cw5m": 3.75, "cw1h": 6,  "speed": _CLAUDE_STD},
@@ -123,9 +123,11 @@ DEFAULT_MODELS = {
     "gpt-5.6-luna":  {"family": "openai", "in": 0.2, "out": 1.2, "cr": 0.02, "cw": 0.25,
                       "speed": {"standard": 1.0, "fast": 2.0},
                       "long_context": {"in": 2.0, "cr": 2.0, "cw": 2.0, "out": 1.5}},
-    # 단기 문맥 전용(<272K). 캐시 쓰기 단가는 표에 없다.
+    # 캐시 쓰기 단가는 표에 없다. Fast 는 다른 모델과 달리 ×2.5($12.50/$1.25/$75),
+    # 장문맥(>272K)은 $10/$1/$45 — 입력·캐시 ×2, 출력 ×1.5.
     "gpt-5.5":       {"family": "openai", "in": 5,   "out": 30,  "cr": 0.50,
-                      "speed": {"standard": 1.0}},
+                      "speed": {"standard": 1.0, "fast": 2.5},
+                      "long_context": {"in": 2.0, "cr": 2.0, "out": 1.5}},
     # Codex 가 사용자 작업과 별도 세션으로 돌리는 자동 리뷰. 공식 단가표에 없고,
     # 사용량이 거의 과금되지 않는 것으로 알려져 있어 단가 ≈ 0 으로 둔다. 토큰은
     # 많아 보이지만(주간 888M, 93.8% 가 캐시 읽기) 이것을 '단가 미등록' 경고로 띄우면

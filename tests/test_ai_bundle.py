@@ -214,8 +214,15 @@ c, d = credit_bundle([{"provider": "codex", "model": "gpt-5.5", "input": 1000,
 check("단가가 없는 토큰 종류만 따로 빼고 나머지는 계산한다",
       (near(c, 1000 * 5 / M / 10), d["unpriced"][0]["tokens"]), (True, 500))
 c, d = credit_bundle([{"provider": "codex", "model": "gpt-5.5", "input": 300_000}])
+check("gpt-5.5 장문맥은 입력 $10 (공식 단가표)",
+      (near(c, 300_000 * 10 / M / 10), d["unpriced"]), (True, []))
+models = ai_pricing.load_models({"pricing": {"models": {"gpt-5.5": {"long_context": None}}}})
 check("장문맥 단가를 모르는 모델은 표준가로 짐작하지 않는다",
-      (c, d["unpriced"][0]["reason"]), (0.0, "장문맥(>272K) 단가 미확인"))
+      ai_pricing.rates(models, "gpt-5.5", long_context=True), (None, "장문맥(>272K) 단가 미확인"))
+check("gpt-5.5 Fast 는 ×2.5 (입력 $12.50)",
+      ai_pricing.rates(ai_pricing.load_models(), "gpt-5.5", speed="fast")[0]["input"], 12.5)
+check("Sonnet 5.5 캐시 읽기는 $0.10 (입력가 ×0.05)",
+      ai_pricing.rates(ai_pricing.load_models(), "claude-sonnet-5-5")[0]["cache_read"], 0.1)
 c, d = credit_bundle([{"provider": "codex", "model": "gpt-6.1-sol", "input": 300_000}])
 check("gpt-6.1-sol 장문맥은 입력 $4 (공식 단가표)",
       (near(c, 300_000 * 4 / M / 10), d["unpriced"]), (True, []))
@@ -269,7 +276,7 @@ check("재개로 겹친 codex 턴이 하나로 접힌다", len(rows), 1)
 check("남는 것은 원래 시각", rows[0]["ts"], 100)
 check("키가 내용 기반으로 바뀐다", rows[0]["uuid"],
       ai_store.codex_usage_uuid("S", "gpt-5.6-sol", 10, 2, 30))
-check("claude 행은 건드리지 않는다",
+check("캐시를 안 쓴 claude 행은 그대로 둔다 (토큰 수가 우연히 겹칠 수 있다)",
       db.execute("SELECT uuid FROM usage WHERE provider='claude'").fetchone()[0], "c1")
 ai_store.connect(path).close()
 check("다시 열어도 그대로 (멱등)",
@@ -291,10 +298,79 @@ ai_store.ingest_batch(db, {"host": "n", "usage": [{
     {"uuid": "t2", "ts": 5, "provider": "claude", "account_email": "lab@x",
      "session_id": "T", "model": "claude-opus-5-5", "input_tokens": 1, "output_tokens": 2,
      "cache_creation_tokens": 50}]})
-r1 = db.execute("SELECT speed, effort, cache_creation_1h FROM usage WHERE uuid='t1'").fetchone()
-r2 = db.execute("SELECT cache_creation_1h FROM usage WHERE uuid='t2'").fetchone()
+r1 = db.execute("SELECT speed, effort, cache_creation_1h FROM usage "
+                "WHERE session_id='T' AND output=1").fetchone()
+r2 = db.execute("SELECT cache_creation_1h FROM usage WHERE session_id='T' AND output=2").fetchone()
 check("송신기가 보낸 단가 값이 저장된다", tuple(r1), ("fast", "xhigh", 800))
 check("TTL 을 안 보낸 쓰기는 NULL(=모름)", r2[0], None)
+
+# Claude Code 는 응답 하나를 블록(thinking·tool_use…)마다 한 줄씩, 같은 usage 를
+# 복사해 적는다. resume/fork 하면 그 줄들이 새 세션 파일로도 복사된다.
+blk = {"provider": "claude", "account_email": "lab@x", "model": "claude-opus-5",
+       "input_tokens": 2, "output_tokens": 793, "cache_creation_tokens": 451030,
+       "cache_read_tokens": 0}
+ai_store.ingest_batch(db, {"host": "n", "usage": [
+    dict(blk, uuid="L1", ts=1000, session_id="B"),
+    dict(blk, uuid="L2", ts=1000, session_id="B"),
+    dict(blk, uuid="L3", ts=6000, session_id="B")]})
+ai_store.ingest_batch(db, {"host": "n", "usage": [dict(blk, uuid="L9", ts=9000, session_id="B2")]})
+check("블록마다 복사된 응답도, 다른 세션으로 복사된 응답도 한 번만 센다",
+      db.execute("SELECT COUNT(*), MIN(session_id) FROM usage WHERE output=793").fetchone()[:],
+      (1, "B"))
+check("세션 누적도 응답 하나만큼",
+      db.execute("SELECT messages, cache_creation FROM session_totals WHERE session_id='B'")
+        .fetchone()[:], (1, 451030))
+
+# Codex Desktop 의 fork: 조상 세션 이력이 '복사 시각' 을 달고 한꺼번에 다시 적힌다.
+fork = [{"provider": "codex", "account_email": "lab@x", "session_id": "OLD",
+         "model": "gpt-5.6-sol", "uuid": f"f{k}", "ts": 50_000_000 + k,
+         "input_tokens": 100 + k, "output_tokens": 5, "cache_read_tokens": 900}
+        for k in range(40)]
+real = [{"provider": "codex", "account_email": "lab@x", "session_id": "NEW",
+         "model": "gpt-6-astra", "uuid": f"r{k}", "ts": 50_000_000 + k * 4000,
+         "input_tokens": 7 + k, "output_tokens": 3, "cache_read_tokens": 50}
+        for k in range(5)]
+ai_store.ingest_batch(db, {"host": "n", "usage": fork + real})
+check("fork 가 다시 적은 이력은 버리고 실제 턴은 남는다",
+      dict(db.execute("SELECT session_id, COUNT(*) FROM usage WHERE session_id IN ('OLD','NEW') "
+                      "GROUP BY session_id").fetchall()), {"NEW": 5})
+db.close()
+
+path2 = os.path.join(tmp, "replayed.db")
+old = sqlite3.connect(path2)
+old.execute("""CREATE TABLE usage (uuid TEXT PRIMARY KEY, ts INTEGER, provider TEXT,
+                 host TEXT, account_email TEXT, session_id TEXT, model TEXT, surface TEXT,
+                 input INTEGER, output INTEGER, cache_creation INTEGER, cache_read INTEGER)""")
+old.execute("""CREATE TABLE session_totals (provider TEXT, session_id TEXT, account_email TEXT,
+                 host TEXT, cwd TEXT, project TEXT, first_ts INTEGER, last_ts INTEGER,
+                 messages INTEGER DEFAULT 0, input INTEGER DEFAULT 0, output INTEGER DEFAULT 0,
+                 cache_creation INTEGER DEFAULT 0, cache_read INTEGER DEFAULT 0,
+                 models TEXT DEFAULT '[]', surfaces TEXT DEFAULT '[]',
+                 PRIMARY KEY (provider, session_id))""")
+for k in range(30):        # 이미 들어와 버린 fork 복사분
+    old.execute("INSERT INTO usage VALUES(?,?,'codex','n','lab@x','OLD','gpt-5.6-sol',NULL,?,5,0,900)",
+                (f"x{k}", 70_000_000 + k, 100 + k))
+old.execute("INSERT INTO usage VALUES('y','80000000','codex','n','lab@x','OLD','gpt-5.6-sol',NULL,1,1,0,1)")
+for uid, ts in (("b1", 10), ("b2", 12)):   # 블록마다 복사된 claude 응답
+    old.execute("INSERT INTO usage VALUES(?,?,'claude','n','lab@x','C','claude-opus-5',NULL,2,9,40,700)",
+                (uid, ts))
+old.execute("INSERT INTO session_totals VALUES('codex','OLD','lab@x','n',NULL,NULL,0,0,31,"
+            "?,155,0,27001,'[]','[]')", (sum(100 + k for k in range(30)) + 1,))
+old.execute("INSERT INTO session_totals VALUES('claude','C','lab@x','n',NULL,NULL,0,0,2,4,18,80,1400,'[]','[]')")
+old.commit()
+old.close()
+db = ai_store.connect(path2)
+check("이미 들어온 fork 복사분을 지우고 진짜 턴만 남긴다",
+      [r[0] for r in db.execute("SELECT ts FROM usage WHERE provider='codex'")], [80_000_000])
+check("세션 누적에서도 그만큼 덜어 낸다",
+      db.execute("SELECT messages, input, output, cache_read FROM session_totals "
+                 "WHERE session_id='OLD'").fetchone()[:], (1, 1, 5, 1))
+check("이미 들어온 claude 블록 중복도 하나로 접고 누적을 덜어 낸다",
+      (db.execute("SELECT COUNT(*), MIN(ts) FROM usage WHERE provider='claude'").fetchone()[:],
+       db.execute("SELECT messages, cache_read FROM session_totals WHERE session_id='C'")
+         .fetchone()[:]), ((1, 10), (1, 700)))
+ai_store.connect(path2).close()
+check("다시 열어도 그대로 (멱등)", db.execute("SELECT COUNT(*) FROM usage").fetchone()[0], 2)
 db.close()
 
 # ---- 사람 판정: 세션 고정이 경로 규칙보다 먼저 ------------------------------
