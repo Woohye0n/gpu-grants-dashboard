@@ -78,8 +78,12 @@
         "cwd_glob": "*omnibench*"
       },
       {
-        "owner": "kdg6245",
+        "owner": "dogeun",
         "cwd_glob": "*kdg6245*"
+      },
+      {
+        "owner": "dogeun",
+        "cwd_glob": "*dogeun*"
       },
       {
         "owner": "minu0426",
@@ -167,7 +171,7 @@
       }
     ],
     "sessions": {
-      "533ca633-229d-4ae7-bd22-3995d4e7d4f5": "kdg6245",
+      "533ca633-229d-4ae7-bd22-3995d4e7d4f5": "dogeun",
       "01a0f61f-1e6a-7753-9109-0dba1b346420": "csjihwanh",
       "01a0f61d-46f4-7303-a336-d84538eccb09": "csjihwanh"
     }
