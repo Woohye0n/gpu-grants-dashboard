@@ -1,6 +1,6 @@
 window.GPU_GRANTS = {
- "generated_at": "2026-10-24T09:10+09:00",
- "generated_at_kst": "2026-10-24 09:10",
+ "generated_at": "2026-10-27T11:06+09:00",
+ "generated_at_kst": "2026-10-27 11:06",
  "timezone": "Asia/Seoul (KST)",
  "sources": [
   {
@@ -10,11 +10,12 @@ window.GPU_GRANTS = {
    "kind": "builtin",
    "ci_blocked": false,
    "note": "",
-   "ok": true,
-   "stale": false,
+   "ok": false,
+   "stale": true,
    "count": 5,
-   "error": "",
-   "collected_at": ""
+   "error": "주소를 찾을 수 없습니다 (DNS 조회 실패). 주소가 바뀌었는지 확인하세요.",
+   "error_detail": "RuntimeError: GET failed after 2 tries: https://aiinfrahub.kr/api/projects?searchType=projectName&searchText=&listSize=100&idx=0&postDate= (HTTPSConnectionPool(host='aiinfrahub.kr', port=443): Max retries exceeded with url: /api/projects?searchType=projectName&searchText=&listSize=100&idx=0&postDate= (Caused by NameResolutionError(\"HTTPSConnection(host='aiinfrahub.kr', port=443): Failed to resolve 'aiinfrahub.kr' ([Errno -3] Temporary failure in name resolution)\")))",
+   "collected_at": "2026-10-24 09:10"
   },
   {
    "key": "nipa",
@@ -23,11 +24,12 @@ window.GPU_GRANTS = {
    "kind": "builtin",
    "ci_blocked": false,
    "note": "",
-   "ok": true,
-   "stale": false,
+   "ok": false,
+   "stale": true,
    "count": 7,
-   "error": "",
-   "collected_at": ""
+   "error": "공고를 한 건도 읽지 못했습니다 (게시판 구조가 바뀌었을 수 있습니다)",
+   "error_detail": "공고를 한 건도 읽지 못했습니다 (게시판 구조가 바뀌었을 수 있습니다)",
+   "collected_at": "2026-10-24 09:10"
   },
   {
    "key": "seoulaihub",
@@ -36,11 +38,12 @@ window.GPU_GRANTS = {
    "kind": "builtin",
    "ci_blocked": false,
    "note": "",
-   "ok": true,
-   "stale": false,
+   "ok": false,
+   "stale": true,
    "count": 3,
-   "error": "",
-   "collected_at": ""
+   "error": "공고를 한 건도 읽지 못했습니다 (게시판 구조가 바뀌었을 수 있습니다)",
+   "error_detail": "공고를 한 건도 읽지 못했습니다 (게시판 구조가 바뀌었을 수 있습니다)",
+   "collected_at": "2026-10-24 09:12"
   },
   {
    "key": "nia",
@@ -49,11 +52,12 @@ window.GPU_GRANTS = {
    "kind": "generic",
    "ci_blocked": false,
    "note": "",
-   "ok": true,
+   "ok": false,
    "stale": false,
    "count": 0,
    "collected_at": "",
-   "error": "게시글 20건을 읽었고, 그중 GPU 관련 공고는 없었습니다"
+   "error": "주소를 찾을 수 없습니다 (DNS 조회 실패). 주소가 바뀌었는지 확인하세요.",
+   "error_detail": "RuntimeError: 목록을 읽지 못했습니다 — RuntimeError: GET failed after 2 tries: https://www.nia.or.kr/site/nia_kor/ex/bbs/List.do?cbIdx=78336 (HTTPSConnectionPool(host='www.nia.or.kr', port=443): Max retries exceeded with url: /site/nia_kor/ex/bbs/List.do?cbIdx=78336 (Caused by NameResolutionError(\"HTTPSConnection(host='www.nia.or.kr', port=443): Failed to resolve 'www.nia.or.kr' ([Errno -3] Temporary failure in name resolution)\")))"
   },
   {
    "key": "aica_gj_kr",
@@ -62,11 +66,12 @@ window.GPU_GRANTS = {
    "kind": "generic",
    "ci_blocked": false,
    "note": "GitHub 러너에는 자동등록방지 페이지가 내려옵니다. 국내 서버에서 수집하므로 정상입니다.",
-   "ok": true,
-   "stale": false,
+   "ok": false,
+   "stale": true,
    "count": 8,
-   "error": "",
-   "collected_at": ""
+   "error": "주소를 찾을 수 없습니다 (DNS 조회 실패). 주소가 바뀌었는지 확인하세요.",
+   "error_detail": "RuntimeError: 목록을 읽지 못했습니다 — RuntimeError: GET failed after 2 tries: https://www.aica-gj.kr/sub.php?PID=0201 (HTTPSConnectionPool(host='www.aica-gj.kr', port=443): Max retries exceeded with url: /sub.php?PID=0201 (Caused by NameResolutionError(\"HTTPSConnection(host='www.aica-gj.kr', port=443): Failed to resolve 'www.aica-gj.kr' ([Errno -3] Temporary failure in name resolution)\")))",
+   "collected_at": "2026-10-24 09:12"
   },
   {
    "key": "kisti",
@@ -75,11 +80,12 @@ window.GPU_GRANTS = {
    "kind": "generic",
    "ci_blocked": false,
    "note": "GitHub 러너에서는 해외 IP 라 연결이 차단됩니다. 국내 서버에서 수집하므로 정상입니다.",
-   "ok": true,
-   "stale": false,
+   "ok": false,
+   "stale": true,
    "count": 3,
-   "error": "",
-   "collected_at": ""
+   "error": "주소를 찾을 수 없습니다 (DNS 조회 실패). 주소가 바뀌었는지 확인하세요.",
+   "error_detail": "RuntimeError: 목록을 읽지 못했습니다 — RuntimeError: GET failed after 2 tries: https://www.kisti.re.kr/notifications/post/notice (HTTPSConnectionPool(host='www.kisti.re.kr', port=443): Max retries exceeded with url: /notifications/post/notice (Caused by NameResolutionError(\"HTTPSConnection(host='www.kisti.re.kr', port=443): Failed to resolve 'www.kisti.re.kr' ([Errno -3] Temporary failure in name resolution)\")))",
+   "collected_at": "2026-10-24 09:14"
   },
   {
    "key": "ksc",
@@ -88,15 +94,23 @@ window.GPU_GRANTS = {
    "kind": "generic",
    "ci_blocked": false,
    "note": "",
-   "ok": true,
-   "stale": false,
+   "ok": false,
+   "stale": true,
    "count": 8,
-   "error": "",
-   "collected_at": ""
+   "error": "주소를 찾을 수 없습니다 (DNS 조회 실패). 주소가 바뀌었는지 확인하세요.",
+   "error_detail": "RuntimeError: 목록을 읽지 못했습니다 — RuntimeError: GET failed after 2 tries: https://www.ksc.re.kr/notice/gjsh/gjsh/include/list (HTTPSConnectionPool(host='www.ksc.re.kr', port=443): Max retries exceeded with url: /notice/gjsh/gjsh/include/list (Caused by NameResolutionError(\"HTTPSConnection(host='www.ksc.re.kr', port=443): Failed to resolve 'www.ksc.re.kr' ([Errno -3] Temporary failure in name resolution)\")))",
+   "collected_at": "2026-10-24 09:14"
   }
  ],
  "repo": "Woohye0n/gpu-grants-dashboard",
- "stale_sources": [],
+ "stale_sources": [
+  "국가 AI컴퓨팅자원 지원포털",
+  "정보통신산업진흥원(NIPA)",
+  "서울 AI 허브",
+  "인공지능산업융합사업단(AICA)",
+  "한국과학기술정보연구원(KISTI)",
+  "국가슈퍼컴퓨팅센터(KSC)"
+ ],
  "unknown_models": [],
  "counts": {
   "total": 25,
@@ -164,6 +178,8 @@ window.GPU_GRANTS = {
      "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=XDHp1HxAJm0tiadLmOcj4w==&fileTy=ATTACH&fileNo=5vYV^AyfWHImbrY7XuuRuQ=="
     }
    ],
+   "stale": true,
+   "stale_since": "2026-10-24 09:10",
    "links": [
     {
      "label": "국가 AI컴퓨팅자원 지원포털",
@@ -180,7 +196,7 @@ window.GPU_GRANTS = {
     "정보통신산업진흥원(NIPA)"
    ],
    "status": "open",
-   "dday": 4,
+   "dday": 1,
    "closing_soon": true
   },
   {
@@ -245,6 +261,8 @@ window.GPU_GRANTS = {
      "url": "https://www.aica-gj.kr/mod/board/boardDownload.php?fileIdx=2013&boardNo=business"
     }
    ],
+   "stale": true,
+   "stale_since": "2026-10-24 09:12",
    "links": [
     {
      "label": "인공지능산업융합사업단(AICA)",
@@ -318,6 +336,8 @@ window.GPU_GRANTS = {
      "url": "https://www.aica-gj.kr/mod/board/boardDownload.php?fileIdx=2054&boardNo=business"
     }
    ],
+   "stale": true,
+   "stale_since": "2026-10-24 09:12",
    "links": [
     {
      "label": "인공지능산업융합사업단(AICA)",
@@ -384,6 +404,8 @@ window.GPU_GRANTS = {
      "url": "https://aiinfrahub.kr/api/attach/30?fileName=%28%EB%B6%99%EC%9E%84%29%20%E3%80%8C%EC%B2%A8%EB%8B%A8%20GPU%20%ED%99%9C%EC%9A%A9%20%EC%A7%80%EC%9B%90%20%EC%82%AC%EC%97%85%E3%80%8D%20%EB%B2%A0%ED%83%80%EC%84%9C%EB%B9%84%EC%8A%A4%20%EC%B0%B8%EC%97%AC%EC%9E%90%20%EB%AA%A8%EC%A7%91%20%EA%B3%B5%EA%B3%A0%EB%AC%B8.hwp"
     }
    ],
+   "stale": true,
+   "stale_since": "2026-10-24 09:10",
    "links": [
     {
      "label": "국가 AI컴퓨팅자원 지원포털",
@@ -486,6 +508,8 @@ window.GPU_GRANTS = {
      "url": "https://aiinfrahub.kr/api/attach/29?fileName=%28%EB%B6%99%EC%9E%845%29%20%EA%B4%80%EB%A0%A8%20%EA%B7%9C%EC%A0%95.Zip"
     }
    ],
+   "stale": true,
+   "stale_since": "2026-10-24 09:10",
    "links": [
     {
      "label": "국가 AI컴퓨팅자원 지원포털",
@@ -572,6 +596,8 @@ window.GPU_GRANTS = {
      "url": "https://www.aica-gj.kr/mod/board/boardDownload.php?fileIdx=2018&boardNo=business"
     }
    ],
+   "stale": true,
+   "stale_since": "2026-10-24 09:12",
    "links": [
     {
      "label": "인공지능산업융합사업단(AICA)",
@@ -676,6 +702,8 @@ window.GPU_GRANTS = {
      "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=tRjWIQoJXpKyHNq5rVpTEw==&fileTy=ATTACH&fileNo=yjIzgBhioWPlWLoARas91g=="
     }
    ],
+   "stale": true,
+   "stale_since": "2026-10-24 09:10",
    "links": [
     {
      "label": "국가 AI컴퓨팅자원 지원포털",
@@ -750,6 +778,8 @@ window.GPU_GRANTS = {
      "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=sjYzkE*zGL7aK^HACwqaYg==&fileTy=ATTACH&fileNo=0PvNOoinfFeII9ewvWxE4A=="
     }
    ],
+   "stale": true,
+   "stale_since": "2026-10-24 09:10",
    "links": [
     {
      "label": "정보통신산업진흥원(NIPA)",
@@ -899,6 +929,8 @@ window.GPU_GRANTS = {
      "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=4J8EB2Vvsrrh5WeUTcLEWg==&fileTy=ATTACH&fileNo=ah6kQZAEY*yPUUSi9KLWMA=="
     }
    ],
+   "stale": true,
+   "stale_since": "2026-10-24 09:10",
    "links": [
     {
      "label": "정보통신산업진흥원(NIPA)",
@@ -1035,6 +1067,8 @@ window.GPU_GRANTS = {
      "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=O6FY80R9peY92xPYwvalNw==&fileTy=ATTACH&fileNo=54zmm3vJeOpSU2*N1y05rA=="
     }
    ],
+   "stale": true,
+   "stale_since": "2026-10-24 09:10",
    "links": [
     {
      "label": "정보통신산업진흥원(NIPA)",
@@ -1176,6 +1210,8 @@ window.GPU_GRANTS = {
      "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=wmmY89PDRKSnlM5vQpvh7w==&fileTy=ATTACH&fileNo=RNr5TRBMOPG1l0HaXe0zlg=="
     }
    ],
+   "stale": true,
+   "stale_since": "2026-10-24 09:10",
    "links": [
     {
      "label": "정보통신산업진흥원(NIPA)",
@@ -1283,6 +1319,8 @@ window.GPU_GRANTS = {
      "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=t4rCknvJK0dydOT^A6XJpQ==&fileTy=ATTACH&fileNo=ekIDrhh9h3maApV4VLGPPQ=="
     }
    ],
+   "stale": true,
+   "stale_since": "2026-10-24 09:10",
    "links": [
     {
      "label": "국가 AI컴퓨팅자원 지원포털",
@@ -1347,6 +1385,8 @@ window.GPU_GRANTS = {
      "url": "https://www.aica-gj.kr/mod/board/boardDownload.php?fileIdx=2135&boardNo=business"
     }
    ],
+   "stale": true,
+   "stale_since": "2026-10-24 09:12",
    "links": [
     {
      "label": "인공지능산업융합사업단(AICA)",
@@ -1384,6 +1424,8 @@ window.GPU_GRANTS = {
    },
    "summary": "슈퍼컴퓨터 5호기 초고성능컴퓨팅 기반 RnD 혁신지원 프로그램(2026년 1차) 공고",
    "attachments": [],
+   "stale": true,
+   "stale_since": "2026-10-24 09:14",
    "links": [
     {
      "label": "국가슈퍼컴퓨팅센터(KSC)",
@@ -1421,6 +1463,8 @@ window.GPU_GRANTS = {
    },
    "summary": "국가슈퍼컴퓨팅본부에서는 KISTI 슈퍼컴퓨터 사용자지원 정책에 따라 계산과학/공학 분야의 연구를 위해 대규모 병렬 계산 또는 첨단 계산 기법을 필요로 하는 슈퍼컴퓨터 사용자들을 지원하고 있습니다.",
    "attachments": [],
+   "stale": true,
+   "stale_since": "2026-10-24 09:14",
    "links": [
     {
      "label": "국가슈퍼컴퓨팅센터(KSC)",
@@ -1510,6 +1554,8 @@ window.GPU_GRANTS = {
      "url": "https://www.aica-gj.kr/mod/board/boardDownload.php?fileIdx=2029&boardNo=business"
     }
    ],
+   "stale": true,
+   "stale_since": "2026-10-24 09:12",
    "links": [
     {
      "label": "인공지능산업융합사업단(AICA)",
@@ -1590,6 +1636,8 @@ window.GPU_GRANTS = {
      "url": "https://www.seoulaihub.kr/include/download.asp?file_name=2026_%EC%83%81%EB%B0%98%EA%B8%B0_%EA%B3%A0%EC%84%B1%EB%8A%A5%EC%BB%B4%ED%93%A8%ED%8C%85%EC%A7%80%EC%9B%90%EC%82%AC%EC%97%85_%ED%8F%AC%EC%8A%A4%ED%84%B0_%EC%B5%9C%EC%A2%85_.jpg&file_full_name=00000001702026000018_file4.jpg&folder=0000000170"
     }
    ],
+   "stale": true,
+   "stale_since": "2026-10-24 09:12",
    "links": [
     {
      "label": "서울 AI 허브",
@@ -1671,6 +1719,8 @@ window.GPU_GRANTS = {
      "url": "https://www.seoulaihub.kr/include/download.asp?file_name=%5B%EB%B6%99%EC%9E%846_7%5D_%EC%A0%9C%EA%B3%B5%EC%9E%90%EC%9B%90_%EB%AA%A9%EB%A1%9D__%EC%9E%90%EC%A3%BC%EB%AC%BB%EB%8A%94%EC%A7%88%EB%AC%B8.pdf&file_full_name=00000001702026000027_file3.pdf&folder=0000000170"
     }
    ],
+   "stale": true,
+   "stale_since": "2026-10-24 09:12",
    "links": [
     {
      "label": "서울 AI 허브",
@@ -1736,6 +1786,8 @@ window.GPU_GRANTS = {
      "url": "https://www.aica-gj.kr/mod/board/boardDownload.php?fileIdx=2073&boardNo=business"
     }
    ],
+   "stale": true,
+   "stale_since": "2026-10-24 09:12",
    "links": [
     {
      "label": "인공지능산업융합사업단(AICA)",
@@ -1800,6 +1852,8 @@ window.GPU_GRANTS = {
      "url": "https://www.aica-gj.kr/mod/board/boardDownload.php?fileIdx=2088&boardNo=business"
     }
    ],
+   "stale": true,
+   "stale_since": "2026-10-24 09:12",
    "links": [
     {
      "label": "인공지능산업융합사업단(AICA)",
@@ -1900,6 +1954,8 @@ window.GPU_GRANTS = {
      "url": "https://www.seoulaihub.kr/include/download.asp?file_name=%EC%84%9C%EC%9A%B8AI%ED%97%88%EB%B8%8C_KHDP_GPU_%EC%A7%80%EC%9B%90%EC%82%AC%EC%97%85_%ED%8F%AC%EC%8A%A4%ED%84%B0.jpg&file_full_name=00000001702026000049_file3.jpg&folder=0000000170"
     }
    ],
+   "stale": true,
+   "stale_since": "2026-10-24 09:12",
    "links": [
     {
      "label": "서울 AI 허브",
@@ -1946,6 +2002,8 @@ window.GPU_GRANTS = {
      "url": "https://www.kisti.re.kr/fatt/3f8e1607a5028e.pdf"
     }
    ],
+   "stale": true,
+   "stale_since": "2026-10-24 09:14",
    "links": [
     {
      "label": "한국과학기술정보연구원(KISTI)",
@@ -1999,6 +2057,8 @@ window.GPU_GRANTS = {
      "url": "https://www.kisti.re.kr/fatt/3f8ee280c677e1.hwp"
     }
    ],
+   "stale": true,
+   "stale_since": "2026-10-24 09:14",
    "links": [
     {
      "label": "한국과학기술정보연구원(KISTI)",
@@ -2048,6 +2108,8 @@ window.GPU_GRANTS = {
      "url": "https://www.kisti.re.kr/fatt/3f8e15936950c4.pdf"
     }
    ],
+   "stale": true,
+   "stale_since": "2026-10-24 09:14",
    "links": [
     {
      "label": "한국과학기술정보연구원(KISTI)",
@@ -2097,6 +2159,8 @@ window.GPU_GRANTS = {
    },
    "summary": "슈퍼컴퓨터 5호기 초고성능컴퓨팅 기반 RnD 혁신지원 프로그램(2026년 2차) 공고 (only 뉴론)",
    "attachments": [],
+   "stale": true,
+   "stale_since": "2026-10-24 09:14",
    "links": [
     {
      "label": "국가슈퍼컴퓨팅센터(KSC)",
