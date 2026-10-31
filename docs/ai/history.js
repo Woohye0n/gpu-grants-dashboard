@@ -1,4 +1,4 @@
-// 기록 탭 — 고른 기간의 AI 사용을 사람·계정·모델·도구별로 합산한다.
+// 기록 탭 — 고른 기간의 AI 사용을 사람·모델·사람×모델·계정별로 합산한다.
 //
 // 데이터(history.json)는 하루 × 사람 × 도구 × 계정 × 모델 × 속도 × effort 로만
 // 묶여 온다. 기간 합산·묶음·차트는 전부 여기서 하므로 기간을 바꿔도 서버에 다시
@@ -18,9 +18,9 @@
   const UNASSIGNED_COLOR = "#8b949e";
   const GROUPS = [
     { key: "owner", label: "사람" },
-    { key: "account", label: "계정·도구" },
     { key: "model", label: "모델" },
-    { key: "provider", label: "도구" },
+    { key: "owner_model", label: "사람·모델" },
+    { key: "account", label: "계정·도구" },
   ];
   const UNITS = [
     { key: "day", label: "일" },
@@ -166,8 +166,8 @@
   function groupKey(d, r, by) {
     const D = d.dims;
     if (by === "owner") return D.owner[r[1]];
-    if (by === "provider") return D.provider[r[2]];
     if (by === "model") return D.model[r[4]] || "(모델 미상)";
+    if (by === "owner_model") return `${D.owner[r[1]]} · ${D.model[r[4]] || "(모델 미상)"}`;
     const acct = (D.account[r[3]] || "").split("@")[0] || "계정 없음";
     return `${D.provider[r[2]]} · ${acct}`;
   }
@@ -301,7 +301,7 @@
       return { owner, prov, acct, model, speed, effort, ...v };
     }).filter((p) => p.tokens || p.credits)   // 토큰 없는 턴(Claude 의 <synthetic> 등)은 내역에서 뺀다
       .sort((a, b) => b.credits - a.credits || b.tokens - a.tokens);
-    const showOwner = s.by !== "owner";
+    const showOwner = s.by !== "owner" && s.by !== "owner_model";
     const comp = g.comp;
     const ct = comp.input + comp.output + comp.cache_write + comp.cache_read || 1;
     const compLine = [["입력", comp.input], ["출력", comp.output], ["캐시 쓰기", comp.cache_write],
@@ -325,7 +325,7 @@
   }
 
   const colorOf = (i, key) => {
-    if (key === "미분류") return UNASSIGNED_COLOR;
+    if (key === "미분류" || key.startsWith("미분류 · ")) return UNASSIGNED_COLOR;
     if (i < COLORS.length) return COLORS[i];
     return `hsl(${Math.round((i * 137.508) % 360)}, 62%, 62%)`;
   };
