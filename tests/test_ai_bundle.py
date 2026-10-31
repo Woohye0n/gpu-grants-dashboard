@@ -197,7 +197,7 @@ c, d = credit_bundle([{"model": "claude-opus-5-5", "input": M},
 check("모르는 모델은 0 으로 숨기지 않고 따로 드러낸다",
       (near(c, 0.4), [(u["model"], u["tokens"]) for u in d["unpriced"]]),
       (True, [("gpt-reserve", 5000)]))
-c, d = credit_bundle([{"provider": "codex", "model": "gpt-6-astra", "input": M,
+c, d = credit_bundle([{"provider": "codex", "model": "gpt-6.1-terra", "input": M,
                        "speed": "ultrafast"}])
 check("모르는 처리 티어도 마찬가지", (c, d["unpriced"][0]["speed"]), (0.0, "ultrafast"))
 c, d = credit_bundle([{"model": "claude-opus-5-5", "input": M},
@@ -223,6 +223,14 @@ check("gpt-5.5 Fast 는 ×2.5 (입력 $12.50)",
       ai_pricing.rates(ai_pricing.load_models(), "gpt-5.5", speed="fast")[0]["input"], 12.5)
 check("Sonnet 5.5 캐시 읽기는 $0.10 (입력가 ×0.05)",
       ai_pricing.rates(ai_pricing.load_models(), "claude-sonnet-5-5")[0]["cache_read"], 0.1)
+check("gpt-6.1-terra 는 $1/$0.05/$5 (공식 단가표)",
+      {k: ai_pricing.rates(ai_pricing.load_models(), "gpt-6.1-terra")[0][k]
+       for k in ("input", "cache_read", "output")}, {"input": 1.0, "cache_read": 0.05, "output": 5.0})
+check("gpt-6-astra Ultrafast 는 ×6 (입력 $60)",
+      ai_pricing.rates(ai_pricing.load_models(), "gpt-6-astra", speed="ultrafast")[0]["input"], 60.0)
+check("gpt-6.1-terra 에는 Ultrafast 가 없다",
+      ai_pricing.rates(ai_pricing.load_models(), "gpt-6.1-terra", speed="ultrafast"),
+      (None, "'ultrafast' 처리 단가 미등록"))
 c, d = credit_bundle([{"provider": "codex", "model": "gpt-6.1-sol", "input": 300_000}])
 check("gpt-6.1-sol 장문맥은 입력 $4 (공식 단가표)",
       (near(c, 300_000 * 4 / M / 10), d["unpriced"]), (True, []))
