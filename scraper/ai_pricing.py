@@ -51,7 +51,7 @@ from __future__ import annotations
 import re
 
 USD_PER_CREDIT = 10.0
-PRICING_AS_OF = "2026-10-27"
+PRICING_AS_OF = "2026-10-31"
 PRICING_SOURCES = [
     "https://platform.claude.com/docs/en/about-claude/pricing",
     "https://developers.openai.com/api/docs/pricing",
@@ -100,33 +100,41 @@ DEFAULT_MODELS = {
     "claude-haiku-4-5":  {"family": "claude", "in": 1,  "out": 5,  "cr": 0.10, "cw5m": 1.25, "cw1h": 2,  "speed": _CLAUDE_STD},
     # ---- OpenAI ---------------------------------------------------------------
     # Fast 는 표에 적힌 모든 칸이 정확히 ×2 다 (예: astra $20/$2/$25/$100).
-    # Flex 는 gpt-5.6-sol 에만 있다($2/$0.2/$10). astra 의 Ultrafast 는 단가를
-    # 확인하지 못해 넣지 않았다 — 쓰이면 '단가 미등록' 으로 드러난다.
+    # Flex 는 아래 모델 모두 정확히 ×0.5 (예: astra $5/$0.5/$25).
+    # Ultrafast 는 astra·6.1-sol 에만 있고 모든 칸이 ×6 이다 (astra $60/$6/$300).
+    # 캐시 쓰기는 이제 30분($cw, 입력가 ×1.25)·12시간(×2.5) 두 가지지만, Codex 기록은
+    # 캐시 쓰기를 0 으로만 남겨 30분 단가 하나만 둔다.
     # long_context 가 없는 모델은 272K 초과 요청의 단가를 확인하지 못했다는 뜻이다.
     # 그 경우 표준가로 짐작하지 않고 미등록으로 둔다.
     "gpt-6-astra":   {"family": "openai", "in": 10,  "out": 50,  "cr": 1.00, "cw": 12.5,
-                      "speed": {"standard": 1.0, "fast": 2.0},
+                      "speed": {"standard": 1.0, "fast": 2.0, "flex": 0.5, "ultrafast": 6.0},
                       "long_context": {"in": 2.0, "cr": 2.0, "cw": 2.0, "out": 1.5}},
     "gpt-6.1-sol":   {"family": "openai", "in": 2,   "out": 10,  "cr": 0.10, "cw": 2.5,
-                      "speed": {"standard": 1.0, "fast": 2.0},
+                      "speed": {"standard": 1.0, "fast": 2.0, "flex": 0.5, "ultrafast": 6.0},
+                      "long_context": {"in": 2.0, "cr": 2.0, "cw": 2.0, "out": 1.5}},
+    "gpt-6.1-terra": {"family": "openai", "in": 1,   "out": 5,   "cr": 0.05, "cw": 1.25,
+                      "speed": {"standard": 1.0, "fast": 2.0, "flex": 0.5},
                       "long_context": {"in": 2.0, "cr": 2.0, "cw": 2.0, "out": 1.5}},
     "gpt-6-sol":     {"family": "openai", "in": 2,   "out": 10,  "cr": 0.20, "cw": 2.5,
-                      "speed": {"standard": 1.0, "fast": 2.0},
+                      "speed": {"standard": 1.0, "fast": 2.0, "flex": 0.5},
+                      "long_context": {"in": 2.0, "cr": 2.0, "cw": 2.0, "out": 1.5}},
+    "gpt-6-luna":    {"family": "openai", "in": 0.1, "out": 0.5, "cr": 0.01, "cw": 0.125,
+                      "speed": {"standard": 1.0, "fast": 2.0, "flex": 0.5},
                       "long_context": {"in": 2.0, "cr": 2.0, "cw": 2.0, "out": 1.5}},
     # 문서상 프로모션가이며 "at least through November 21, 2026" 유지된다.
     "gpt-5.6-sol":   {"family": "openai", "in": 4,   "out": 20,  "cr": 0.40, "cw": 5,
                       "speed": {"standard": 1.0, "fast": 2.0, "flex": 0.5},
                       "long_context": {"in": 2.0, "cr": 2.0, "cw": 2.0, "out": 1.5}},
     "gpt-5.6-terra": {"family": "openai", "in": 2,   "out": 12,  "cr": 0.20, "cw": 2.5,
-                      "speed": {"standard": 1.0, "fast": 2.0},
+                      "speed": {"standard": 1.0, "fast": 2.0, "flex": 0.5},
                       "long_context": {"in": 2.0, "cr": 2.0, "cw": 2.0, "out": 1.5}},
     "gpt-5.6-luna":  {"family": "openai", "in": 0.2, "out": 1.2, "cr": 0.02, "cw": 0.25,
-                      "speed": {"standard": 1.0, "fast": 2.0},
+                      "speed": {"standard": 1.0, "fast": 2.0, "flex": 0.5},
                       "long_context": {"in": 2.0, "cr": 2.0, "cw": 2.0, "out": 1.5}},
-    # 캐시 쓰기 단가는 표에 없다. Fast 는 다른 모델과 달리 ×2.5($12.50/$1.25/$75),
+    # 캐시 쓰기 단가는 표에 없다. Fast 는 다른 모델과 달리 ×2.5($12.50/$1.25/$75), Flex ×0.5,
     # 장문맥(>272K)은 $10/$1/$45 — 입력·캐시 ×2, 출력 ×1.5.
     "gpt-5.5":       {"family": "openai", "in": 5,   "out": 30,  "cr": 0.50,
-                      "speed": {"standard": 1.0, "fast": 2.5},
+                      "speed": {"standard": 1.0, "fast": 2.5, "flex": 0.5},
                       "long_context": {"in": 2.0, "cr": 2.0, "out": 1.5}},
     # Codex 가 사용자 작업과 별도 세션으로 돌리는 자동 리뷰. 공식 단가표에 없고,
     # 사용량이 거의 과금되지 않는 것으로 알려져 있어 단가 ≈ 0 으로 둔다. 토큰은
