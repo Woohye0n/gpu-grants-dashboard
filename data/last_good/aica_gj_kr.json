@@ -1,5 +1,5 @@
 {
- "saved_at": "2026-11-03 09:11",
+ "saved_at": "2026-11-04 09:11",
  "rows": [
   {
    "source": "aica_gj_kr",
@@ -458,69 +458,6 @@
     {
      "name": "붙임1. 「2026년 국가 AI데이터센터 고도화」 사업 공급사 모집 공모안내서.pdf",
      "url": "https://www.aica-gj.kr/mod/board/boardDownload.php?fileIdx=2018&boardNo=business"
-    }
-   ]
-  },
-  {
-   "source": "aica_gj_kr",
-   "source_label": "인공지능산업융합사업단(AICA)",
-   "org": "광주광역시 · AICA",
-   "uid": "aica_gj_kr-httpswwwaica-gjkrsubphpPID0201page3categ",
-   "title": "2026년 AI데이터센터 서비스 이용자 정기모집(추가1차) 공고",
-   "program": "인공지능산업융합사업단(AICA)",
-   "url": "https://www.aica-gj.kr/sub.php?PID=0201&page=3&category=&searchText=&searchType=&action=Read&idx=2781",
-   "posted": "2026-01-26",
-   "apply_start": "2026-02-04",
-   "apply_end": null,
-   "closed_hint": false,
-   "audience": "user",
-   "gpu_models": [
-    "T4",
-    "Bow(IPU)",
-    "A100",
-    "H100"
-   ],
-   "unknown_models": [],
-   "gpu_specs": [
-    {
-     "model": "Bow(IPU)",
-     "qty": "➀ (기본자원) 가속기 1식 및 스토리지(기본 50TB)제공 ※ 백업공간별도",
-     "qty_tokens": "1식",
-     "vram": "",
-     "line": "BOW Backend.ai 솔루션 기반 동적할당 제공하여 컨테 — ➀ (기본자원) 가속기 1식 및 스토리지(기본 50TB)제공 ※ 백업공간별도"
-    },
-    {
-     "model": "T4",
-     "qty": "8장",
-     "qty_tokens": "8장",
-     "vram": "",
-     "line": "T4 T4*8장 동적(GPU Live) 기본 50TB"
-    },
-    {
-     "model": "Bow(IPU)",
-     "qty": "8장",
-     "qty_tokens": "8장",
-     "vram": "",
-     "line": "+백업 20TB BOW BOW*8장 동적(backend.ai)"
-    }
-   ],
-   "scale": [],
-   "cost": [
-    {
-     "audience": "산업계",
-     "text": "무상/유상 자원을 나누어 부과"
-    }
-   ],
-   "usage_period": {
-    "text": "o (지원기간) ’26. 1. ~ ’26. 12. ※ 트랙별종료기간상이",
-    "start": null,
-    "end": null
-   },
-   "summary": "인공지능산업융합사업단(AICA)에서는 2026년 AI 데이터센터 서비스 이용자 정기모집 잔여자원에 대한 추가 이용자 모집을 추진하오니 관심 있는 분들의 많은 지원 바랍니다.",
-   "attachments": [
-    {
-     "name": "1. [공고문] 2026년 AI 데이터센터 서비스 이용자 정기모집(추가 1차) 공고문_수정.pdf",
-     "url": "https://www.aica-gj.kr/mod/board/boardDownload.php?fileIdx=2013&boardNo=business"
     }
    ]
   }
