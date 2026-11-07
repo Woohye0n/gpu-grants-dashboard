@@ -70,6 +70,7 @@ let SYNC = null;
 // 같은 순간 받은 sync.json 은 새것인데 스냅샷만 몇 시간 전 것이 된다 — 실제로 "데이터가
 // 7시간 전 / 집계는 2분 전에 정상" 이 함께 떴다. 스냅샷이 묵어 보이면 같은 파일을 발행
 // 원본(ai-data 브랜치의 raw, 최대 5분 캐시)에서 다시 받아 더 새것을 쓴다.
+const POLICY_URL = "https://raw.githubusercontent.com/AIDASLab/aidas-ai-monitoring-dashboard/main/data/policy.json";
 const RAW_BASE = location.hostname.endsWith("github.io")
   ? "https://raw.githubusercontent.com/Woohye0n/gpu-grants-dashboard/ai-data/" : null;
 const FALLBACK_AFTER_MS = 15 * 60 * 1000;
@@ -124,6 +125,11 @@ async function loadHistory() {
     if (fresh && (fresh.generated_at || 0) > (h.generated_at || 0)) return fresh;
   }
   return h;
+}
+
+// 정책 위반 판정은 중앙 서버만 할 수 있다(사용률 기록이 거기 있다). 그쪽이 공개한 파일을 읽는다.
+async function loadPolicy() {
+  return fetchJSON(POLICY_URL);
 }
 
 async function api(path) {
@@ -807,7 +813,7 @@ async function render() {
     if (state.tab === "live") renderLive(); else renderSessions();
   }
   if (state.tab === "charts") await renderCharts();
-  if (state.tab === "history") await AIHistory.render($("#historyArea"), loadHistory);
+  if (state.tab === "history") await AIHistory.render($("#historyArea"), loadHistory, loadPolicy);
   if (state.tab === "alerts") await renderAlerts();
   if (state.tab === "settings") await renderSettings();
 }
