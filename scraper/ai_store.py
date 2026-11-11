@@ -717,6 +717,21 @@ def record_credits(db, provider, email, credits):
     if not isinstance(credits, dict):
         return
     at = int(credits.get("observed_at") or 0)
+    # Claude 리셋권(limit_resets)은 송신기를 새로 올린 서버만 보낸다. 같은 계정을 옛
+    # 송신기도 보고하므로, 그쪽이 더 최근이라고 리셋권이 사라지면 안 된다 — 새 값이
+    # 없으면 앞의 것을 그 관측 시각과 함께 이어 둔다.
+    if "limit_resets" in credits:
+        credits = dict(credits, limit_resets_at=at)
+    else:
+        row = db.execute("SELECT credits FROM accounts WHERE provider = ? AND email = ?",
+                         (provider, email)).fetchone()
+        try:
+            old = json.loads(row[0]) if row and row[0] else {}
+        except ValueError:
+            old = {}
+        if old.get("limit_resets") is not None:
+            credits = dict(credits, limit_resets=old["limit_resets"],
+                           limit_resets_at=old.get("limit_resets_at"))
     db.execute("""UPDATE accounts SET credits = ?, credits_at = ?
                   WHERE provider = ? AND email = ? AND COALESCE(credits_at, 0) <= ?""",
                (json.dumps(credits, ensure_ascii=False), at, provider, email, at))
