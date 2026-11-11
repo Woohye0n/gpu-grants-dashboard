@@ -554,6 +554,22 @@ ths = ai_bundle._thresholds(
 check("알림 끈 5시간은 넘어도 breached 아님", [(t["name"], t["breached"], t["alert"]) for t in ths],
       [("5h", False, False), ("wk", True, True)])
 
+print("\n[Claude 리셋권] 옛 송신기의 더 최근 크레딧이 리셋권을 지우지 않는다")
+rdb = ai_store.connect(os.path.join(tempfile.mkdtemp(), "r.db"))
+rdb.execute("INSERT INTO accounts(provider, email) VALUES ('claude', 'lab@x')")
+grants = {"eligible": True, "grants": [{"id": "g", "resets_left": 1, "resets_total": 1}]}
+ai_store.record_credits(rdb, "claude", "lab@x", {"is_enabled": False, "observed_at": 100,
+                                                  "limit_resets": grants})
+ai_store.record_credits(rdb, "claude", "lab@x", {"is_enabled": True, "observed_at": 200})
+got = json.loads(rdb.execute("SELECT credits FROM accounts").fetchone()[0])
+check("새 크레딧은 받고 리셋권은 이어 둔다",
+      (got["is_enabled"], got["limit_resets"], got["limit_resets_at"]), (True, grants, 100))
+ai_store.record_credits(rdb, "claude", "lab@x", {"is_enabled": True, "observed_at": 300,
+                                                  "limit_resets": {"eligible": True, "grants": []}})
+got = json.loads(rdb.execute("SELECT credits FROM accounts").fetchone()[0])
+check("새 리셋권 관측은 그대로 바꾼다 (다 쓰면 비어 있다)",
+      (got["limit_resets"]["grants"], got["limit_resets_at"]), ([], 300))
+
 print()
 if fails:
     print(f"실패 {len(fails)}건: {', '.join(fails)}")

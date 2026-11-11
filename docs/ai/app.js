@@ -265,6 +265,22 @@ function gaugeHTML(th) {
 // (Codex 자체 단위 — 이 화면의 크레딧(=$10)과 다르다). Claude: 추가 사용(extra usage) 상태 —
 // 사용량 API 가 잔액 숫자는 주지 않는다.
 const CLAUDE_EXTRA_REASON = { out_of_credits: "크레딧 소진" };
+// Claude 리셋권: 리셋권마다 무엇을 비우는지·남은 횟수·기한. 송신기가 사용량 API 에서 함께 받아 온다.
+function limitResetsHTML(c) {
+  const r = c && c.limit_resets;
+  if (!r) return "";
+  const when = c.limit_resets_at ? ` <span class="hint">· ${ago(c.limit_resets_at)} 관측</span>` : "";
+  if (!r.eligible && !(r.grants || []).length) {
+    return `<div class="credits"><span class="credit-lab">리셋권</span> 없음${r.ineligible_reason ? ` (${esc(r.ineligible_reason)})` : ""}${when}</div>`;
+  }
+  const kind = (g) => ((g.clears || []).includes("seven_day") ? "주간 전체" : "Fable");
+  const day = (s) => (s ? new Date(Date.parse(s) + 9 * 3600 * 1000).toISOString().slice(0, 16).replace("T", " ") : "—");
+  const items = (r.grants || []).map((g) => `<span class="chip" data-tip="${esc(g.label || g.id)}">${kind(g)} ${g.resets_left}/${g.resets_total}회 · ${day(g.ends_at)}까지${
+    g.paused ? " · 일시정지" : g.usable_now === false ? " · 지금 사용 불가" : ""}</span>`).join(" ");
+  return `<div class="credits" data-tip="Anthropic 이 지급한 사용량 리셋권입니다. 쓰면 표시된 주간 한도가 바로 비워집니다. 기한은 한국 시각.">
+    <span class="credit-lab">리셋권</span> ${items || "없음"}${when}</div>`;
+}
+
 function creditsHTML(a) {
   const c = a.credits;
   if (!c) return "";
@@ -335,6 +351,7 @@ function renderAccounts(s) {
       <div class="${suspended || stale ? "gauges dim" : "gauges"}">${gauges}</div>
       <div class="src">${src}</div>
       ${creditsHTML(a)}
+      ${a.provider === "claude" ? limitResetsHTML(a.credits) : ""}
       <div class="tokrow">참고 토큰량 (${m}): ${tok} · 누적 ${fmt(a.lifetime[m])}</div>
     </div>`;
   }).join("");
