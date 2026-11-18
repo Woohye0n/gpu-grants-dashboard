@@ -51,7 +51,7 @@ from __future__ import annotations
 import re
 
 USD_PER_CREDIT = 10.0
-PRICING_AS_OF = "2026-10-31"
+PRICING_AS_OF = "2026-11-18"
 PRICING_SOURCES = [
     "https://platform.claude.com/docs/en/about-claude/pricing",
     "https://developers.openai.com/api/docs/pricing",
@@ -79,9 +79,12 @@ _CLAUDE_FAST = {"standard": 1.0, "fast": 2.0}
 _CLAUDE_STD = {"standard": 1.0}
 
 # $/1M 토큰. Anthropic 표는 5분/1시간 쓰기와 캐시 읽기를 모델별로 직접 적는다
-# (캐시 읽기 배수가 모델마다 다르다: 기본 ×0.1, Opus 5.5·Sonnet 5.5 ×0.05, Fable 5.1 ×0.025).
+# (캐시 읽기 배수가 모델마다 다르다: 기본 ×0.1, Opus 5.5·Sonnet 5.5 ×0.05, Fable 5.1·5.2 ×0.025).
 DEFAULT_MODELS = {
     # ---- Anthropic ------------------------------------------------------------
+    # Fable 5.2 는 fast 가 있다($16/$80, ×2). Opus 4.8 의 fast 는 deprecated 지만 아직 과금표에 있다.
+    "claude-fable-5-2":  {"family": "claude", "in": 8,  "out": 40, "cr": 0.20, "cw5m": 10,   "cw1h": 16, "speed": _CLAUDE_FAST},
+    "claude-mythos-5-2": {"family": "claude", "in": 8,  "out": 40, "cr": 0.20, "cw5m": 10,   "cw1h": 16, "speed": _CLAUDE_FAST},
     "claude-fable-5-1":  {"family": "claude", "in": 10, "out": 50, "cr": 0.25, "cw5m": 12.5, "cw1h": 20, "speed": _CLAUDE_STD},
     "claude-mythos-5-1": {"family": "claude", "in": 10, "out": 50, "cr": 0.25, "cw5m": 12.5, "cw1h": 20, "speed": _CLAUDE_STD},
     "claude-fable-5":    {"family": "claude", "in": 10, "out": 50, "cr": 1.00, "cw5m": 12.5, "cw1h": 20, "speed": _CLAUDE_STD},
@@ -106,6 +109,13 @@ DEFAULT_MODELS = {
     # 캐시 쓰기를 0 으로만 남겨 30분 단가 하나만 둔다.
     # long_context 가 없는 모델은 272K 초과 요청의 단가를 확인하지 못했다는 뜻이다.
     # 그 경우 표준가로 짐작하지 않고 미등록으로 둔다.
+    # GPT-6.2: Flex 는 표에 없다. Ultrafast 는 2027-02-28 까지 프로모션 ×3, 2027-03-01 부터 ×6.
+    "gpt-6.2-astra": {"family": "openai", "in": 8,   "out": 40,  "cr": 0.40, "cw": 10,
+                      "speed": {"standard": 1.0, "fast": 2.0, "ultrafast": 3.0},
+                      "long_context": {"in": 2.0, "cr": 2.0, "cw": 2.0, "out": 1.5}},
+    "gpt-6.2-sol":   {"family": "openai", "in": 2,   "out": 10,  "cr": 0.10, "cw": 2.5,
+                      "speed": {"standard": 1.0, "fast": 2.0, "ultrafast": 3.0},
+                      "long_context": {"in": 2.0, "cr": 2.0, "cw": 2.0, "out": 1.5}},
     "gpt-6-astra":   {"family": "openai", "in": 10,  "out": 50,  "cr": 1.00, "cw": 12.5,
                       "speed": {"standard": 1.0, "fast": 2.0, "flex": 0.5, "ultrafast": 6.0},
                       "long_context": {"in": 2.0, "cr": 2.0, "cw": 2.0, "out": 1.5}},
@@ -121,7 +131,7 @@ DEFAULT_MODELS = {
     "gpt-6-luna":    {"family": "openai", "in": 0.1, "out": 0.5, "cr": 0.01, "cw": 0.125,
                       "speed": {"standard": 1.0, "fast": 2.0, "flex": 0.5},
                       "long_context": {"in": 2.0, "cr": 2.0, "cw": 2.0, "out": 1.5}},
-    # 문서상 프로모션가이며 "at least through November 21, 2026" 유지된다.
+    # 문서상 프로모션가이며 "available until November 30, 2026". 그 뒤 단가는 아직 공개되지 않았다.
     "gpt-5.6-sol":   {"family": "openai", "in": 4,   "out": 20,  "cr": 0.40, "cw": 5,
                       "speed": {"standard": 1.0, "fast": 2.0, "flex": 0.5},
                       "long_context": {"in": 2.0, "cr": 2.0, "cw": 2.0, "out": 1.5}},

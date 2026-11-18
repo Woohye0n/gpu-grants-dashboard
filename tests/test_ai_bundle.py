@@ -226,6 +226,16 @@ check("Sonnet 5.5 캐시 읽기는 $0.10 (입력가 ×0.05)",
 check("gpt-6.1-terra 는 $1/$0.05/$5 (공식 단가표)",
       {k: ai_pricing.rates(ai_pricing.load_models(), "gpt-6.1-terra")[0][k]
        for k in ("input", "cache_read", "output")}, {"input": 1.0, "cache_read": 0.05, "output": 5.0})
+check("Fable 5.2 는 $8/$0.20/$40, fast ×2",
+      ({k: ai_pricing.rates(ai_pricing.load_models(), "claude-fable-5-2")[0][k] for k in ("input", "cache_read", "output", "cache_write_1h")},
+       ai_pricing.rates(ai_pricing.load_models(), "claude-fable-5-2", speed="fast")[0]["output"]),
+      ({"input": 8.0, "cache_read": 0.2, "output": 40.0, "cache_write_1h": 16.0}, 80.0))
+check("gpt-6.2-sol 는 $2/$0.10/$10, 장문맥 입력 $4, Ultrafast 프로모션 ×3",
+      (ai_pricing.rates(ai_pricing.load_models(), "gpt-6.2-sol")[0]["output"],
+       ai_pricing.rates(ai_pricing.load_models(), "gpt-6.2-sol", long_context=True)[0]["input"],
+       ai_pricing.rates(ai_pricing.load_models(), "gpt-6.2-astra", speed="ultrafast")[0]["input"]),
+      (10.0, 4.0, 24.0))
+check("gpt-6.2 에는 Flex 가 없다", ai_pricing.rates(ai_pricing.load_models(), "gpt-6.2-sol", speed="flex")[0], None)
 check("gpt-6-astra Ultrafast 는 ×6 (입력 $60)",
       ai_pricing.rates(ai_pricing.load_models(), "gpt-6-astra", speed="ultrafast")[0]["input"], 60.0)
 check("gpt-6.1-terra 에는 Ultrafast 가 없다",
