@@ -433,7 +433,7 @@ _ASSET_Q = re.compile(r'((?:href|src)="\./([\w./-]+\.(?:js|css)))\?v=[^"]*"')
 _PAGES = [
     ("index.html", ["app.js", "style.css", "data.js"]),
     (os.path.join("ai", "index.html"),
-     [os.path.join("ai", "app.js"), os.path.join("ai", "style.css")]),
+     [os.path.join("ai", n) for n in ("app.js", "style.css", "history.js", "history.css")]),
 ]
 
 

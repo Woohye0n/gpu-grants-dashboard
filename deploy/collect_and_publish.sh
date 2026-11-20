@@ -20,7 +20,10 @@ git pull -q --rebase --autostash origin main 2>/dev/null || say "pull 실패 —
 "$ROOT/update.sh"; code=$?
 say "수집 종료 코드 $code (0 정상 / 1 일부 직전데이터 / 2 실패)"
 
-PATHS=(docs/data.js docs/data.json docs/index.html data/history data/last_good)
+# docs/ai/index.html 도 수집 때마다 ?v= 가 다시 찍힌다(scraper/run.py stamp_assets). 여기서
+# 빠져 있어 그 수정이 커밋되지 않은 채 남았고, 저장소 쪽에서 같은 파일이 바뀌자 pull 의
+# autostash 가 충돌해 2026-11-08 부터 이 작업 전체가 멈췄다. daily.yml 과 같은 목록을 쓴다.
+PATHS=(docs/data.js docs/data.json docs/index.html docs/ai/index.html data/history data/last_good)
 git add -- "${PATHS[@]}" 2>/dev/null
 if git diff --staged --quiet -- "${PATHS[@]}"; then
   say "바뀐 공고 없음 — 올리지 않음"
