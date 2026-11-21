@@ -1,6 +1,6 @@
 window.GPU_GRANTS = {
- "generated_at": "2026-11-07T09:10+09:00",
- "generated_at_kst": "2026-11-07 09:10",
+ "generated_at": "2026-11-21T09:10+09:00",
+ "generated_at_kst": "2026-11-21 09:10",
  "timezone": "Asia/Seoul (KST)",
  "sources": [
   {
@@ -12,7 +12,7 @@ window.GPU_GRANTS = {
    "note": "",
    "ok": true,
    "stale": false,
-   "count": 5,
+   "count": 6,
    "error": "",
    "collected_at": ""
   },
@@ -25,7 +25,7 @@ window.GPU_GRANTS = {
    "note": "",
    "ok": true,
    "stale": false,
-   "count": 7,
+   "count": 8,
    "error": "",
    "collected_at": ""
   },
@@ -64,7 +64,7 @@ window.GPU_GRANTS = {
    "note": "GitHub 러너에는 자동등록방지 페이지가 내려옵니다. 국내 서버에서 수집하므로 정상입니다.",
    "ok": true,
    "stale": false,
-   "count": 7,
+   "count": 8,
    "error": "",
    "collected_at": ""
   },
@@ -99,13 +99,155 @@ window.GPU_GRANTS = {
  "stale_sources": [],
  "unknown_models": [],
  "counts": {
-  "total": 24,
-  "open": 0,
+  "total": 26,
+  "open": 2,
   "upcoming": 0,
-  "closing_soon": 0,
+  "closing_soon": 1,
   "closed": 23
  },
  "programs": [
+  {
+   "source": "aiinfrahub",
+   "source_label": "국가 AI컴퓨팅자원 지원포털",
+   "org": "과기정통부·NIPA·KAIT",
+   "uid": "aiinfrahub-07",
+   "title": "2026년 「첨단 GPU 활용 지원 사업」 베타서비스 참여자 모집 공고",
+   "program": "「첨단 GPU 활용 지원 사업」",
+   "url": "https://aiinfrahub.kr/project/07",
+   "posted": "2026-11-19",
+   "apply_start": "2026-11-19T11:40",
+   "apply_end": "2026-11-24T15:00",
+   "closed_hint": false,
+   "audience": "user",
+   "gpu_models": [
+    "B300"
+   ],
+   "unknown_models": [],
+   "gpu_specs": [
+    {
+     "model": "B300",
+     "qty": "최소 2서버 ~ 최대 8서버",
+     "qty_tokens": "2서버 / 8서버",
+     "vram": "",
+     "line": "B300 — 최소 2서버 ~ 최대 8서버"
+    },
+    {
+     "model": "B300",
+     "qty": "서버 62대(496장)",
+     "qty_tokens": "62대 / 496장",
+     "vram": "",
+     "line": "○ (지원규모) B300 서버 62대(496장) (산업계, 학계·연구계 2트랙 선정·지원)"
+    }
+   ],
+   "scale": [
+    "(지원규모) B300 서버 62대(496장) (산업계, 학계·연구계 2트랙 선정·지원)"
+   ],
+   "cost": [
+    {
+     "audience": "",
+     "text": "(비용) 자부담금 전액 면제(무상 지원)"
+    }
+   ],
+   "usage_period": {
+    "text": "",
+    "start": null,
+    "end": null
+   },
+   "summary": "「첨단 GPU 활용 지원 사업」베타서비스 참여자 모집 공고",
+   "attachments": [
+    {
+     "name": "(붙임) 「첨단 GPU 활용 지원 사업」 베타서비스 참여자 모집 공고문.hwp",
+     "url": "https://aiinfrahub.kr/api/attach/1566?fileName=%28%EB%B6%99%EC%9E%84%29%20%E3%80%8C%EC%B2%A8%EB%8B%A8%20GPU%20%ED%99%9C%EC%9A%A9%20%EC%A7%80%EC%9B%90%20%EC%82%AC%EC%97%85%E3%80%8D%20%EB%B2%A0%ED%83%80%EC%84%9C%EB%B9%84%EC%8A%A4%20%EC%B0%B8%EC%97%AC%EC%9E%90%20%EB%AA%A8%EC%A7%91%20%EA%B3%B5%EA%B3%A0%EB%AC%B8.hwp"
+    },
+    {
+     "name": "2026년 「첨단 GPU 활용 지원 사업」 베타서비스 참여자 모집 공고문.hwpx",
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=teseCLAGrIro11jYu07Trg==&fileTy=ATTACH&fileNo=iclR6bjHn4QQYBZo1m0kRA=="
+    }
+   ],
+   "links": [
+    {
+     "label": "국가 AI컴퓨팅자원 지원포털",
+     "url": "https://aiinfrahub.kr/project/07",
+     "source": "aiinfrahub"
+    },
+    {
+     "label": "정보통신산업진흥원(NIPA)",
+     "url": "https://www.nipa.kr/home/2-2/16976",
+     "source": "nipa"
+    }
+   ],
+   "also_on": [
+    "정보통신산업진흥원(NIPA)"
+   ],
+   "status": "open",
+   "dday": 3,
+   "closing_soon": true
+  },
+  {
+   "source": "aica_gj_kr",
+   "source_label": "인공지능산업융합사업단(AICA)",
+   "org": "광주광역시 · AICA",
+   "uid": "aica_gj_kr-httpswwwaica-gjkrsubphpPID0201pagecatego",
+   "title": "2027년『AI 데이터센터 서비스』이용자 정기모집(1트랙) 모집공고",
+   "program": "인공지능산업융합사업단(AICA)",
+   "url": "https://www.aica-gj.kr/sub.php?PID=0201&page=&category=&searchText=&searchType=&action=Read&idx=2952",
+   "posted": "2026-11-13",
+   "apply_start": "2026-11-13",
+   "apply_end": "2026-12-04T14:00",
+   "closed_hint": false,
+   "audience": "user",
+   "gpu_models": [
+    "H100"
+   ],
+   "unknown_models": [],
+   "gpu_specs": [
+    {
+     "model": "H100",
+     "qty": "8장",
+     "qty_tokens": "1노드 / 8장",
+     "vram": "",
+     "line": "※ 1노드(H100 8장) 이상 고용량 자원 신청시 SSD 10TB 이상 추가 제공 (그 외 유상 이용가능)"
+    }
+   ],
+   "scale": [],
+   "cost": [
+    {
+     "audience": "",
+     "text": "H100 (1장) 30만원/월 15만원/월"
+    },
+    {
+     "audience": "",
+     "text": "HPC (1장) 30만원/월 15만원/월"
+    },
+    {
+     "audience": "",
+     "text": "(1PF 월 480만원)"
+    }
+   ],
+   "usage_period": {
+    "text": "o (지원기간) ’27. 1. ~ ’27. 12. ※ 구분별상이",
+    "start": null,
+    "end": null
+   },
+   "summary": "인공지능산업융합사업단(AICA)에서는 인공지능 융복합단지 조성 활성화를 위해 AI 데이터센터에서 확보한 컴퓨팅자원을 활용할",
+   "attachments": [
+    {
+     "name": "[공고문] 2027년 AI 데이터센터 서비스 이용자 정기모집 공고문(1트랙).pdf",
+     "url": "https://www.aica-gj.kr/mod/board/boardDownload.php?fileIdx=2243&boardNo=business"
+    }
+   ],
+   "links": [
+    {
+     "label": "인공지능산업융합사업단(AICA)",
+     "url": "https://www.aica-gj.kr/sub.php?PID=0201&page=&category=&searchText=&searchType=&action=Read&idx=2952",
+     "source": "aica_gj_kr"
+    }
+   ],
+   "also_on": [],
+   "status": "open",
+   "dday": 13,
+   "closing_soon": false
+  },
   {
    "source": "aica_gj_kr",
    "source_label": "인공지능산업융합사업단(AICA)",
@@ -506,23 +648,23 @@ window.GPU_GRANTS = {
     },
     {
      "name": "(붙임1) 「첨단 GPU 활용 지원 사업」사용자 모집(26-1차) 공고문(산업계 대상).hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=n8FPhVa7iPxCIMXmJqzcMg==&fileTy=ATTACH&fileNo=h2yzgGPZUOSI0Wh352mAMg=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=Z^JlCBsbokugrqueDx3npg==&fileTy=ATTACH&fileNo=F4*ou1WYJfBzjJBwja7ofA=="
     },
     {
      "name": "(붙임2) 「첨단 GPU 활용 지원 사업」 사용자 모집(26-1차) 공모 안내서(산업계 대상).hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=83VuYN0zvrUFc3emFt^^Lg==&fileTy=ATTACH&fileNo=ZRwbFUUB^lhxN9o2x4GcAw=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=mb00ZjVgyVnR^JoL4*Id7Q==&fileTy=ATTACH&fileNo=OALGINQEi*IPSauS7WthjA=="
     },
     {
      "name": "(붙임3) 「첨단 GPU 활용 지원 사업」 사업수행계획서(산업계 대상).hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=hIRJLSMfaco5j*jKVOn1Jg==&fileTy=ATTACH&fileNo=VZU4UdDo2lxuUF42qSJc1w=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=uQlko3NGHu7mG847FswyLA==&fileTy=ATTACH&fileNo=1ZfI0Oj9UUHZ4oWdkMnIpw=="
     },
     {
      "name": "(붙임4) 「첨단 GPU 활용 지원 사업」 제출 서류.hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=bAEp4dogbljPnZRzea7gpw==&fileTy=ATTACH&fileNo=3T1lEtino*ovjyVzdQ8s*g=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=AuuTIZy3wX7QOhm7KMvibQ==&fileTy=ATTACH&fileNo=yNgHy0oHafR9WVi5tEXj8A=="
     },
     {
      "name": "(붙임5) 관련 규정.Zip",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=JWCd8W34eyUZFDLGlUOYPA==&fileTy=ATTACH&fileNo=c7HEe00TdMID1Z^1CG5Jyg=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=spAILEcLsQqQUHMNYMOeOQ==&fileTy=ATTACH&fileNo=vWHtOefLqrlURjEiVyCkFA=="
     }
    ],
    "links": [
@@ -580,23 +722,23 @@ window.GPU_GRANTS = {
    "attachments": [
     {
      "name": "붙임1. 2026년 AI컴퓨팅자원 활용기반 강화사업(GPU확보구축운용지원) 공고문.hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=NfTPP*12KnbGqhwOzW2J^A==&fileTy=ATTACH&fileNo=Ix4DRymmYgl60th1jtMzrg=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=CMXYM5vIqdKWN7OtdnBihA==&fileTy=ATTACH&fileNo=5oSuxk6KJBmuvV3yL*QFhA=="
     },
     {
      "name": "붙임2. 2026년 AI컴퓨팅자원 활용기반 강화사업(GPU확보구축운용지원) 공모안내서.hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=LlGdeumtNBB103EYyqLxQA==&fileTy=ATTACH&fileNo=KC8yTegwia*Q5Vy38wzI5A=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=xL5wD*Jh2Fxn*^MQ57LIAQ==&fileTy=ATTACH&fileNo=UqHsiDCqcbgQjLzFbxIQjw=="
     },
     {
      "name": "붙임3. 수행계획서 및 제출서류 양식.zip",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=DEH3rxqQlpSdzxstsZzDRw==&fileTy=ATTACH&fileNo=9SWTNhNxyn9qoz4Sl*RJdQ=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=WkvJK1M1tsnxBt8pKAfQzA==&fileTy=ATTACH&fileNo=nj2YGDlpGNaVo6i2elUP5A=="
     },
     {
      "name": "붙임4. 관련 규정.zip",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=CvuDV*Qhs8QU3^*^HbHDAw==&fileTy=ATTACH&fileNo=NAUARSiD3i7oIyCFF6p4qA=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=KSl5Y^NwZXgK2na*xgrCDA==&fileTy=ATTACH&fileNo=7WyLJt7XjN*Toj7da7fBgA=="
     },
     {
      "name": "붙임5. 외부사용자 메뉴얼(NXT시스템-회원가입, 접수).zip",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=QWQB1OLJMUQzJ1D^u0YqRw==&fileTy=ATTACH&fileNo=zylUylS6t2m2RWBI7zR8HQ=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=Q^fJTx09Iq^CfDq7ifjgIw==&fileTy=ATTACH&fileNo=vorWTfdrwteqpKsPCki0UQ=="
     }
    ],
    "links": [
@@ -709,43 +851,43 @@ window.GPU_GRANTS = {
    "attachments": [
     {
      "name": "(사업공고) 2026년 고성능컴퓨팅지원 공급사 모집공고문.hwpx",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=3xcO2WVoiMlsYnsDehdR5A==&fileTy=ATTACH&fileNo=i5YcJ^HEKDBq7bx6Ar0H5g=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=lTNrw4WaSc7V*VQn2raWqw==&fileTy=ATTACH&fileNo=AxWu9VC4wbB8vXcYr5PAlQ=="
     },
     {
      "name": "[붙임1-1, 2-1] 2026년 고성능컴퓨팅지원 공급사 공고안내서(최종).hwpx",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=lnUKsVB*MWTTCw1^6lkD9A==&fileTy=ATTACH&fileNo=ZzlGVzEQdEvAqyPqGT6OhA=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=TnD007IWa5ZfX3mUoY8NQA==&fileTy=ATTACH&fileNo=gyOAqce35zDU7RfiUYF1vQ=="
     },
     {
      "name": "[붙임1-2] 2026년 고성능 컴퓨팅 자원 지원 사업 공급자 신청서.hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=iPjcxWPGB0jT6ic7MUPzVA==&fileTy=ATTACH&fileNo=W7yxWjWI4u^DeqCcnV803g=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=LfhLuKqEoOxoudqdtSYfHw==&fileTy=ATTACH&fileNo=3qznrZ5sUtqKyXuPMQqAUw=="
     },
     {
      "name": "[붙임1-3] 평가항목 참조표(고성능컴퓨팅자원지원사업).hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=rx12IuDxbGlGKV^s31crMA==&fileTy=ATTACH&fileNo=xP01UCx336HJT3vWOhA9CQ=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=O2sedQpTgnL1WYjtAaIEog==&fileTy=ATTACH&fileNo=Myw0GYuUDqoeflhtW7smEA=="
     },
     {
      "name": "[붙임1-4] 공급사 AI가속기 현황 자료(고성능컴퓨팅 지원사업)_v2.xlsx",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=7usMDiL*3*pUiIk7SLcWaA==&fileTy=ATTACH&fileNo=*F^pbjZ3jstDqJPRvoLBmw=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=jj38SU6UYvDtR^7P3OHeqg==&fileTy=ATTACH&fileNo=VZuaUeq1dNeO6G1vh5QPqA=="
     },
     {
      "name": "[붙임2-2] 2026년 국산 AI 반도체 활용 사업 공급자 신청서.hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=7ydT77iQTsUqtKlBY*CubQ==&fileTy=ATTACH&fileNo=d^Bo1s3lVtdJ8DlLPy7PDw=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=MkAfrXhbAhaSSnWV5CtYqw==&fileTy=ATTACH&fileNo=GcGQ8uIXk^rz9Nr7VjtcZw=="
     },
     {
      "name": "[붙임2-3] 평가항목 참조표(국산AI반도체활용사업).hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=K2vBOq0CyVCdimshHsSQBw==&fileTy=ATTACH&fileNo=sGVjMuj1wlGI6^Usux4Y2Q=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=OB2fEkAIV18AsQirSpcc1g==&fileTy=ATTACH&fileNo=QfZu6nrLabyxfZ8mrvaySA=="
     },
     {
      "name": "[붙임2-4] 기술지원 확약서.hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=qU0IQ6Zm2cEEAqH8^fZ8xg==&fileTy=ATTACH&fileNo=L*fEXNbX6QSJKB^Cwe9EHQ=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=BcPgXNb4GRDULyOp7woJ1g==&fileTy=ATTACH&fileNo=fdprG2RU*HoM1o^dH7SNlA=="
     },
     {
      "name": "[붙임2-5] AI 반도체 설치 확인서.hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=7ibGOoKWLl0V5g*3DstCzA==&fileTy=ATTACH&fileNo=she6ksonv5hv*esOXONqJw=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=z*a*vqVzml1rprO6P7OdjQ==&fileTy=ATTACH&fileNo=Epy4hkJ3JhXbgLiA7yGDKA=="
     },
     {
      "name": "[붙임2-9] 공급사 AI가속기 현황 자료(국산 AI반도체 활용사업)_v2.xlsx",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=3Ma*QqFfRI*k2BHEcErZAg==&fileTy=ATTACH&fileNo=3a03hFRbiGPBPvdvVY90Zg=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=73wszLmtZ*pkLHcNJXv1Mg==&fileTy=ATTACH&fileNo=ISKg42iRkTRxrdaXz^Xi5w=="
     }
    ],
    "links": [
@@ -865,23 +1007,23 @@ window.GPU_GRANTS = {
    "attachments": [
     {
      "name": "붙임 1. 2026년 고성능 컴퓨팅 지원 사용자 모집 공고(제2026-0365호).hwpx",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=fpG0v0QkwjyfnA9B^Po0sw==&fileTy=ATTACH&fileNo=0NbGiOJ7qXRaq^qxiiJa^A=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=TU0gp4ZL3VAPFDIKaK5B4w==&fileTy=ATTACH&fileNo=bGBDJCBgPRr7J*6sGZykRg=="
     },
     {
      "name": "[모집안내문] 2026년 고성능컴퓨팅 지원사업(GPU) 사용자 모집 공모안내서.hwpx",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=ZrMdRSnfYsEu*VBmedr88Q==&fileTy=ATTACH&fileNo=60MP5Wmywm0DZa8tuna04g=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=0Jyn6j5VG20rmCbxza9u*Q==&fileTy=ATTACH&fileNo=RCxRYghTRq1x*grHnLUnaQ=="
     },
     {
      "name": "[모집안내문] 붙임1. 2026년 고성능컴퓨팅 지원사업(NPU) 사용자 모집 공모안내서.hwpx",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=TW8LvaCUtjOL72H18aGeFQ==&fileTy=ATTACH&fileNo=XxYFp3EEGRdjjmNyBoBNtA=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=ELBohGx9il*78mRe0qBLHw==&fileTy=ATTACH&fileNo=GiGjVQhoMQOmNdx8WytthA=="
     },
     {
      "name": "붙임 2. 2026년 고성능컴퓨팅지원(GPU) 사용자 모집안내서(제출서류포함).zip",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=ibz1iF6q*PHhWBouBa^2Cg==&fileTy=ATTACH&fileNo=NtWOW3qEoiXIUtRnS3sBdg=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=VJrG0FfAuzSkqL*SVlz96g==&fileTy=ATTACH&fileNo=CE5O*Qvzq4nmWanVffX7vg=="
     },
     {
      "name": "붙임 3. 2026년 고성능컴퓨팅지원(NPU_국산AI반도체활용사업) 사용자 모집안내서(제출서류포함).zip",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=Dko9bBYeVAE0z8ylqmqn3g==&fileTy=ATTACH&fileNo=HeqASTyKjlyieN80hFF0rA=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=gtjeCiRTKiJel7YEs0LlRg==&fileTy=ATTACH&fileNo=AuG4scaWKme8VumttCk6Cw=="
     }
    ],
    "links": [
@@ -1002,27 +1144,27 @@ window.GPU_GRANTS = {
    "attachments": [
     {
      "name": "[모집안내문] 2026년 고성능컴퓨팅 지원사업(GPU) 사용자 추가모집 공모안내서.hwpx",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=KWw^JvxU1OPUukwK00vlAw==&fileTy=ATTACH&fileNo=bQrg5TjcNfEObf4uqrsfyA=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=ejnafxWIshhHcKoZWboFqg==&fileTy=ATTACH&fileNo=qm5FG*JV12agFNL9H6240Q=="
     },
     {
      "name": "붙임2. 2026년 고성능 컴퓨팅 지원(GPU) 사용자(추가모집) 이용신청서 및 현황표.zip",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=np6i1KutFa8SztA0IRqNaQ==&fileTy=ATTACH&fileNo=16oP2MWQ1EE2qD1xeGTJ*g=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=MvHlid2CX9^mbERfvfp9kg==&fileTy=ATTACH&fileNo=wiEk0NSlpdptVjY0wnJZCg=="
     },
     {
      "name": "붙임3. 2026년 고성능 컴퓨팅 지원(NPU) 사용자(추가모집) 이용신청서 및 현황표.zip",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=KGHmekPh^9RU0CKb*HC79A==&fileTy=ATTACH&fileNo=ScrPdO0huTeSLVRNRLSixA=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=HIPJKOzHFRCd*Yf5**ZwHQ==&fileTy=ATTACH&fileNo=FeiRbuaIyNaPvGm9^pDy4Q=="
     },
     {
      "name": "붙임1. 2026년 고성능 컴퓨팅 지원 사용자 추가 모집 공고(제2026-0654호).hwpx",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=HE14ZO3KdKyxdyPojA4UbA==&fileTy=ATTACH&fileNo=U^xP7fYQR^jyUF*mJxavTA=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=y14FeBp6n*zeqBC7fIgJ0w==&fileTy=ATTACH&fileNo=hQuPSo4xH8k7GKssbh*MCA=="
     },
     {
      "name": "고성능컴퓨팅 지원사업 사업관리시스템 메뉴얼.pdf",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=HU5AwENy1Ql2ZKzKbQK*vA==&fileTy=ATTACH&fileNo=xYMyYpDaPQCN3Ez*qVRwmg=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=f*PoNTmKIblYccbDI2vMpQ==&fileTy=ATTACH&fileNo=LFzJmRSPjhaH1996Ehtdig=="
     },
     {
      "name": "[모집안내문] 2026년 고성능컴퓨팅 지원사업(NPU) 사용자 추가모집 공모안내서.hwpx",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=BtVjwSHtG2sOHaI^pcn9yQ==&fileTy=ATTACH&fileNo=areKq8GLrY78YgczJ^Q3EQ=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=^MA6Ao83v^okNgBqiVcG5Q==&fileTy=ATTACH&fileNo=FL5oIly4*boVmW^ZL7^7^g=="
     }
    ],
    "links": [
@@ -1113,23 +1255,23 @@ window.GPU_GRANTS = {
     },
     {
      "name": "(붙임1) 「첨단 GPU 활용 지원 사업」사용자 수시모집 공고문(산학연 대상).hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=SklK2owoi*GuIUJz4KM1jg==&fileTy=ATTACH&fileNo=ws0*zlE8rANiFc9pq0fVtA=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=j*67jsH3vW8M9qlHPfAqOA==&fileTy=ATTACH&fileNo=wVF38efzTFer47bu2pDOKw=="
     },
     {
      "name": "(붙임2) 「첨단 GPU 활용 지원 사업」 사용자 수시모집 공고 안내서(산학연 대상).hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=gyyf5IKUfUIiU9n3vDjoew==&fileTy=ATTACH&fileNo=2DwAvQLsv4lOzaWC3yCqKQ=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=zeg1F1O7xsCyfqLyyxZP8Q==&fileTy=ATTACH&fileNo=rYsOtYQV8uqf2oazmSWZnA=="
     },
     {
      "name": "(붙임3) 「첨단 GPU 활용 지원 사업」 사업수행계획서(산학연 대상).hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=VXP9XfJUcC2h*UXQEJ6UNg==&fileTy=ATTACH&fileNo=Ye8yhgAaSFmXscVcwfKsKQ=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=GZdfjxobRcrmaxIPRi1dIQ==&fileTy=ATTACH&fileNo=m42nXXekgO84PkD^9kzGsg=="
     },
     {
      "name": "(붙임4) 「첨단 GPU 활용 지원 사업」 제출 서류.hwp",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=7Lb7kKXgI2ieHvsTeJGx7w==&fileTy=ATTACH&fileNo=4UianRE*IKp9KDG1Yfx3XA=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=gEeYYGtGJj8DfwaVzqWY8A==&fileTy=ATTACH&fileNo=0gLmzNmuzpQOCfIrcEOCRA=="
     },
     {
      "name": "(붙임5) 관련 규정.Zip",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=5*^tBkIPs3RJGCAapuRI0g==&fileTy=ATTACH&fileNo=itUNZTek9k*JVZzJqwo9Lg=="
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=G4iy6HfY6EF7UdDZZvo6xg==&fileTy=ATTACH&fileNo=opih*3quSLtQvwfiicg3Vw=="
     }
    ],
    "links": [
@@ -1213,13 +1355,13 @@ window.GPU_GRANTS = {
    "source_label": "국가 AI컴퓨팅자원 지원포털",
    "org": "과기정통부·NIPA·KAIT",
    "uid": "aiinfrahub-06",
-   "title": "2026년도 「첨단 GPU 활용 지원 사업」 베타서비스 참여자 모집 공고문",
+   "title": "[접수마감] 2026년도 「첨단 GPU 활용 지원 사업」 베타서비스 참여자 모집 공고문",
    "program": "「첨단 GPU 활용 지원 사업」",
    "url": "https://aiinfrahub.kr/project/06",
    "posted": "2026-10-23",
    "apply_start": "2026-10-23T15:00",
    "apply_end": "2026-10-28T15:00",
-   "closed_hint": false,
+   "closed_hint": true,
    "audience": "user",
    "gpu_models": [
     "B300"
@@ -1262,8 +1404,8 @@ window.GPU_GRANTS = {
      "url": "https://aiinfrahub.kr/api/attach/1224?fileName=2026%EB%85%84%EB%8F%84%20%E3%80%8C%EC%B2%A8%EB%8B%A8%20GPU%20%ED%99%9C%EC%9A%A9%20%EC%A7%80%EC%9B%90%20%EC%82%AC%EC%97%85%E3%80%8D%20%EB%B2%A0%ED%83%80%EC%84%9C%EB%B9%84%EC%8A%A4%20%EC%B0%B8%EC%97%AC%EC%9E%90%20%EB%AA%A8%EC%A7%91%20%EA%B3%B5%EA%B3%A0%EB%AC%B8.hwp"
     },
     {
-     "name": "2026년 「첨단 GPU 활용 지원 사업」 베타서비스 참여자 모집 공고문.hwpx",
-     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=jTpA3sUgOL8pC5AAzlhLNg==&fileTy=ATTACH&fileNo=bAOnZ^jwpOzdpOLNlQDLqw=="
+     "name": "(붙임) 「첨단 GPU 활용 지원 사업」 베타서비스 참여자 모집 공고문.hwpx",
+     "url": "https://www.nipa.kr/comm/getFile?srvcId=BBSTY1&upperNo=l4fJ^2MBXhSdwAZLojj7Mg==&fileTy=ATTACH&fileNo=rWvlZPSzvMShOH1bErybvg=="
     }
    ],
    "links": [
@@ -1274,7 +1416,7 @@ window.GPU_GRANTS = {
     },
     {
      "label": "정보통신산업진흥원(NIPA)",
-     "url": "https://www.nipa.kr/home/2-2/16976",
+     "url": "https://www.nipa.kr/home/2-2/17006",
      "source": "nipa"
     }
    ],

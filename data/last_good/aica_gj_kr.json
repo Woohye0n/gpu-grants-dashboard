@@ -1,6 +1,60 @@
 {
- "saved_at": "2026-11-07 09:11",
+ "saved_at": "2026-11-21 09:12",
  "rows": [
+  {
+   "source": "aica_gj_kr",
+   "source_label": "인공지능산업융합사업단(AICA)",
+   "org": "광주광역시 · AICA",
+   "uid": "aica_gj_kr-httpswwwaica-gjkrsubphpPID0201pagecatego",
+   "title": "2027년『AI 데이터센터 서비스』이용자 정기모집(1트랙) 모집공고",
+   "program": "인공지능산업융합사업단(AICA)",
+   "url": "https://www.aica-gj.kr/sub.php?PID=0201&page=&category=&searchText=&searchType=&action=Read&idx=2952",
+   "posted": "2026-11-13",
+   "apply_start": "2026-11-13",
+   "apply_end": "2026-12-04T14:00",
+   "closed_hint": false,
+   "audience": "user",
+   "gpu_models": [
+    "H100"
+   ],
+   "unknown_models": [],
+   "gpu_specs": [
+    {
+     "model": "H100",
+     "qty": "8장",
+     "qty_tokens": "1노드 / 8장",
+     "vram": "",
+     "line": "※ 1노드(H100 8장) 이상 고용량 자원 신청시 SSD 10TB 이상 추가 제공 (그 외 유상 이용가능)"
+    }
+   ],
+   "scale": [],
+   "cost": [
+    {
+     "audience": "",
+     "text": "H100 (1장) 30만원/월 15만원/월"
+    },
+    {
+     "audience": "",
+     "text": "HPC (1장) 30만원/월 15만원/월"
+    },
+    {
+     "audience": "",
+     "text": "(1PF 월 480만원)"
+    }
+   ],
+   "usage_period": {
+    "text": "o (지원기간) ’27. 1. ~ ’27. 12. ※ 구분별상이",
+    "start": null,
+    "end": null
+   },
+   "summary": "인공지능산업융합사업단(AICA)에서는 인공지능 융복합단지 조성 활성화를 위해 AI 데이터센터에서 확보한 컴퓨팅자원을 활용할",
+   "attachments": [
+    {
+     "name": "[공고문] 2027년 AI 데이터센터 서비스 이용자 정기모집 공고문(1트랙).pdf",
+     "url": "https://www.aica-gj.kr/mod/board/boardDownload.php?fileIdx=2243&boardNo=business"
+    }
+   ]
+  },
   {
    "source": "aica_gj_kr",
    "source_label": "인공지능산업융합사업단(AICA)",
@@ -220,10 +274,10 @@
    "source": "aica_gj_kr",
    "source_label": "인공지능산업융합사업단(AICA)",
    "org": "광주광역시 · AICA",
-   "uid": "aica_gj_kr-httpswwwaica-gjkrsubphpPID0201page2categ",
+   "uid": "aica_gj_kr-httpswwwaica-gjkrsubphpPID0201page3categ",
    "title": "2026년 AI데이터센터 서비스 이용자 하반기 정기모집 공고",
    "program": "인공지능산업융합사업단(AICA)",
-   "url": "https://www.aica-gj.kr/sub.php?PID=0201&page=2&category=&searchText=&searchType=&action=Read&idx=2843",
+   "url": "https://www.aica-gj.kr/sub.php?PID=0201&page=3&category=&searchText=&searchType=&action=Read&idx=2843",
    "posted": "2026-05-20",
    "apply_start": "2026-05-20",
    "apply_end": "2025-06-10T14:00",
