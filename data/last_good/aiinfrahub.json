@@ -1,18 +1,18 @@
 {
- "saved_at": "2026-11-24 09:10",
+ "saved_at": "2026-11-25 09:10",
  "rows": [
   {
    "source": "aiinfrahub",
    "source_label": "국가 AI컴퓨팅자원 지원포털",
    "org": "과기정통부·NIPA·KAIT",
    "uid": "aiinfrahub-07",
-   "title": "2026년 「첨단 GPU 활용 지원 사업」 베타서비스 참여자 모집 공고",
+   "title": "[접수마감] 2026년 「첨단 GPU 활용 지원 사업」 베타서비스 참여자 모집 공고",
    "program": "「첨단 GPU 활용 지원 사업」",
    "url": "https://aiinfrahub.kr/project/07",
    "posted": "2026-11-19",
    "apply_start": "2026-11-19T11:40",
    "apply_end": "2026-11-24T15:00",
-   "closed_hint": false,
+   "closed_hint": true,
    "audience": "user",
    "gpu_models": [
     "B300"
