@@ -1,5 +1,5 @@
 {
- "saved_at": "2026-11-25 09:12",
+ "saved_at": "2026-11-26 09:11",
  "rows": [
   {
    "source": "aica_gj_kr",
@@ -212,10 +212,10 @@
    "source": "aica_gj_kr",
    "source_label": "인공지능산업융합사업단(AICA)",
    "org": "광주광역시 · AICA",
-   "uid": "aica_gj_kr-httpswwwaica-gjkrsubphpPID0201page2categ",
+   "uid": "aica_gj_kr-httpswwwaica-gjkrsubphpPID0201page3categ",
    "title": "2026년 국가 AI데이터센터 고도화 사업 이용자 추가모집(상시) 공고",
    "program": "인공지능산업융합사업단(AICA)",
-   "url": "https://www.aica-gj.kr/sub.php?PID=0201&page=2&category=&searchText=&searchType=&action=Read&idx=2859",
+   "url": "https://www.aica-gj.kr/sub.php?PID=0201&page=3&category=&searchText=&searchType=&action=Read&idx=2859",
    "posted": "2026-06-09",
    "apply_start": "2026-06-09",
    "apply_end": null,
@@ -437,81 +437,6 @@
     {
      "name": "[공고문] 2026년 국가 AI데이터센터 고도화 사업 이용자 정기모집 공고문.pdf",
      "url": "https://www.aica-gj.kr/mod/board/boardDownload.php?fileIdx=2029&boardNo=business"
-    }
-   ]
-  },
-  {
-   "source": "aica_gj_kr",
-   "source_label": "인공지능산업융합사업단(AICA)",
-   "org": "광주광역시 · AICA",
-   "uid": "aica_gj_kr-httpswwwaica-gjkrsubphpPID0201page3categ",
-   "title": "2026년 국가 AI데이터센터 고도화 사업 공급사 모집 공고",
-   "program": "인공지능산업융합사업단(AICA)",
-   "url": "https://www.aica-gj.kr/sub.php?PID=0201&page=3&category=&searchText=&searchType=&action=Read&idx=2795",
-   "posted": "2026-03-09",
-   "apply_start": "2026-03-06",
-   "apply_end": "2026-03-26T14:00",
-   "closed_hint": false,
-   "audience": "supplier",
-   "gpu_models": [
-    "H100",
-    "H200",
-    "B200",
-    "B300"
-   ],
-   "unknown_models": [],
-   "gpu_specs": [
-    {
-     "model": "H100",
-     "qty": "등 368장",
-     "qty_tokens": "1개 / 368장",
-     "vram": "",
-     "line": "□ (선정기업 수) 1개 이상 공급사(H100 등 368장 이상 제공 가능 기업)"
-    },
-    {
-     "model": "H100",
-     "qty": "최소 368장",
-     "qty_tokens": "368장",
-     "vram": "",
-     "line": "H100 최소 368장 이상"
-    },
-    {
-     "model": "B200",
-     "qty": "8장",
-     "qty_tokens": "8장",
-     "vram": "",
-     "line": "트랙 2 B200 8장 등 단일노드 공급사 선정 결과에"
-    }
-   ],
-   "scale": [],
-   "cost": [
-    {
-     "audience": "",
-     "text": "280만원 이하 620만원 이하 20"
-    },
-    {
-     "audience": "",
-     "text": "280만원 초과 ~ 300만원 이하 620만원 초과 ~ 640만원 이하 19"
-    },
-    {
-     "audience": "",
-     "text": "300만원 초과 ~ 320만원 이하 640만원 초과 ~ 660만원 이하 18"
-    }
-   ],
-   "usage_period": {
-    "text": "(사업기간) 협약 체결일 ~ 2026. 12. 31.",
-    "start": null,
-    "end": "2026-12-31"
-   },
-   "summary": "인공지능산업융합사업단에서는 인공지능 연구·개발·서비스에 특화된 고성능 GPU 제공을 통해",
-   "attachments": [
-    {
-     "name": "1. 「2026년 국가 AI데이터센터 고도화」 사업 공급사 모집 공고문.pdf",
-     "url": "https://www.aica-gj.kr/mod/board/boardDownload.php?fileIdx=2017&boardNo=business"
-    },
-    {
-     "name": "붙임1. 「2026년 국가 AI데이터센터 고도화」 사업 공급사 모집 공모안내서.pdf",
-     "url": "https://www.aica-gj.kr/mod/board/boardDownload.php?fileIdx=2018&boardNo=business"
     }
    ]
   }
