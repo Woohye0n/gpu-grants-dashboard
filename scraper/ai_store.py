@@ -720,8 +720,9 @@ def record_credits(db, provider, email, credits):
     # Claude 리셋권(limit_resets)은 송신기를 새로 올린 서버만 보낸다. 같은 계정을 옛
     # 송신기도 보고하므로, 그쪽이 더 최근이라고 리셋권이 사라지면 안 된다 — 새 값이
     # 없으면 앞의 것을 그 관측 시각과 함께 이어 둔다.
+    lr_at = int(credits.get("limit_resets_observed_at") or at)
     if "limit_resets" in credits:
-        credits = dict(credits, limit_resets_at=at)
+        credits = dict(credits, limit_resets_at=lr_at)
     else:
         row = db.execute("SELECT credits FROM accounts WHERE provider = ? AND email = ?",
                          (provider, email)).fetchone()
@@ -732,9 +733,22 @@ def record_credits(db, provider, email, credits):
         if old.get("limit_resets") is not None:
             credits = dict(credits, limit_resets=old["limit_resets"],
                            limit_resets_at=old.get("limit_resets_at"))
-    db.execute("""UPDATE accounts SET credits = ?, credits_at = ?
+    cur = db.execute("""UPDATE accounts SET credits = ?, credits_at = ?
                   WHERE provider = ? AND email = ? AND COALESCE(credits_at, 0) <= ?""",
-               (json.dumps(credits, ensure_ascii=False), at, provider, email, at))
+                     (json.dumps(credits, ensure_ascii=False), at, provider, email, at))
+    # 잔액은 다른 서버가 더 최근에 봤더라도, 리셋권은 이 관측이 더 새로우면 받는다
+    # (Codex 리셋권은 토큰이 살아 있는 서버 하나만 조회한다).
+    if not cur.rowcount and credits.get("limit_resets") is not None:
+        row = db.execute("SELECT credits FROM accounts WHERE provider = ? AND email = ?",
+                         (provider, email)).fetchone()
+        try:
+            stored = json.loads(row[0]) if row and row[0] else None
+        except ValueError:
+            stored = None
+        if stored is not None and int(stored.get("limit_resets_at") or 0) <= lr_at:
+            stored.update(limit_resets=credits["limit_resets"], limit_resets_at=lr_at)
+            db.execute("UPDATE accounts SET credits = ? WHERE provider = ? AND email = ?",
+                       (json.dumps(stored, ensure_ascii=False), provider, email))
     bal = credits.get("balance")
     if provider == "codex" and isinstance(bal, (int, float)) and at:
         prev = db.execute("""SELECT balance FROM credit_balance WHERE provider = ? AND email = ?

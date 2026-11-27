@@ -275,7 +275,9 @@ function limitResetsHTML(c) {
   }
   const kind = (g) => ((g.clears || []).includes("seven_day") ? "주간 전체" : "Fable");
   const day = (s) => (s ? new Date(Date.parse(s) + 9 * 3600 * 1000).toISOString().slice(0, 16).replace("T", " ") : "—");
-  const items = (r.grants || []).map((g) => `<span class="chip" data-tip="${esc(g.label || g.id)}">${kind(g)} ${g.resets_left}/${g.resets_total}회 · ${day(g.ends_at)}까지${
+  const grants = (r.grants || []).filter((g) => g.status == null || g.status === "available" || g.resets_left > 0
+    || (g.ends_at && Date.parse(g.ends_at) > Date.now()));
+  const items = grants.map((g) => `<span class="chip" data-tip="${esc(g.label || g.id)}">${kind(g)} ${g.resets_left}/${g.resets_total}회 · ${day(g.ends_at)}까지${
     g.paused ? " · 일시정지" : g.usable_now === false ? " · 지금 사용 불가" : ""}</span>`).join(" ");
   return `<div class="credits" data-tip="Anthropic 이 지급한 사용량 리셋권입니다. 쓰면 표시된 주간 한도가 바로 비워집니다. 기한은 한국 시각.">
     <span class="credit-lab">리셋권</span> ${items || "없음"}${when}</div>`;
@@ -286,6 +288,8 @@ function creditsHTML(a) {
   if (!c) return "";
   const when = c.observed_at ? ` <span class="hint">· ${ago(c.observed_at)} 관측</span>` : "";
   if (a.provider === "codex") {
+    // 리셋권만 조회된 계정은 잔액 정보가 없다 — "0 (없음)" 으로 보이면 안 된다.
+    if (c.balance == null && !c.unlimited && c.has_credits == null) return "";
     const bal = c.unlimited ? "무제한" : Math.round(c.balance || 0).toLocaleString();
     const tip = "주간 한도를 다 쓰면 이 잔액에서 차감됩니다. Codex 를 쓸 때만 갱신됩니다.";
     return `<div class="credits" data-tip="${esc(tip)}"><span class="credit-lab">Codex 크레딧 잔액</span>
@@ -351,7 +355,7 @@ function renderAccounts(s) {
       <div class="${suspended || stale ? "gauges dim" : "gauges"}">${gauges}</div>
       <div class="src">${src}</div>
       ${creditsHTML(a)}
-      ${a.provider === "claude" ? limitResetsHTML(a.credits) : ""}
+      ${limitResetsHTML(a.credits)}
       <div class="tokrow">참고 토큰량 (${m}): ${tok} · 누적 ${fmt(a.lifetime[m])}</div>
     </div>`;
   }).join("");
