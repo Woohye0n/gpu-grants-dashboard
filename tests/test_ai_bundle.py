@@ -580,6 +580,20 @@ got = json.loads(rdb.execute("SELECT credits FROM accounts").fetchone()[0])
 check("새 리셋권 관측은 그대로 바꾼다 (다 쓰면 비어 있다)",
       (got["limit_resets"]["grants"], got["limit_resets_at"]), ([], 300))
 
+print("\n[Codex 리셋권] 잔액이 더 오래된 관측이어도 새 리셋권은 받는다")
+rdb2 = ai_store.connect(os.path.join(tempfile.mkdtemp(), "c.db"))
+rdb2.execute("INSERT INTO accounts(provider, email) VALUES ('codex', 'lab@x')")
+ai_store.record_credits(rdb2, "codex", "lab@x", {"balance": 5.0, "observed_at": 500})
+cg = {"eligible": True, "grants": [{"id": "R1", "resets_left": 1}]}
+ai_store.record_credits(rdb2, "codex", "lab@x", {"balance": 9.0, "observed_at": 100,
+                                                   "limit_resets": cg, "limit_resets_observed_at": 600})
+got = json.loads(rdb2.execute("SELECT credits FROM accounts").fetchone()[0])
+check("잔액은 최신 그대로, 리셋권은 새로", (got["balance"], got["limit_resets"], got["limit_resets_at"]), (5.0, cg, 600))
+ai_store.record_credits(rdb2, "codex", "lab@x", {"balance": 9.0, "observed_at": 100,
+                                                   "limit_resets": {"grants": []}, "limit_resets_observed_at": 550})
+got = json.loads(rdb2.execute("SELECT credits FROM accounts").fetchone()[0])
+check("더 오래된 리셋권 관측은 덮지 않는다", got["limit_resets"], cg)
+
 print()
 if fails:
     print(f"실패 {len(fails)}건: {', '.join(fails)}")
